@@ -25,9 +25,10 @@ update_trigger: "Continuously"
 |----|-----|------|--------|-----------|-------|
 
 
-| T-003 | 🔴 | **Create a myQNX account and REQUEST the QNX Everywhere licence** | ⬜ | — | ⚠️ **Highest priority.** [Setup 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence). Approval latency is Risk R1. |
-| T-010 | 🟠 | **Accept AND deploy** the licence in the myQNX License Manager | ⬜ | T-003 | The step everyone misses — [Setup 02 §5](../guides/Setup_02_QNX_Account_And_License.md#5-step-3--accept-and-deploy-the-licence-) |
-| T-011 | 🟠 | Install QNX Software Center + SDP 8.0 (~10 GB) | ⬜ | T-010 | [Setup 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) |
+
+
+| T-011 | 🔴 | **Install QNX Software Center + SDP 8.0** (~10 GB) — blocks **V3** | ⬜ | — | ✅ Unblocked: the licence is deployed. [Setup 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) |
+| T-014 | 🔵 | *When convenient:* report the licence approval latency and the real portal button labels | ⬜ | — | Non-blocking. Chapter 04 currently cannot tell a reader what to expect. |
 | T-012 | 🟠 | **Report back the output of every verification checkpoint** | ⬜ | T-011 | Follow [`VerificationRuns.md`](../internal/VerificationRuns.md) — blocks V1–V4, 18 checkpoints. Only your pasted output can clear an `[UNVERIFIED]` marker (ADR-024). |
 | T-013 | 🟠 | `git pull` before each work session | ⬜ | — | The authoring side moves between your sessions. |
 | T-006 | 🔵 | Decide whether to buy a Raspberry Pi 4/5 for the hardware track | ⬜ | Ch 31 | Not needed until Part 6 |
@@ -116,6 +117,9 @@ update_trigger: "Continuously"
 | T-140 | Create the `docs/internal/` tier (4 documents) | 2026-08-26 | 003 |
 | T-142 | Absorb full project context at author handover and report back | 2026-08-26 | 003 |
 | T-143 | Create `PROMPTS.md` and establish the prompt+response logging rule (ADR-023) | 2026-08-26 | 003 |
+| T-003 | Request the QNX Everywhere licence | 2026-08-26 | 004 |
+| T-010 | Accept **and deploy** the licence | 2026-08-26 | 004 |
+| T-146 | Clear Setup Guide 02 §§3–5 markers (Part A confirmed) | 2026-08-26 | 004 |
 | T-008 | Add the user to the `kvm` group | 2026-08-25 | 003 |
 | T-009 | Complete Setup Guide 01 on the host | 2026-08-25 | 003 |
 | T-145 | Clear the Setup Guide 01 `[UNVERIFIED]` markers with real output → v2.0 | 2026-08-26 | 003 |
@@ -143,6 +147,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | **Block V2 complete.** T-003, T-010 and T-146 closed; Risk R1 closed. T-011 promoted to 🔴 and unblocked. T-014 added (optional licence-flow detail for Chapter 04). |
 | 1.3 | 2026-08-26 | **Block V1 verified.** T-008 and T-009 closed; T-145 added and closed (Setup Guide 01 → v2.0). T-013 re-scoped to every session. T-144 added for Setup Guide 02. |
 | 1.2 | 2026-08-26 | Session 003: author handover. T-140/142/143 closed. New learner items T-012 (rewritten) and T-013. New author item T-141 (clear the markers). **T-102 Chapter 00 put on hold** by learner instruction until onboarding and verification are complete. T-200 re-scoped to ADR-024. |
 | 1.1 | 2026-08-25 | Session 002: plan approved; T-001/002/004/005/100/101/104 closed. New learner items T-008…T-012 (KVM group, Setup 01, licence request/accept/deploy, SDP install, verification feedback). Next author item: Chapter 00. |

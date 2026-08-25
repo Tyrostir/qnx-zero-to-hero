@@ -56,6 +56,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#1](#prompt1) | 2026-08-26 | Claude (Opus 5) | Handover from Copilot: absorb all prior context, report understanding (what/why/where/how), start logging prompts | ✅ Handover report delivered · `PROMPTS.md` created |
 | [PROMPT#2](#prompt2) | 2026-08-26 | Claude (Opus 5) | Six instructions: log responses too · leave the token · write the 3 onboarding docs · hide the two-machine split from readers · list the verification to-dos · hold Chapter 00 | ✅ All six done · ADR-022/023/024 · `docs/internal/` created |
 | [PROMPT#3](#prompt3) | 2026-08-26 | Claude (Opus 5) | Block V1 output delivered in `toAgent/1.BlockV1Output.md`; update the Git identity | ✅ Block V1 verified · Setup Guide 01 → v2.0 · repo path corrected · identity set |
+| [PROMPT#4](#prompt4) | 2026-08-26 | Claude (Opus 5) | Correct the name spelling; licence already deployed — mark V2.1–V2.3 complete | ✅ Block V2 complete · **Risk R1 closed** · Setup Guide 02 → v1.1 · V3 unblocked |
 
 ---
 
@@ -460,10 +461,136 @@ Once it's deployed, blocks V3 and V4 will clear Setup Guide 02, and Chapter 00 c
 
 ---
 
+## PROMPT#4
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 005 |
+| **Context** | Immediately after the Block V1 verification of [PROMPT#3](#prompt3). |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> 1. "Karthikeyan Kasivishwanathan" is correct, need 'i' after "Kas". 2. I have already deployed the license with my mail id. You can consider V2.1, V2.2, V2.3 are complete.
+
+### Standing instructions
+
+| # | Instruction | Recorded as |
+|---|-------------|-------------|
+| SI-9 *(corrected)* | Git commit identity is **`Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>`** — note the **`i` after `Kas`**. | `git config --local`; `DecisionsLog.md` Session 005 |
+| SI-11 | The learner may **attest** that a verification block is complete without pasting output. Treat the attestation as clearing the block, while being explicit in the documents about which detail was and was not captured. | `VerificationRuns.md` V2; `Setup_02` §§3–5 |
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+Both done. **Risk R1 is closed — and that was the last external blocker in the entire project.**
+
+## 1️⃣ Spelling corrected, including in history
+
+```text
+user.name  = Karthikeyan Kasivishwanathan
+user.email = Karthikeyan.KLU@gmail.com
+```
+
+The commit carrying the misspelling was still unpushed, so I re-authored it in place rather than leaving it wrong:
+
+```text
+348f17f  Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>   ← corrected
+afc583b  Tyrostir <19234119+...>
+79029c2  Tyrostir <19234119+...>
+```
+
+The two `Tyrostir` commits are already on GitHub and stay as they are — rewriting published history would break their links for no benefit.
+
+## 2️⃣ Block V2 complete — and the project just changed shape
+
+| Checkpoint | State |
+|---|---|
+| **V2.1** request | ✅ |
+| **V2.2** approval | ✅ |
+| **V2.3** accept **and deploy** | ✅ **deployed** |
+
+**T-003 and T-010 closed. Risk R1 closed.**
+
+That last one matters more than it looks. R1 was the only risk in the project rated *Blocking*, and it was the reason the whole course was sequenced around waiting — Part 0 was deliberately placed first *because* it needs no software, and the plan's timeline budgeted dead time for licence approval. **That constraint is gone.** Every remaining step is under our own control.
+
+Three of the four highest risks are now closed:
+
+| Risk | Status |
+|---|---|
+| ~~R1 licence latency~~ | ✅ closed (this session) |
+| ~~R3 KVM under WSL2~~ | ✅ closed (Session 004) |
+| ~~R9 Ubuntu 26.04 package drift~~ | ✅ closed (Session 004) |
+| **R2 — QSC install on WSL2** | 👉 next to be tested, in block V3 |
+
+## 📕 Setup Guide 02 → v1.1
+
+`[UNVERIFIED]` cleared from **§§3–5** (account → request → accept → deploy). The header notice now scopes the remaining markers precisely to **Part B**, §§7–11: Software Center, SDP install, environment setup, verification.
+
+I kept the clearance honest rather than overstating it:
+
+> ✅ **Confirmed by a real run (2026-08-26).** The flow documented here is accurate. Exact on-screen wording is not transcribed — QNX changes portal copy without notice, so follow the *meaning* of each step rather than hunting for an exact button label.
+
+**Two details you didn't capture, and neither blocks you:**
+
+- **How long approval took.** Chapter 04 currently cannot tell a reader whether to expect minutes or a week — the honest answer is "we don't know". Your data point is the only way to fix that.
+- **The real button labels for accept and deploy.** This is the step that silently breaks everyone's install; if §5's wording doesn't match what you actually saw, tell me and I'll correct it.
+
+Logged as **T-014**, priority 🔵 — answer whenever, or never.
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_02_QNX_Account_And_License.md` | → **v1.1.** §§3–5 confirmed; header notice re-scoped to Part B |
+| `docs/internal/VerificationRuns.md` | V2.1–V2.3 → ✅; §3 rewritten as a status board; V3 unblocked; results log entry |
+| `docs/meta/DecisionsLog.md` | Session 005: licence flow verified · **R1 closed** · identity spelling revised |
+| `docs/meta/CourseState.md` | Session 005 log; licence row ✅; next action → V3; no external blockers |
+| `docs/meta/CompactContext.md` | Regenerated: R1/R3/R9 struck through, R2 now the live risk |
+| `docs/meta/ToDos.md` | T-003, T-010, T-146 closed; T-011 promoted to 🔴 and unblocked; T-014 added |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 005 row; H-5 closed; H-3 narrowed to Part B; identity spelling noted |
+
+Leak scan across Tier 1 and Tier 2: **clean**.
+
+---
+
+## 👉 Next: Block V3 — install the SDP
+
+Nothing gates it. [Setup Guide 02 Part B](docs/guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) — roughly 60–90 minutes, ~10 GB download.
+
+**The one command I most want back** is this, from V3.3:
+
+```bash
+host$ cd ~/qnx/qnxsoftwarecenter
+host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+```
+
+It does triple duty: it proves the licence deployed correctly, it gives us the exact **SDP build number** that every chapter's front matter has to record (T-202), and if it comes back **empty** it means the deploy didn't take — in which case we go back to the dashboard rather than fighting the installer.
+
+Then **V4** — ten minutes — cross-compiles a binary and watches Linux refuse to run it. That failure is the proof, and it's the moment the course becomes real.
+
+**Watch out for R2 on the way:** QNX Software Center is an Eclipse app, and the GUI under WSL2 is the most likely thing to misbehave. If the graphical installer doesn't open, §8.3 has the headless route (`./qnx-setup-*.run -- --unattended`). Either way, tell me which one you needed — that's exactly the kind of thing the guide should state as fact rather than offer as two options.
+
+Once V3 and V4 land, Part B's markers clear and **Chapter 00 comes off hold**.
+
+### Artefacts changed
+
+*(See the table above.)*
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.2 | 2026-08-26 | PROMPT#4 logged: name spelling correction and Block V2 completion. |
 | 2.1 | 2026-08-26 | PROMPT#3 logged: Block V1 verification results and the Git identity change. |
 | 2.0 | 2026-08-26 | **ADR-023 adopted:** full agent responses are now logged alongside prompts. PROMPT#1's response back-filled; PROMPT#2 added. Marked Tier 3 per ADR-022. |
 | 1.0 | 2026-08-26 | Created at the Copilot → Claude handover. PROMPT#1 logged. |

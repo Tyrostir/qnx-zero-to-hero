@@ -27,12 +27,13 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Current phase** | **Phase 1 — Environment setup** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **2 / 5** — 01 ✅ **verified on the host**, 02 `[UNVERIFIED]` |
+| **Setup guides published** | **2 / 5** — 01 ✅ **verified**, 02 Part A ✅ confirmed / Part B `[UNVERIFIED]` |
 | **Labs completed** | **0 / 21** |
-| **QNX software installed?** | ❌ Not yet — **you can start now** |
+| **QNX licence** | ✅ **Deployed** 2026-08-26 |
+| **QNX software installed?** | ❌ Not yet — **nothing blocks it now** |
 | **QNX VM booting?** | ❌ Not yet |
-| **Blocked on** | ⏸️ Chapter 00 is **deliberately on hold** until the `[UNVERIFIED]` markers are cleared |
-| **Last session** | 2026-08-26 (Session 003) |
+| **Blocked on** | ⏸️ Chapter 00 only — held until Part B's markers clear. **No external blockers remain.** |
+| **Last session** | 2026-08-26 (Session 004) |
 
 ### Progress bar
 
@@ -54,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do today** | 🔴 **Request the QNX Everywhere licence** at https://www.qnx.com/getqnx (~15 min) — block **V2.1**. This is now the *only* thing standing between you and a booting QNX VM. Approval latency is the last unquantified risk (R1). |
-| 🤖 **Me — next turn** | Setup Guide 01 is done ✅. Setup Guide 02's markers need blocks V2–V4. **Chapter 00 remains on hold** by your instruction until those clear. |
+| 👤 **You — do next** | 🔴 **Block V3 — install QNX Software Center, then QNX SDP 8.0** (~60–90 min, ~10 GB). [Setup Guide 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software). Then **V4** — the cross-compile proof (~10 min). Report output per [`VerificationRuns.md`](../internal/VerificationRuns.md). |
+| 🤖 **Me — next turn** | Clear Setup Guide 02 Part B's markers from your V3/V4 output, then **Chapter 00 comes off hold** (SI-8 satisfied). |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -85,8 +86,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 | `build-essential` (gcc, make) | ✅ GCC 15.2.0 · GNU Make 4.4.1 | ✅ |
 | Java runtime | ✅ OpenJDK 25.0.4 | ✅ |
 | QEMU | ✅ 10.2.1 (qemu-system-x86_64 + qemu-img) | ✅ |
-| QNX SDP 8.0 | **not installed** | ⬜ Setup 02 |
-| QNX licence | **not requested** | ⬜ Setup 02 |
+| QNX SDP 8.0 | **not installed** | ⬜ Setup 02 Part B |
+| QNX licence | ✅ **requested, accepted and deployed** (2026-08-26) | ✅ |
 | VS Code + QNX Toolkit | **not installed** | ⬜ Setup 04 |
 | Pandoc / TeX (PDF) | **not installed** | ⬜ PDF_Export |
 
@@ -180,7 +181,7 @@ The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolc
 | Guide | Doc status | Notes |
 |-------|-----------|-------|
 | Setup 01 — Prerequisites | 📕 **Published ✅ verified** | v2.0 — executed end to end on the host. All expected output is real. Risk R9 did not materialise. |
-| Setup 02 — Account, Licence, SDP | 📕 **Published** | Steps `[UNVERIFIED]` until you run them and report back. Teaches request → accept → **deploy**. |
+| Setup 02 — Account, Licence, SDP | 📕 **Published** | **Part A ✅ confirmed** by a real run. Part B (§§7–11) `[UNVERIFIED]` pending blocks V3–V4. |
 | Setup 03 — QEMU VM ⭐ | 📄 | Will follow QNX's official **QSTI for QEMU** guide (ADR-004) |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
@@ -208,6 +209,17 @@ The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolc
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 005 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Record the licence as obtained and unblock the SDP install. |
+| **Done** | • Learner confirmed the QNX Everywhere licence is **requested, accepted and deployed**<br>• **Blocks V2.1–V2.3 complete** — T-003 and T-010 closed<br>• 🎉 **Risk R1 closed.** Licence latency was the only unquantified blocker in the project; nothing external gates the course any more<br>• Setup Guide 02 → v1.1: `[UNVERIFIED]` cleared from §§3–5 (Part A confirmed by a real run) and now scoped to Part B only<br>• **Block V3 unblocked** and promoted to the next action<br>• Git author name spelling corrected to **Kasivishwanathan**; the unpushed commit re-authored |
+| **Learner decisions** | Name spelling correction; licence steps attested complete |
+| **Questions logged** | None new |
+| **Blockers** | None external. Chapter 00 remains on hold by SI-8 until Part B clears. |
+| **Next session** | Clear Setup Guide 02 Part B from the V3/V4 output, then **Chapter 00** |
 
 ### Session 004 — 2026-08-26
 
@@ -274,6 +286,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, Risk R1 closed, V3 is the next action. |
 | 1.3 | 2026-08-26 | Session 004: Block V1 verified. Environment snapshot now all-green. Setup Guide 01 marked verified. Repo path corrected. |
 | 1.2 | 2026-08-26 | Session 003: author handover. Next action rewritten around `VerificationRuns.md`. Setup Guide 01 status corrected. Chapter 00 marked on hold. |
 | 1.0 | 2026-08-25 | Created. Phase 0, 0/34 chapters, environment verified. |

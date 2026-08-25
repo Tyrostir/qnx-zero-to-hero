@@ -1,8 +1,8 @@
 ---
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
-version: 1.1
-status: Active — Block V1 ✅ verified; V2–V4 pending
+version: 1.2
+status: Active — Blocks V1 and V2 ✅ complete; V3–V4 pending
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -91,16 +91,17 @@ Worked / Failed. Notes: ...
 
 ---
 
-## 3. 🔴 Do this first — today
+## 3. ✅ Where you are now
 
-**One task, fifteen minutes, and it unblocks everything else.**
+| Block | State |
+|-------|-------|
+| **V1** — host preparation | ✅ **Verified 2026-08-25.** `19 passed · 6 warnings · 0 failed` |
+| **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
+| **V3** — Software Center + SDP | 👉 **Next.** Nothing gates it |
+| **V4** — toolchain proof | After V3 |
 
-> **V2.1 — Request the QNX Everywhere licence.** Go to **https://www.qnx.com/getqnx**, create your
-> myQNX account, and submit the licence request.
-
-Approval latency is unknown and is the **only true blocker in this course** (Risk **R1**). Submit it
-now; everything else can proceed while it processes. Details in
-[Setup Guide 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence).
+> 🎉 **Risk R1 is closed.** Licence latency was the only unquantified blocker in the project, and the
+> licence is now deployed to the learner's account. Every remaining step is under our own control.
 
 ---
 
@@ -219,19 +220,24 @@ and the KVM warning is gone.
 > ⏱️ 15 minutes of work, then an unknown wait.
 > 📖 [Setup Guide 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence)
 
-### V2.1 — Create the account and request the licence 🔴
+> ✅ **Block V2 is complete (2026-08-26).** The licence was requested, accepted and **deployed**.
+> The steps below are kept as the record of what was done, and as the instructions a future reader
+> follows.
 
-At **https://www.qnx.com/getqnx**.
+### V2.1 — Create the account and request the licence ✅
 
-📋 **Report:** which fields the form actually asked for, and anything the guide did not predict.
-🎯 **Why the agent needs this:** Chapter 04 documents this flow for every future reader. Screenshots
-of the wording are ideal; a description is fine.
+At **https://www.qnx.com/getqnx**. **Done.**
 
-### V2.2 — Approval
+📋 *Optional, whenever convenient:* which fields the form actually asked for. Chapter 04 documents
+this flow for every future reader, and real wording beats a paraphrase of the docs.
 
-📋 **Report:** **how long approval took**, and the wording of the confirmation email.
-🎯 **Why:** Risk R1 is "unknown latency". Your data point turns it into a known quantity, and the
-course can then tell readers what to expect.
+### V2.2 — Approval ✅
+
+**Received.**
+
+📋 *Optional, whenever convenient:* **how long approval took.** Risk R1 was "unknown latency"; your
+data point is the only way the course can honestly tell a reader what to expect ("minutes", "a day",
+"a week"). Right now Chapter 04 can only say *"we don't know"*.
 
 ### V2.3 — Accept **and DEPLOY** ⚠️
 
@@ -239,17 +245,18 @@ course can then tell readers what to expect.
 > **request → accept → DEPLOY.** If you skip *deploy*, QNX Software Center will show **zero
 > installable products** and the error message will never tell you why.
 
-In the myQNX License Manager at **https://www.qnx.com/account/dashboard**.
+In the myQNX License Manager at **https://www.qnx.com/account/dashboard**. ✅ **Deployed.**
 
-📋 **Report:** what the dashboard actually calls these actions — the real button labels. Vendors
-rename UI constantly, and the guide must match what you see.
+📋 *Optional, whenever convenient:* what the dashboard actually calls these actions — the real button
+labels. Vendors rename UI constantly, and this is the step that silently breaks everyone's install.
+If §5 of Setup Guide 02 doesn't match what you saw, tell me and I'll fix the wording.
 
 ---
 
 ## 6. Block V3 — QNX Software Center + SDP (Setup Guide 02, Part B)
 
 > 🎯 **Goal:** QNX SDP 8.0 installed at `~/qnx800`.
-> 🔒 **Gated on V2.3.** Do not attempt this until the licence is **deployed**.
+> ✅ **Unblocked** — the licence is deployed. Start here.
 > ⏱️ 60–90 minutes, ~10 GB download.
 
 ### V3.1 — Download QNX Software Center
@@ -367,7 +374,7 @@ host$ ./tools/check-environment.sh
 
 | ID | What | Owner | Gated on | Clears | Status |
 |----|------|-------|----------|--------|--------|
-| **V2.1** | 🔴 Request the licence — **still outstanding** | 👤 | — | Risk R1 | ⬜ |
+| **V2.1** | Request the licence | 👤 | — | Risk R1 | ✅ |
 | V1.0 | Baseline `check-environment.sh` | 👤 | — | — | ✅ |
 | V1.1 | Build tools | 👤 | — | Setup 01 §5 | ✅ GCC 15.2.0 · Make 4.4.1 |
 | V1.2 | Java runtime | 👤 | — | Setup 01 §6 | ✅ OpenJDK 25.0.4 |
@@ -375,20 +382,20 @@ host$ ./tools/check-environment.sh
 | V1.4 | KVM group fix ⚡ | 👤 | — | **T-008** | ✅ accessible |
 | V1.5 | KVM proof | 👤 | V1.4 | Setup 01 §9 · Risk R3 | ✅ booted, no KVM error |
 | V1.6 | Workspace + re-check | 👤 | V1.1–V1.5 | **T-009** | ✅ 19 pass · 6 warn · **0 fail** |
-| V2.2 | Approval received | 👤 | V2.1 | **T-003** · Risk R1 | ⏸️ |
-| V2.3 | Accept **and deploy** | 👤 | V2.2 | **T-010** · Setup 02 §5 | ⏸️ |
-| V3.1 | Download QSC | 👤 | V2.3 | Setup 02 §7 | ⏸️ |
-| V3.2 | Install QSC | 👤 | V3.1 | Setup 02 §8 · Risk R2 | ⏸️ |
-| V3.3 | Install SDP 8.0 | 👤 | V3.2 | **T-011** · Setup 02 §9 · **T-202** | ⏸️ |
-| V4.1 | Environment + `qcc -V` | 👤 | V3.3 | Setup 02 §10 | ⏸️ |
-| V4.2 | Cross-compile | 👤 | V4.1 | Setup 02 §11 | ⏸️ |
-| V4.3 | Prove it will not run on Linux | 👤 | V4.2 | Setup 02 §11.4 | ⏸️ |
-| V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ⏸️ |
-| — | Remove markers, paste real output | 🤖 | V4.4 | **T-200** | ⏸️ |
+| V2.2 | Approval received | 👤 | V2.1 | **T-003** · Risk R1 | ✅ |
+| V2.3 | Accept **and deploy** | 👤 | V2.2 | **T-010** · Setup 02 §5 | ✅ **deployed** |
+| V3.1 | Download QSC | 👤 | V2.3 | Setup 02 §7 | ⬜ **next** |
+| V3.2 | Install QSC | 👤 | V3.1 | Setup 02 §8 · Risk R2 | ⬜ |
+| V3.3 | Install SDP 8.0 | 👤 | V3.2 | **T-011** · Setup 02 §9 · **T-202** | ⬜ |
+| V4.1 | Environment + `qcc -V` | 👤 | V3.3 | Setup 02 §10 | ⬜ |
+| V4.2 | Cross-compile | 👤 | V4.1 | Setup 02 §11 | ⬜ |
+| V4.3 | Prove it will not run on Linux | 👤 | V4.2 | Setup 02 §11.4 | ⬜ |
+| V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ⬜ |
+| — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ⏸️ |
 | — | Write `Setup_03_QEMU_VM.md` | 🤖 | V4.4 | **T-112** | ⏸️ |
 
-> 💡 **V1 and V2.1 are independent.** Do V2.1 first because of the wait, then work through V1 while
-> approval processes. V3 and V4 cannot start until the licence is deployed.
+> ✅ **Blocks V1 and V2 are complete.** The host is prepared and the licence is **deployed**.
+> **V3.1 is the next action** — nothing gates it any more.
 
 ---
 
@@ -421,6 +428,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V2 (all)** | ✅ **Complete** | Licence requested, accepted and **deployed** (learner-attested). **T-003 and T-010 cleared. Risk R1 closed.** Setup Guide 02 §§3–5 markers cleared; Part B (§§7–11) still `[UNVERIFIED]`. Approval latency and portal button labels not captured — still wanted for Chapter 04, but non-blocking. |
 | 2026-08-25 | **V1 (all)** | ✅ **Passed** | `19 passed · 6 warnings · 0 failed`. **T-008** and **T-009** cleared. Setup Guide 01 → v2.0, `[UNVERIFIED]` removed, all expected-output blocks replaced with real output. **Risk R9 did not materialise** — every documented package installed under its documented name on Ubuntu 26.04. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
 
 ### Real versions observed on the host (2026-08-25)
@@ -448,5 +456,6 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | **Block V2 complete.** Licence deployed; Risk R1 closed; V3 unblocked and is now the next action. §3 rewritten as a status board. |
 | 1.1 | 2026-08-26 | **Block V1 verified.** All six V1 checkpoints ✅; T-008 and T-009 cleared; real host versions recorded; V1.5's documented output replaced with the real SeaBIOS/iPXE result. |
 | 1.0 | 2026-08-26 | Created in Session 003. Defines the ADR-024 clearance protocol and enumerates blocks V1–V4 (18 checkpoints) against Setup Guides 01 and 02. |

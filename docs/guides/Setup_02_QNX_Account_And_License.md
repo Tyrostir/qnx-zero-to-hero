@@ -1,10 +1,10 @@
 ---
 title: "Setup Guide 02 — QNX Account, Licence & SDP 8.0 Install"
 document_id: SETUP-02
-version: 1.0
-status: Published — steps marked [UNVERIFIED] pending first real run
+version: 1.1
+status: Published — Part A (licence) ✅ confirmed; Part B (install) [UNVERIFIED]
 created: 2026-08-25
-last_updated: 2026-08-25
+last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "60–120 min of work + waiting for licence approval"
 prereqs: "Setup Guide 01"
@@ -19,10 +19,14 @@ prereqs: "Setup Guide 01"
 > the request, then read Part 0 of the course (Chapters 00–03) while you wait — none of it needs
 > software.
 
-> 📌 **`[UNVERIFIED]` markers.** Steps carrying this marker are written from official QNX
-> documentation but have not yet been executed on your machine. As we run them together, the marker
-> is removed and the real output is pasted in. Nothing stays in this course that we haven't actually
-> run. *(Tracked as T-200 in [ToDos.md](../meta/ToDos.md).)*
+> ✅ **Part A (the licence) is confirmed.** The account → request → accept → **deploy** flow in §§3–5
+> has been completed successfully by a real learner. Follow it as written.
+>
+> 📌 **`[UNVERIFIED]` markers remain on Part B** (§§7–11 — Software Center, SDP install, environment
+> setup, verification). Those steps are written from official QNX documentation but have not yet been
+> executed. As you run them, paste the output back and the real result replaces the marker. Nothing
+> stays in this course that we haven't actually run. *(ADR-024; tracked as T-200 in
+> [ToDos.md](../meta/ToDos.md).)*
 
 ---
 
@@ -137,7 +141,10 @@ that is genuinely hard to unwind.
 
 ## 3. Step 1 — Create a myQNX account
 
-`[UNVERIFIED]`
+✅ **Confirmed by a real run (2026-08-26).** A learner completed this step successfully at
+`qnx.com/getqnx`. The flow documented here is accurate. Exact on-screen wording is not transcribed —
+QNX changes portal copy without notice, so follow the *meaning* of each step rather than hunting for
+an exact button label.
 
 ### 3.1 Go to the licence portal
 
@@ -180,7 +187,10 @@ License Manager** dashboard.
 
 ## 4. Step 2 — Request the QNX Everywhere licence
 
-`[UNVERIFIED]`
+✅ **Confirmed by a real run (2026-08-26).** A learner completed this step successfully at
+`qnx.com/getqnx`. The flow documented here is accurate. Exact on-screen wording is not transcribed —
+QNX changes portal copy without notice, so follow the *meaning* of each step rather than hunting for
+an exact button label.
 
 Logged in, at https://www.qnx.com/getqnx, complete the **QNX Everywhere licence form**.
 
@@ -222,7 +232,10 @@ QNX software license for non-commercial use."*
 
 ## 5. Step 3 — Accept and DEPLOY the licence ⚠️
 
-`[UNVERIFIED]`
+✅ **Confirmed by a real run (2026-08-26).** A learner completed this step successfully at
+`qnx.com/getqnx`. The flow documented here is accurate. Exact on-screen wording is not transcribed —
+QNX changes portal copy without notice, so follow the *meaning* of each step rather than hunting for
+an exact button label.
 
 > ⚠️ **This is the step everyone misses.** Please read it properly.
 
@@ -927,4 +940,5 @@ But you have **nowhere to run it**. That's next.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | **Part A confirmed by a real run** — the account → request → accept → deploy flow works as documented; `[UNVERIFIED]` cleared from §§3–5 and now scoped to Part B only. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
 | 1.0 | 2026-08-25 | Created. Documents the request → accept → **deploy** licence flow (ADR-021) and the host/target split. Install steps marked `[UNVERIFIED]` pending first real run. |

@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.3
+version: 1.4
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -592,10 +592,60 @@ history is not rewritten.
 
 ---
 
+## 2026-08-26 — Session 005 (Licence deployed; Risk R1 closed)
+
+### 🔍 VERIFIED — The QNX Everywhere licence flow works as documented
+
+The learner completed **request → accept → deploy** at `qnx.com/getqnx` and the myQNX License
+Manager, and confirmed the licence is **deployed**. Blocks **V2.1–V2.3** are complete; **T-003** and
+**T-010** are closed.
+
+Setup Guide 02 §§3–5 are promoted from `[UNVERIFIED]` to **confirmed by a real run**. The
+`[UNVERIFIED]` scope now covers **Part B only** (§§7–11: Software Center, SDP install, environment
+setup, verification).
+
+**What was not captured.** Approval latency and the portal's real button labels were not recorded.
+Both remain wanted for Chapter 04 — the course still cannot honestly tell a reader whether approval
+takes minutes or days — but neither blocks anything. Tracked as **T-014**, priority 🔵.
+
+---
+
+### ⛔ CLOSED — Risk R1: QNX Everywhere licence latency
+
+R1 was rated *Medium likelihood / **Blocking** impact* and was the only risk in the project with an
+external dependency. The licence is deployed, so it is closed.
+
+**Consequence — this changes the project's shape.** Since Session 001 the course has been organised
+around waiting: Part 0 was sequenced first *because* it needs no software, and the plan's timeline
+assumed dead time. **Nothing external gates the course any more.** Every remaining step — install,
+boot, write, verify — is under our own control.
+
+Risks **R3** (KVM) and **R9** (Ubuntu 26.04 package drift) closed in Session 004. The next risk due
+for testing is **R2** — QNX Software Center's GUI/Java behaviour under WSL2, which block V3 exercises
+directly.
+
+---
+
+### 🔄 REVISED — Git author identity spelling
+
+Corrected to **`Karthikeyan Kasivishwanathan`** — with an `i` after `Kas`. The previous session had
+set `Kasvishwanathan`, transcribed literally from the learner's message; the learner confirmed the
+`i` belongs.
+
+The one affected commit was **unpushed**, so it was re-authored in place rather than left wrong or
+rewritten after publication. Commits 1–2 remain under `Tyrostir` and are untouched — they are already
+published, and rewriting them would break their GitHub history for no benefit.
+
+**Why a name spelling is worth a log entry.** It is the identity attached to every future commit in a
+public repository. Fixing it silently would leave no record of which commits carry which spelling.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | Session 005 appended: licence flow verified, Risk R1 closed, Git identity spelling revised. |
 | 1.3 | 2026-08-26 | Session 004 appended: 4 verifications (Setup Guide 01 executed, R9 closed, R3/KVM closed, repo path corrected) and 1 decision (Git identity). |
 | 1.2 | 2026-08-26 | Session 003 appended: author handover (Copilot → Claude), 2 verifications, 3 new decisions (ADR-022/023/024), 1 deferral. Setup Guide 01's verification claim corrected. |
 | 1.1 | 2026-08-25 | Session 002 appended: 2 verifications, 1 revision (ADR-004), 1 strengthening (ADR-008), 3 new decisions (ADR-019/020/021), plan approved, 1 new risk (R9), 1 deferral (P-06). |
