@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.0
+version: 1.2
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -441,9 +441,93 @@ timeline). Affects only chapter sizing, so it does not block anything.
 
 ---
 
+## 2026-08-26 — Session 003 (Author handover; document tiers established)
+
+### 🔍 VERIFIED — Repository state at handover
+
+Read end to end: `COPILOT_PROMPT_HISTORY.md`, `README.md`, `PLAN.md`, `TableOfContents.md`, all six
+`docs/meta/` documents, all `docs/reference/` documents, Setup Guides 01 and 02, and both `tools/`
+scripts.
+
+Confirmed accurate: 6 parts / 34 chapters / 3 paths / 21 ADRs / 5 answered doubts / 2 commits on
+`main` / 0 chapters published / 2 setup guides published.
+
+Found **incomplete**: the final instruction of Session 002 asked for `NewAgentOnboardingGuide.md`,
+`NewAgentOnboardingPrompts.md` and `CLAUDE-MEMORY.md`. **None had been created** — the session ended
+first. All three are delivered in this session.
+
+---
+
+### 🆕 DECIDED — ADR-022: Three document tiers
+
+**Decision.** Every document belongs to Tier 1 (course), Tier 2 (`docs/meta/` bookkeeping) or
+Tier 3 (`docs/internal/` plus the root prompt logs). Tier 3 is excluded from the PDF book and is not
+linked from the Table of Contents.
+
+**Why.** The course has already changed authors once and expects to again. Continuity requires
+operational documents — handover notes, working memory, prompt logs — that teach the reader nothing
+about QNX. Keeping them in a marked tier means continuity costs the course nothing.
+
+**What was rejected.** Scattering onboarding notes through `docs/meta/`. It would have made the
+bookkeeping documents serve two audiences badly, and would eventually have leaked authoring
+mechanics into the book.
+
+**Consequence.** Tier 1 and Tier 2 describe **exactly one machine**: the learner's Ubuntu 26.04 /
+WSL2 host. `tools/build-pdf.sh` was annotated so no future author adds Tier 3 to the book.
+
+---
+
+### 🆕 DECIDED — ADR-023: `PROMPTS.md` logs prompts *and* responses
+
+**Decision.** Every learner prompt is recorded verbatim, and the author's complete response is
+recorded beneath it.
+
+**Why.** Requested directly by the learner. A prompt without its response records what was asked but
+not what was decided, explained or promised — and this project has already lost one author mid-task.
+
+**Consequence.** `PROMPTS.md` becomes the project's narrative history, alongside this log (what was
+decided) and `Doubts.md` (what was asked technically).
+
+---
+
+### 🆕 DECIDED — ADR-024: The author cannot verify; only learner-run output clears `[UNVERIFIED]`
+
+**Decision.** The author writes commands; the learner runs them. A marker is cleared by pasted
+output from a real run, and by nothing else.
+
+**Why.** The course promises that nothing stays in it that has not actually been run. Under Copilot
+this was blurred, because the author and the machine were the same session. Making the separation
+explicit protects the promise. It matters most against Risk **R9** — QNX documents its QEMU flow for
+Ubuntu 22.04/24.04 while the host runs 26.04.
+
+**Consequence.** [`docs/internal/VerificationRuns.md`](../internal/VerificationRuns.md) defines the
+clearance protocol across 18 checkpoints in four blocks.
+
+---
+
+### 🔍 VERIFIED — Setup Guide 01 was never actually run
+
+Setup Guide 01's front matter claimed `verified_on: "Ubuntu 26.04 LTS on WSL2 …"`. Only
+`tools/check-environment.sh` was ever executed against the host. **None of its install commands
+were.** The front matter has been corrected and the guide now carries the same `[UNVERIFIED]` notice
+as Setup Guide 02.
+
+**Why this matters.** An unearned verification claim is worse than no claim: it is exactly the kind
+of quiet inaccuracy the `[UNVERIFIED]` convention exists to prevent.
+
+---
+
+### ❓ DEFERRED — Credential hygiene in the Git remote
+
+Raised by the author, **consciously deferred by the learner** on 2026-08-26. Not to be raised again
+unprompted. Recorded here so the deferral is a decision on the record rather than an oversight.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Session 003 appended: author handover (Copilot → Claude), 2 verifications, 3 new decisions (ADR-022/023/024), 1 deferral. Setup Guide 01's verification claim corrected. |
 | 1.1 | 2026-08-25 | Session 002 appended: 2 verifications, 1 revision (ADR-004), 1 strengthening (ADR-008), 3 new decisions (ADR-019/020/021), plan approved, 1 new risk (R9), 1 deferral (P-06). |
 | 1.0 | 2026-08-25 | Log created. Session 001: 2 verifications, 18 decisions, 5 deferrals. |

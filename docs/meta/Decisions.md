@@ -46,6 +46,9 @@ update_trigger: "Whenever a decision is made, changed, or superseded"
 | [ADR-019](#adr-019) | The capstone ships in **all three domain flavours**; the reader chooses | Pedagogy | ✅ |
 | [ADR-020](#adr-020) | Deliver **one chapter per turn**, auto-committed and pushed | Process | ✅ |
 | [ADR-021](#adr-021) | Use `https://www.qnx.com/getqnx` as the canonical licence entry point | Setup | ✅ |
+| [ADR-022](#adr-022) | Documents are organised in **three tiers**; `docs/internal/` is excluded from the book | Docs | ✅ |
+| [ADR-023](#adr-023) | `PROMPTS.md` records every learner prompt **and** every full author response | Process | ✅ |
+| [ADR-024](#adr-024) | The author does not execute commands; `[UNVERIFIED]` is cleared only by learner-run output | Process | ✅ |
 
 ---
 
@@ -587,6 +590,95 @@ less stable URLs. `getqnx` is short, official, and stated in the docs themselves
 
 ---
 
+## ADR-022
+
+### Documents are organised in three tiers; `docs/internal/` is excluded from the book
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-26 |
+| **Category** | Docs |
+
+**Decision.** Every document in this repository belongs to exactly one of three tiers.
+
+| Tier | Location | Audience | Included in the PDF book? |
+|------|----------|----------|---------------------------|
+| 📗 **1 — Course** | `README.md`, `docs/PLAN.md`, `docs/TableOfContents.md`, `docs/chapters/`, `docs/guides/`, `docs/reference/` | The end reader | ✅ Yes |
+| 📘 **2 — Course bookkeeping** | `docs/meta/` | The learner, and readers curious how the course is made | ✅ Yes |
+| 🔒 **3 — Internal** | `docs/internal/`, plus `PROMPTS.md` and `COPILOT_PROMPT_HISTORY.md` at the repo root | The learner and the author only | ❌ No |
+
+**Why.** This course has already changed authors once and expects to again. Continuity requires
+operational documents — handover notes, prompt logs, working memory — that have nothing to teach a
+reader about QNX. Mixing them into the course would dilute it and confuse anyone who found the repo.
+
+**Consequences.**
+- Tier 1 and Tier 2 describe **exactly one machine**: the learner's Ubuntu 26.04 / WSL2 host. Any
+  detail about how the course is *produced* stays in Tier 3.
+- `tools/build-pdf.sh` enumerates Tier 1 and Tier 2 by explicit path and never globs
+  `docs/internal/`, so Tier 3 is excluded from the book automatically.
+- `docs/TableOfContents.md` does not link Tier 3.
+- Tier 3 remains in Git — it is version-controlled continuity, not a secret.
+
+---
+
+## ADR-023
+
+### `PROMPTS.md` records every learner prompt and every full author response
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-26 |
+| **Category** | Process |
+
+**Decision.** Every learner prompt is logged verbatim in [`PROMPTS.md`](../../PROMPTS.md) as
+`PROMPT#N`, **and the author's complete response is logged immediately beneath it.** Both halves,
+every time, without exception.
+
+**Why.** Requested directly by the learner. A prompt without its response is half a record: it shows
+what was asked but not what was decided, explained, or promised. Reasoning that exists only in a chat
+window is lost the moment the session ends — and this project has already lost one author.
+
+**Consequences.**
+- `PROMPTS.md` becomes the project's narrative history, complementing `DecisionsLog.md` (what was
+  decided) and `Doubts.md` (what was asked technically).
+- Responses are logged in full, not summarised.
+- This is Tier 3 (ADR-022) and is not part of the book.
+- Extends, and does not replace, ADR-014 — a technical question still earns its own `D-NNN` entry.
+
+---
+
+## ADR-024
+
+### The author does not execute commands; `[UNVERIFIED]` is cleared only by learner-run output
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-26 |
+| **Category** | Process |
+
+**Decision.** The author writes commands; **the learner runs them.** A step marked `[UNVERIFIED]`
+can be cleared by exactly one thing: **output the learner pastes back from a real run on their own
+machine.** The author may never clear a marker on its own judgement, however confident it is.
+
+**Why.** The course's central honesty promise is that nothing stays in it that has not actually been
+run. Confidence is not evidence. This matters most where the risk is highest: QNX documents its QEMU
+flow for Ubuntu 22.04/24.04 while the learner's host is 26.04 (Risk **R9**), so package names and
+behaviour genuinely may differ.
+
+**Consequences.**
+- [`docs/internal/VerificationRuns.md`](../internal/VerificationRuns.md) defines the clearance
+  protocol and tracks every checkpoint.
+- Setup Guide 01's front matter is corrected: only `check-environment.sh` was ever run against the
+  host — its install steps are as unverified as Setup Guide 02's.
+- Failures are as valuable as successes: a documented failure with a documented fix helps every
+  future reader.
+- `T-200` and `T-201` cannot close until the learner reports back.
+
+---
+
 ## ✅ Resolved pending decisions
 
 | ID | Question | Resolution | Resolved |
@@ -609,5 +701,6 @@ less stable URLs. `getqnx` is short, official, and stated in the docs themselves
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Author handover (Copilot → Claude). Added ADR-022 (three document tiers, `docs/internal/` excluded from the book), ADR-023 (`PROMPTS.md` logs prompts **and** responses), ADR-024 (the author cannot verify; only learner-run output clears `[UNVERIFIED]`). |
 | 1.1 | 2026-08-25 | Learner approved the plan. ADR-004 revised (QSTI for QEMU). ADR-008 strengthened (all three paths fully authored). ADR-018 confirmed. Added ADR-019 (three capstone flavours), ADR-020 (one chapter per turn, auto-push), ADR-021 (`getqnx` licence flow). P-01…P-05 resolved; P-06 opened. |
 | 1.0 | 2026-08-25 | Initial 18 ADRs + 5 pending decisions recorded. |

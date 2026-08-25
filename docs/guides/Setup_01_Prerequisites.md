@@ -1,14 +1,14 @@
 ---
 title: "Setup Guide 01 — Prerequisites & Host Preparation"
 document_id: SETUP-01
-version: 1.0
+version: 1.1
 status: Published
 created: 2026-08-25
 last_updated: 2026-08-25
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "30–45 minutes"
 prereqs: "None"
-verified_on: "Ubuntu 26.04 LTS on WSL2, Intel i7-11850H, 2026-08-25"
+verified_on: "Host readiness checked on Ubuntu 26.04 LTS / WSL2, 2026-08-25. Install steps [UNVERIFIED] — see the note below."
 ---
 
 # 🛠️ Setup Guide 01 — Prerequisites & Host Preparation
@@ -18,6 +18,15 @@ verified_on: "Ubuntu 26.04 LTS on WSL2, Intel i7-11850H, 2026-08-25"
 >
 > **What it does *not* do.** It does not install QNX. That is [Setup Guide 02](Setup_02_QNX_Account_And_License.md).
 > Nothing here requires a QNX account, so **you can do this right now.**
+
+> 📌 **`[UNVERIFIED]` — please read this once.** The commands in this guide are written from official
+> Ubuntu and QNX documentation, and the *host readiness check* (`tools/check-environment.sh`) has
+> been run against your machine. The **install commands themselves have not yet been executed.** As
+> you run them, paste the output back and each step is confirmed — or corrected — with the real
+> result. Nothing stays in this course that we haven't actually run.
+>
+> This matters here more than usual: QNX documents its QEMU workflow for **Ubuntu 22.04 / 24.04**,
+> and you are on **26.04**. Some package names may differ. *(Risk R9; tracked as T-200.)*
 
 ---
 
@@ -845,4 +854,5 @@ Your host is ready. 🎉
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Corrected the `verified_on` claim: only the host readiness check was ever run, not the install steps. Added the `[UNVERIFIED]` notice (ADR-024). |
 | 1.0 | 2026-08-25 | Created. Verified against Ubuntu 26.04 / WSL2 / i7-11850H. Documents the Ubuntu 26.04 package-name divergence from QNX's documented 22.04/24.04 lists (risk R9). |

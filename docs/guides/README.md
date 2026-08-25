@@ -56,4 +56,5 @@ Every command block is followed by an **Expected output** block. If what you see
 check [Setup_05_Troubleshooting.md](Setup_05_Troubleshooting.md).
 
 Steps marked **`[UNVERIFIED]`** have been written but not yet executed on the learner's machine.
-The marker is removed once the step has actually been run and confirmed.
+The marker is removed once the step has actually been run and its real output confirmed (ADR-024).
+This currently applies to **both** Setup Guide 01 and Setup Guide 02.

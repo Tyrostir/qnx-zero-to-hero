@@ -1,7 +1,7 @@
 ---
 title: "Course State — Where We Are"
 document_id: STATE
-version: 1.0
+version: 1.2
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -31,8 +31,8 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Labs completed** | **0 / 21** |
 | **QNX software installed?** | ❌ Not yet — **you can start now** |
 | **QNX VM booting?** | ❌ Not yet |
-| **Blocked on** | Nothing |
-| **Last session** | 2026-08-25 (Session 002) |
+| **Blocked on** | ⏸️ Chapter 00 is **deliberately on hold** until the `[UNVERIFIED]` markers are cleared |
+| **Last session** | 2026-08-26 (Session 003) |
 
 ### Progress bar
 
@@ -54,8 +54,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do today** | 1. Follow **[Setup Guide 01](../guides/Setup_01_Prerequisites.md)** (~40 min) — includes the `kvm` group fix (T-008).<br>2. Start **[Setup Guide 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence)** — create your myQNX account and **request the licence**. ⚠️ Do this even if you stop there; approval takes time. |
-| 🤖 **Me — next turn** | Write **Chapter 00 — How To Use This Course** (no software needed; read it while your licence is processing). |
+| 👤 **You — do today** | 1. **Request the QNX Everywhere licence** at https://www.qnx.com/getqnx (~15 min). Approval latency is the only true blocker (Risk R1).<br>2. `git pull`, then work through **[Setup Guide 01](../guides/Setup_01_Prerequisites.md)** (~45 min) — including the `kvm` group fix (T-008).<br>3. **Paste the output back** for each checkpoint. The full list is in [`VerificationRuns.md`](../internal/VerificationRuns.md). |
+| 🤖 **Me — next turn** | Clear the `[UNVERIFIED]` markers from Setup Guides 01 and 02 using your real output, fixing anything that failed. **Chapter 00 is on hold until that is done** (your instruction, Session 003). |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -179,8 +179,8 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 
 | Guide | Doc status | Notes |
 |-------|-----------|-------|
-| Setup 01 — Prerequisites | � **Published** | Verified against your machine. Includes the `kvm` group fix and Ubuntu 26.04 package deltas. |
-| Setup 02 — Account, Licence, SDP | 📕 **Published** | Steps marked `[UNVERIFIED]` until we run them together. Teaches request → accept → **deploy**. |
+| Setup 01 — Prerequisites | 📕 **Published** | Includes the `kvm` group fix and Ubuntu 26.04 package deltas. Install steps `[UNVERIFIED]` — only `check-environment.sh` was ever run. |
+| Setup 02 — Account, Licence, SDP | 📕 **Published** | Steps `[UNVERIFIED]` until you run them and report back. Teaches request → accept → **deploy**. |
 | Setup 03 — QEMU VM ⭐ | 📄 | Will follow QNX's official **QSTI for QEMU** guide (ADR-004) |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
@@ -208,6 +208,17 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 003 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Hand the project over to a new author without losing context, and make the next handover cheap. |
+| **Done** | • New author absorbed the full repository and reported back its understanding<br>• Found that Session 002's final instruction was never carried out — the three onboarding documents did not exist<br>• Established **three document tiers** (ADR-022): course · bookkeeping · internal<br>• Created `docs/internal/`: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md`<br>• Created `PROMPTS.md` and the rule that **both prompts and full responses** are logged (ADR-023)<br>• Established that the author **cannot verify anything** — only learner-run output clears an `[UNVERIFIED]` marker (ADR-024)<br>• **Corrected Setup Guide 01's front matter**: it claimed verification it had not earned |
+| **Learner decisions** | Log responses as well as prompts · document tiers as above · Chapter 00 held until verification is complete · one deferral recorded |
+| **Questions logged** | None new |
+| **Blockers** | ⏸️ Chapter 00, by design, pending `[UNVERIFIED]` clearance |
+| **Next session** | Clear the markers from the learner's reported output, then Chapter 00 |
 
 ### Session 002 — 2026-08-25
 
@@ -252,4 +263,5 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Session 003: author handover. Next action rewritten around `VerificationRuns.md`. Setup Guide 01 status corrected. Chapter 00 marked on hold. |
 | 1.0 | 2026-08-25 | Created. Phase 0, 0/34 chapters, environment verified. |

@@ -1,7 +1,7 @@
 ---
 title: "Compact Context — One-Page Session Reload"
 document_id: CTX
-version: 1.0
+version: 1.2
 status: Active (regenerated every session)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -31,7 +31,7 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 - **Course:** *QNX Zero to Hero* — 6 parts, 34 chapters, ~21 labs, 1 capstone.
 - **Repo:** `https://github.com/Tyrostir/qnx-zero-to-hero`
-- **Local path:** `/home/tyrostir/exercises/qnx/qnx-zero-to-hero`
+- **Local path:** `~/exercises/qnx/qnx-zero-to-hero`
 - **Deliverable:** a Markdown book + runnable labs, exportable to PDF.
 
 ## WHERE WE ARE
@@ -45,8 +45,9 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 | QNX installed | ❌ — learner to do Setup 01 + 02 now |
 | VM booting | ❌ |
 | Blocker | None |
-| Next (me) | **Chapter 00 — How To Use This Course** |
-| Next (learner) | Setup 01 (incl. `kvm` group fix), then **request the QNX licence today** (Risk R1) |
+| Next (me) | Clear the `[UNVERIFIED]` markers from the learner's reported output |
+| Next (learner) | **Request the QNX licence today** (Risk R1), then Setup 01 (incl. `kvm` group fix) — reporting output per `VerificationRuns.md` |
+| On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
 
@@ -115,6 +116,9 @@ Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
 | ADR-019 | Capstone ships in **three flavours**: 🤖 robotics · 🚗 automotive · 🏥 medical/industrial |
 | ADR-020 | **One chapter per turn**, auto-commit + push |
 | ADR-021 | Licence entry point **`qnx.com/getqnx`**; teach request → accept → **deploy** |
+| ADR-022 | **Three document tiers**: course · `meta/` bookkeeping · `internal/` (excluded from the book) |
+| ADR-023 | `PROMPTS.md` logs **every prompt and every full response** |
+| ADR-024 | The author **cannot verify**; only learner-run output clears an `[UNVERIFIED]` marker |
 
 ## COURSE SHAPE
 
@@ -154,6 +158,7 @@ docs/guides/PDF_Export.md          md → pdf
 docs/reference/{Glossary,ReferenceLinks,ResourcesMeta}.md
 docs/reference/cheatsheets/CS_*.md
 docs/meta/{CourseState,Decisions,DecisionsLog,CompactContext,ToDos,Doubts}.md
+docs/internal/                     internal working documents — NOT part of the course (ADR-022)
 labs/labNN_*/{README,Makefile,skeleton,solution,prebuilt}
 tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ```
@@ -161,8 +166,9 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ## OPEN ITEMS
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
-- **Learner's open actions:** T-008 `kvm` group · T-009 Setup 01 · **T-003 request licence (urgent)** ·
-  T-010 accept+deploy · T-011 install SDP · T-012 report `[UNVERIFIED]` results.
+- **Learner's open actions:** **T-003 request licence (urgent)** · T-013 `git pull` · T-008 `kvm` group ·
+  T-009 Setup 01 · T-010 accept+deploy · T-011 install SDP · **T-012 report verification output**
+  (blocks V1–V4 in `docs/internal/VerificationRuns.md` — 18 checkpoints).
 - **Doubts logged:** 5 (D-001…D-005, all answered)
 - **Top risks:** R1 licence latency (mitigated: Part 0 needs no software) · R9 Ubuntu 26.04 newer than
   QNX-documented 22.04/24.04 · R10 three-path authoring cost.
@@ -171,6 +177,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Regenerated after Session 003 (author handover): ADR-022/023/024 added; next actions rewritten around the verification protocol; Chapter 00 on hold. |
 | 1.1 | 2026-08-25 | Regenerated after Session 002: plan approved, ADR-004 revised (QSTI), ADR-008 strengthened, ADR-019/020/021 added, Setup Guides 01–02 published, QNX facts expanded. |
 | 1.0 | 2026-08-25 | Created at end of Session 001. |
 
