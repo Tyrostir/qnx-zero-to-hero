@@ -27,7 +27,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Current phase** | **Phase 1 — Environment setup** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **2 / 5** (01, 02) |
+| **Setup guides published** | **2 / 5** — 01 ✅ **verified on the host**, 02 `[UNVERIFIED]` |
 | **Labs completed** | **0 / 21** |
 | **QNX software installed?** | ❌ Not yet — **you can start now** |
 | **QNX VM booting?** | ❌ Not yet |
@@ -54,8 +54,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do today** | 1. **Request the QNX Everywhere licence** at https://www.qnx.com/getqnx (~15 min). Approval latency is the only true blocker (Risk R1).<br>2. `git pull`, then work through **[Setup Guide 01](../guides/Setup_01_Prerequisites.md)** (~45 min) — including the `kvm` group fix (T-008).<br>3. **Paste the output back** for each checkpoint. The full list is in [`VerificationRuns.md`](../internal/VerificationRuns.md). |
-| 🤖 **Me — next turn** | Clear the `[UNVERIFIED]` markers from Setup Guides 01 and 02 using your real output, fixing anything that failed. **Chapter 00 is on hold until that is done** (your instruction, Session 003). |
+| 👤 **You — do today** | 🔴 **Request the QNX Everywhere licence** at https://www.qnx.com/getqnx (~15 min) — block **V2.1**. This is now the *only* thing standing between you and a booting QNX VM. Approval latency is the last unquantified risk (R1). |
+| 🤖 **Me — next turn** | Setup Guide 01 is done ✅. Setup Guide 02's markers need blocks V2–V4. **Chapter 00 remains on hold** by your instruction until those clear. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -76,22 +76,22 @@ OVERALL                    [                    ]   0 %   (0/34)
 | Environment | **WSL2** on Windows | ✅ |
 | CPU | Intel Core i7-11850H, 16 logical CPUs, VT-x | ✅ |
 | Nested virtualization | `/dev/kvm` **present** | ✅ |
-| KVM group membership | User is **not** in the `kvm` group — device not writable | ⚠️ Setup 01 (T-008) |
+| KVM group membership | ✅ **Fixed 2026-08-25** — `/dev/kvm` present and accessible | ✅ |
 | RAM | 23 GiB total, ~21 GiB free | ✅ |
 | Disk | 1007 GB volume, **952 GB free** (need ~25 GB) | ✅ |
 | Git | `git 2.53.0` | ✅ |
 | curl | `curl 8.18.0` | ✅ |
 | tar / ssh | GNU tar 1.35 / OpenSSH 10.2p1 | ✅ |
-| `build-essential` (gcc, make) | **not installed** | ⬜ Setup 01 |
-| Java runtime | **not installed** (QNX Software Center may need it) | ⬜ Setup 02 |
-| QEMU | **not installed** | ⬜ Setup 01 |
+| `build-essential` (gcc, make) | ✅ GCC 15.2.0 · GNU Make 4.4.1 | ✅ |
+| Java runtime | ✅ OpenJDK 25.0.4 | ✅ |
+| QEMU | ✅ 10.2.1 (qemu-system-x86_64 + qemu-img) | ✅ |
 | QNX SDP 8.0 | **not installed** | ⬜ Setup 02 |
 | QNX licence | **not requested** | ⬜ Setup 02 |
 | VS Code + QNX Toolkit | **not installed** | ⬜ Setup 04 |
 | Pandoc / TeX (PDF) | **not installed** | ⬜ PDF_Export |
 
-**Latest check (2026-08-25):** `13 passed · 9 warnings · 3 failed`
-Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` — installed in Setup Guide 01.
+**Latest check (2026-08-25, after Setup Guide 01):** `19 passed · 6 warnings · **0 failed**` ✅
+The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolchain.
 
 > Re-run the environment check any time:
 >
@@ -179,7 +179,7 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 
 | Guide | Doc status | Notes |
 |-------|-----------|-------|
-| Setup 01 — Prerequisites | 📕 **Published** | Includes the `kvm` group fix and Ubuntu 26.04 package deltas. Install steps `[UNVERIFIED]` — only `check-environment.sh` was ever run. |
+| Setup 01 — Prerequisites | 📕 **Published ✅ verified** | v2.0 — executed end to end on the host. All expected output is real. Risk R9 did not materialise. |
 | Setup 02 — Account, Licence, SDP | 📕 **Published** | Steps `[UNVERIFIED]` until you run them and report back. Teaches request → accept → **deploy**. |
 | Setup 03 — QEMU VM ⭐ | 📄 | Will follow QNX's official **QSTI for QEMU** guide (ADR-004) |
 | Setup 04 — IDE & Tooling | 📄 | |
@@ -196,7 +196,7 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 |-----------|-----------|--------|--------------|
 | **M0** Plan approved | `PLAN.md` status = Approved | ⬜ In progress | — |
 | **M1** "I get it" | Ch 00–03 read | ⬜ | — |
-| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | ⬜ | — |
+| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | 🔄 In progress — host ready | — |
 | **M3** "I speak QNX" | Ch 09–15 + labs done | ⬜ | — |
 | **M4** "I can extend the OS" | Resource manager written and working | ⬜ | — |
 | **M5** "I own the image" | Custom IFS boots | ⬜ | — |
@@ -208,6 +208,17 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 004 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Turn Setup Guide 01 from a researched guess into a verified document. |
+| **Done** | • Learner executed **Block V1** on the host and reported the output<br>• `check-environment.sh`: **19 passed · 6 warnings · 0 failed** (was 13/9/3)<br>• **T-008 cleared** — `/dev/kvm` now present *and* accessible<br>• **T-009 cleared** — Setup Guide 01 complete<br>• **Risk R9 did not materialise** — every documented package installed under its documented name on Ubuntu 26.04<br>• Setup Guide 01 → **v2.0**: `[UNVERIFIED]` removed, all expected-output blocks replaced with real observed output<br>• §9.2 rewritten around the command actually run, with the SeaBIOS → iPXE → *"No bootable device"* trace explained as the pass<br>• **Corrected the repo path** everywhere: `~/exercises/qnx/qnx-zero-to-hero` → `~/exercises/qnx-zero-to-hero`<br>• Real host toolchain versions recorded for chapter front matter |
+| **Learner decisions** | Git identity updated |
+| **Questions logged** | None new |
+| **Blockers** | 🔴 **V2.1** — the QNX licence has still not been requested. Everything downstream waits on it. |
+| **Next session** | Blocks V2–V4 once the licence is deployed; then Setup Guide 02's markers; then Chapter 00 |
 
 ### Session 003 — 2026-08-26
 
@@ -263,5 +274,6 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | Session 004: Block V1 verified. Environment snapshot now all-green. Setup Guide 01 marked verified. Repo path corrected. |
 | 1.2 | 2026-08-26 | Session 003: author handover. Next action rewritten around `VerificationRuns.md`. Setup Guide 01 status corrected. Chapter 00 marked on hold. |
 | 1.0 | 2026-08-25 | Created. Phase 0, 0/34 chapters, environment verified. |

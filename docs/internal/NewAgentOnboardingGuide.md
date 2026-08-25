@@ -109,7 +109,7 @@ Say **"your host machine"**, **"your laptop"**, **"your Ubuntu 26.04 / WSL2 syst
 Never mention the authoring environment, its OS, its architecture, or the fact that a split exists.
 
 **Tier map:** Tier 1 = course · Tier 2 = `docs/meta/` · Tier 3 = `docs/internal/` + root
-`PROMPTS.md` and `COPILOT_PROMPT_HISTORY.md`. Full definition in
+`PROMPTS.md`, `COPILOT_PROMPT_HISTORY.md` and `toAgent/`. Full definition in
 [`README.md`](README.md#who-reads-what--the-three-document-tiers-adr-022) (ADR-022).
 
 ### 5.2 ⚡ Nothing heavy runs in the authoring environment
@@ -174,6 +174,7 @@ qnx-zero-to-hero/
 ├── README.md                       📗 Tier 1 — reader entry point
 ├── PROMPTS.md                      🔒 Tier 3 — learner prompts + agent responses (Claude era)
 ├── COPILOT_PROMPT_HISTORY.md       🔒 Tier 3 — the Copilot era, sessions 001–002
+├── toAgent/                        🔒 Tier 3 — raw output the learner captures on the host
 ├── LICENSE                         📗 CC BY-SA 4.0 content + MIT code
 │
 ├── docs/

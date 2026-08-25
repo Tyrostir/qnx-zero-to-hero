@@ -1,8 +1,8 @@
 ---
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
-version: 1.0
-status: Active — awaiting learner run
+version: 1.1
+status: Active — Block V1 ✅ verified; V2–V4 pending
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -76,7 +76,7 @@ Worked / Failed. Notes: ...
 | | |
 |---|---|
 | **Machine** | Your laptop — Ubuntu 26.04 LTS on WSL2 |
-| **Repo checkout** | `~/exercises/qnx/qnx-zero-to-hero` |
+| **Repo checkout** | `~/exercises/qnx-zero-to-hero` |
 | **Time** | V1 ≈ 45 min · V2 ≈ 15 min + approval wait · V3 ≈ 60–90 min (~10 GB download) · V4 ≈ 10 min |
 | **Disk** | ~25 GB free |
 | **Network** | A good connection for V3 |
@@ -85,7 +85,7 @@ Worked / Failed. Notes: ...
 > start, pull the latest — otherwise you will be following an older copy of these guides.
 >
 > ```bash
-> host$ cd ~/exercises/qnx/qnx-zero-to-hero
+> host$ cd ~/exercises/qnx-zero-to-hero
 > host$ git pull
 > ```
 
@@ -114,7 +114,7 @@ now; everything else can proceed while it processes. Details in
 ### V1.0 — Baseline snapshot
 
 ```bash
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
@@ -194,12 +194,16 @@ success case**. What matters is that it does **not** say *"KVM is not supported"
 *"Could not access KVM kernel module"*.
 🚪 **Exit:** `Ctrl+A` then `X`.
 
+✅ **Verified 2026-08-25.** Real result: SeaBIOS → iPXE (which even took a DHCP lease of
+`10.0.2.15` from QEMU's built-in NAT) → *"No bootable device."* No KVM error. Now the documented
+expected output in [Setup Guide 01 §9.2](../guides/Setup_01_Prerequisites.md#92-prove-qemu-can-actually-use-it).
+
 ### V1.6 — Workspace and final check
 
 ```bash
 host$ mkdir -p ~/qnx-workspace/{images,vms,shared,downloads}
 host$ ls -la ~/qnx-workspace
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
@@ -349,7 +353,7 @@ host$ rm -f /tmp/hello_qnx /tmp/hello_qnx.c
 ### V4.4 — Final environment check
 
 ```bash
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
@@ -363,14 +367,14 @@ host$ ./tools/check-environment.sh
 
 | ID | What | Owner | Gated on | Clears | Status |
 |----|------|-------|----------|--------|--------|
-| **V2.1** | 🔴 Request the licence — **do today** | 👤 | — | Risk R1 | ⬜ |
-| V1.0 | Baseline `check-environment.sh` | 👤 | — | — | ⬜ |
-| V1.1 | Build tools | 👤 | — | Setup 01 §5 | ⬜ |
-| V1.2 | Java runtime | 👤 | — | Setup 01 §6 | ⬜ |
-| V1.3 | QEMU | 👤 | — | Setup 01 §7 · Risk R9 | ⬜ |
-| V1.4 | KVM group fix ⚡ | 👤 | — | **T-008** | ⬜ |
-| V1.5 | KVM proof | 👤 | V1.4 | Setup 01 §9 · Risk R3 | ⬜ |
-| V1.6 | Workspace + re-check | 👤 | V1.1–V1.5 | **T-009** | ⬜ |
+| **V2.1** | 🔴 Request the licence — **still outstanding** | 👤 | — | Risk R1 | ⬜ |
+| V1.0 | Baseline `check-environment.sh` | 👤 | — | — | ✅ |
+| V1.1 | Build tools | 👤 | — | Setup 01 §5 | ✅ GCC 15.2.0 · Make 4.4.1 |
+| V1.2 | Java runtime | 👤 | — | Setup 01 §6 | ✅ OpenJDK 25.0.4 |
+| V1.3 | QEMU | 👤 | — | Setup 01 §7 · Risk R9 | ✅ QEMU 10.2.1 |
+| V1.4 | KVM group fix ⚡ | 👤 | — | **T-008** | ✅ accessible |
+| V1.5 | KVM proof | 👤 | V1.4 | Setup 01 §9 · Risk R3 | ✅ booted, no KVM error |
+| V1.6 | Workspace + re-check | 👤 | V1.1–V1.5 | **T-009** | ✅ 19 pass · 6 warn · **0 fail** |
 | V2.2 | Approval received | 👤 | V2.1 | **T-003** · Risk R1 | ⏸️ |
 | V2.3 | Accept **and deploy** | 👤 | V2.2 | **T-010** · Setup 02 §5 | ⏸️ |
 | V3.1 | Download QSC | 👤 | V2.3 | Setup 02 §7 | ⏸️ |
@@ -417,7 +421,26 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
-| — | — | *awaiting first run* | — |
+| 2026-08-25 | **V1 (all)** | ✅ **Passed** | `19 passed · 6 warnings · 0 failed`. **T-008** and **T-009** cleared. Setup Guide 01 → v2.0, `[UNVERIFIED]` removed, all expected-output blocks replaced with real output. **Risk R9 did not materialise** — every documented package installed under its documented name on Ubuntu 26.04. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
+
+### Real versions observed on the host (2026-08-25)
+
+| Component | Version |
+|-----------|---------|
+| OS | Ubuntu 26.04 LTS |
+| Kernel | 6.18.33.2-microsoft-standard-WSL2 |
+| GCC | 15.2.0 (Ubuntu 15.2.0-16ubuntu1) |
+| GNU Make | 4.4.1 |
+| Git | 2.53.0 |
+| curl | 8.18.0 |
+| OpenSSH | 10.2p1 (OpenSSL 3.5.5) |
+| GNU tar | 1.35 |
+| OpenJDK | 25.0.4 |
+| QEMU | 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3) |
+| qemu-img | 10.2.1 |
+
+> 💡 **Use this table when writing chapters.** Front matter records the exact toolchain each chapter
+> was written against; these are the host-side values.
 
 ---
 
@@ -425,4 +448,5 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | **Block V1 verified.** All six V1 checkpoints ✅; T-008 and T-009 cleared; real host versions recorded; V1.5's documented output replaced with the real SeaBIOS/iPXE result. |
 | 1.0 | 2026-08-26 | Created in Session 003. Defines the ADR-024 clearance protocol and enumerates blocks V1–V4 (18 checkpoints) against Setup Guides 01 and 02. |

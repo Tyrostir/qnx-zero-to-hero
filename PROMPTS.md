@@ -55,6 +55,7 @@ and this project has already lost one author mid-task. Requested directly by the
 |---|------|-------|---------|---------|
 | [PROMPT#1](#prompt1) | 2026-08-26 | Claude (Opus 5) | Handover from Copilot: absorb all prior context, report understanding (what/why/where/how), start logging prompts | ✅ Handover report delivered · `PROMPTS.md` created |
 | [PROMPT#2](#prompt2) | 2026-08-26 | Claude (Opus 5) | Six instructions: log responses too · leave the token · write the 3 onboarding docs · hide the two-machine split from readers · list the verification to-dos · hold Chapter 00 | ✅ All six done · ADR-022/023/024 · `docs/internal/` created |
+| [PROMPT#3](#prompt3) | 2026-08-26 | Claude (Opus 5) | Block V1 output delivered in `toAgent/1.BlockV1Output.md`; update the Git identity | ✅ Block V1 verified · Setup Guide 01 → v2.0 · repo path corrected · identity set |
 
 ---
 
@@ -331,9 +332,138 @@ Committed locally. **Not pushed** — say the word and I'll push, since that's a
 
 ---
 
+## PROMPT#3
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 004 |
+| **Context** | The learner executed verification Block V1 on the host and dropped the output into the repository. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I have executed Block V1 and pasted the output at toAgent/1.BlockV1Output.md file. Please read it. And I want to update one info. Please user.name as "Karthikeyan Kasvishwanathan" and user.email as Karthikeyan.KLU@gmail.com
+
+### Standing instructions
+
+| # | Instruction | Recorded as |
+|---|-------------|-------------|
+| SI-9 | Git commit identity is **`Karthikeyan Kasvishwanathan <Karthikeyan.KLU@gmail.com>`**. History is not rewritten; earlier commits stay under `Tyrostir`. | `git config --local`; logged in `DecisionsLog.md` |
+| SI-10 | The learner drops captured host output into **`toAgent/<n>.<WhatItIs>.md`**. Treat it as the evidence that clears `[UNVERIFIED]` markers (ADR-024). | `toAgent/README.md` |
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+Read it. **Block V1 passed clean — `19 passed · 6 warnings · 0 failed`**, up from 13/9/3. Identity updated.
+
+## ✅ What your output proved
+
+| Checkpoint | Result |
+|---|---|
+| **V1.1** build tools | GCC **15.2.0** · GNU Make **4.4.1** |
+| **V1.2** Java | OpenJDK **25.0.4** |
+| **V1.3** QEMU | **10.2.1** (`qemu-system-x86_64` + `qemu-img`) |
+| **V1.4** KVM group ⚡ | `/dev/kvm` **present and accessible** — T-008 cleared |
+| **V1.5** KVM proof | Booted, no KVM error — **Risk R3 closed** |
+| **V1.6** workspace + re-check | 4 directories created · **0 failures** |
+
+**Two risks are now dead, not just mitigated:**
+
+- **R9 — Ubuntu 26.04 vs. QNX's documented 22.04/24.04.** This was the one I most expected to bite. **Every package installed under its documented name**, no substitutions, no "Unable to locate package". The guide is now *proven* on 26.04 rather than believed to work there.
+- **R3 — KVM under nested virtualization.** Confirmed working inside WSL2.
+
+**Your V1.5 output is genuinely nice**, and I've promoted it into the guide as the documented expected result:
+
+```text
+SeaBIOS → Booting from Hard Disk... failed
+        → Booting from DVD/CD... failed
+        → iPXE... net0: 10.0.2.15/255.255.255.0 gw 10.0.2.2
+        → Nothing to boot
+        → Booting from Floppy... failed
+        → No bootable device.
+```
+
+That is a complete virtual machine coming up, trying every boot device in order — including pulling a **DHCP lease from QEMU's built-in NAT** — and finding nothing. It's a preview of the whole course: in Setup Guide 03 you hand that same machine a QNX image, and *"No bootable device"* becomes a `qnx#` prompt.
+
+## 🔧 Two corrections your output caught
+
+**1. The documented repo path was wrong.** Every guide said `~/exercises/qnx/qnx-zero-to-hero`. Your prompt shows the truth: **`~/exercises/qnx-zero-to-hero`** — no intermediate `qnx/` directory. That's a first-line copy-paste failure in every verification block, now fixed across Setup 01, Setup 02, `CompactContext.md` and `VerificationRuns.md`. (`COPILOT_PROMPT_HISTORY.md` keeps the old path — it's a historical transcript, not a live instruction.)
+
+**2. Setup 01 §9.2 documented a command that was never run.** It specified `-kernel /dev/null` and predicted a kernel-loading error. You ran the plain form from `VerificationRuns.md` and got the firmware boot trace instead. I've rewritten the section around the command actually executed, with your real output and an explanation of why that failure is the pass — plus the `Ctrl+A`, `X` exit sequence, which was missing.
+
+## 📕 Setup Guide 01 is now v2.0 — verified
+
+`[UNVERIFIED]` removed. Every expected-output block now carries **real observed output**, not illustrative versions. The front matter says so plainly:
+
+> `verified_on: "✅ Fully executed on Ubuntu 26.04 LTS / WSL2, Intel i7-11850H, 2026-08-25."`
+
+I also recorded your real toolchain versions in `VerificationRuns.md` as a reference table — chapter front matter has to state the exact toolchain each chapter was written against, and now it can.
+
+## 👤 Git identity updated
+
+```text
+user.name  = Karthikeyan Kasvishwanathan
+user.email = Karthikeyan.KLU@gmail.com
+```
+
+Set locally on this repository, applied from this commit onward. The two earlier commits stay under `Tyrostir` — rewriting history would break the published GitHub commits for no benefit.
+
+> ⚠️ **One thing worth a second look before this goes public.** You wrote **"Kasvishwanathan"**, but your account email is `karthikeyankasi**vi**shwanathan@` — which suggests **"Kasivishwanathan"**, with an `i` after `Kas`. I've set exactly what you typed. Say the word if it should be the other spelling and I'll correct it before you push.
+
+## 📥 `toAgent/` is now a documented convention
+
+Dropping output in a file rather than pasting into chat is better — it's faithful, and it's version-controlled evidence. I gave it a `README.md` marking it **Tier 3** (internal, excluded from the book), a naming convention (`<n>.<WhatItIs>.md`), and an index. Your Block V1 drop is entry 1.
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_01_Prerequisites.md` | → **v2.0 verified.** Markers cleared; real output throughout; §9.2 rewritten; path corrected |
+| `docs/internal/VerificationRuns.md` | V1.0–V1.6 → ✅; real-versions reference table; results log entry |
+| `docs/meta/DecisionsLog.md` | Session 004: 4 verifications (guide executed, R9 closed, R3 closed, path corrected) + Git identity |
+| `docs/meta/CourseState.md` | Session 004 log; environment snapshot all-green; M2 in progress; next action rewritten |
+| `docs/meta/CompactContext.md` | Regenerated: real versions, 0 failures, R3/R9 closed |
+| `docs/meta/ToDos.md` | T-008, T-009, T-145 closed; T-144 added |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 004 row; hazards H-3/H-4/H-5 updated; identity recorded |
+| `toAgent/README.md` | **Created** — Tier 3 drop convention and index |
+| `docs/internal/README.md`, `NewAgentOnboardingGuide.md`, `tools/build-pdf.sh` | `toAgent/` added to the Tier 3 map |
+| `docs/guides/Setup_02_*.md` | Repo path corrected |
+
+Leak scan across Tier 1 and Tier 2: **clean**.
+
+---
+
+## 🔴 One thing is now blocking everything
+
+**The QNX licence request — V2.1 — has still not been submitted.**
+
+Your host is completely ready. There is nothing else to prepare, and nothing further I can verify. Setup Guide 02 blocks V2–V4 all sit behind licence approval, whose latency is unknown (**Risk R1**) and is now the *only* live risk in the project.
+
+👉 **https://www.qnx.com/getqnx** — fifteen minutes. Then send me:
+
+- what the form actually asked for
+- **how long approval took** (this turns R1 from unknown into documented)
+- the real button labels for **accept** and **deploy** — that's the step that silently breaks everyone's install
+
+Once it's deployed, blocks V3 and V4 will clear Setup Guide 02, and Chapter 00 comes off hold.
+
+### Artefacts changed
+
+*(See the table above.)*
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.1 | 2026-08-26 | PROMPT#3 logged: Block V1 verification results and the Git identity change. |
 | 2.0 | 2026-08-26 | **ADR-023 adopted:** full agent responses are now logged alongside prompts. PROMPT#1's response back-filled; PROMPT#2 added. Marked Tier 3 per ADR-022. |
 | 1.0 | 2026-08-26 | Created at the Copilot → Claude handover. PROMPT#1 logged. |

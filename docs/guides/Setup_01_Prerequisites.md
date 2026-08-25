@@ -1,14 +1,14 @@
 ---
 title: "Setup Guide 01 — Prerequisites & Host Preparation"
 document_id: SETUP-01
-version: 1.1
-status: Published
+version: 2.0
+status: ✅ Published & verified
 created: 2026-08-25
-last_updated: 2026-08-25
+last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "30–45 minutes"
 prereqs: "None"
-verified_on: "Host readiness checked on Ubuntu 26.04 LTS / WSL2, 2026-08-25. Install steps [UNVERIFIED] — see the note below."
+verified_on: "✅ Fully executed on Ubuntu 26.04 LTS / WSL2, Intel i7-11850H, 2026-08-25. All expected-output blocks are real observed output."
 ---
 
 # 🛠️ Setup Guide 01 — Prerequisites & Host Preparation
@@ -19,14 +19,14 @@ verified_on: "Host readiness checked on Ubuntu 26.04 LTS / WSL2, 2026-08-25. Ins
 > **What it does *not* do.** It does not install QNX. That is [Setup Guide 02](Setup_02_QNX_Account_And_License.md).
 > Nothing here requires a QNX account, so **you can do this right now.**
 
-> 📌 **`[UNVERIFIED]` — please read this once.** The commands in this guide are written from official
-> Ubuntu and QNX documentation, and the *host readiness check* (`tools/check-environment.sh`) has
-> been run against your machine. The **install commands themselves have not yet been executed.** As
-> you run them, paste the output back and each step is confirmed — or corrected — with the real
-> result. Nothing stays in this course that we haven't actually run.
+> ✅ **Verified.** Every step in this guide has been executed end to end on **Ubuntu 26.04 LTS under
+> WSL2** (Intel i7-11850H, 16 threads, 23 GiB RAM) on **2026-08-25**. The version numbers shown in
+> the expected-output blocks are the real ones observed on that run, not illustrations.
 >
-> This matters here more than usual: QNX documents its QEMU workflow for **Ubuntu 22.04 / 24.04**,
-> and you are on **26.04**. Some package names may differ. *(Risk R9; tracked as T-200.)*
+> 💡 **Good news about Ubuntu 26.04.** QNX documents its QEMU workflow for Ubuntu 22.04 / 24.04, so
+> there was a real risk that package names had changed by 26.04. **They had not** — every package in
+> this guide installed under its documented name, with no substitutions. *(Risk R9 did not
+> materialise.)*
 
 ---
 
@@ -167,7 +167,7 @@ The course ships a read-only script that checks all of this for you. It installs
 nothing.
 
 ```bash
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
@@ -302,13 +302,17 @@ Processing triggers for man-db (2.13.1-1) ...
 host$ gcc --version | head -1 && make --version | head -1 && git --version
 ```
 
-✅ **Expected output** (versions will differ):
+✅ **Expected output** — real values observed on Ubuntu 26.04 (yours may be newer):
 
 ```text
-gcc (Ubuntu 14.2.0-4ubuntu2) 14.2.0
+gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
 GNU Make 4.4.1
 git version 2.53.0
 ```
+
+> 💡 Ubuntu 26.04 ships **GCC 15**. Nothing in this course depends on the host compiler version —
+> your QNX code is built by `qcc` from the QNX SDP, not by this GCC. Host GCC is here only to build
+> ordinary Linux helper tools.
 
 ---
 
@@ -327,13 +331,15 @@ host$ sudo apt install -y default-jre
 host$ java -version
 ```
 
-✅ **Expected output** (version will differ; **17 or newer** is safe):
+✅ **Expected output** — real value observed on Ubuntu 26.04 (**17 or newer** is safe):
 
 ```text
-openjdk version "21.0.5" 2026-10-15
-OpenJDK Runtime Environment (build 21.0.5+11-Ubuntu-1ubuntu1)
-OpenJDK 64-Bit Server VM (build 21.0.5+11-Ubuntu-1ubuntu1, mixed mode, sharing)
+openjdk version "25.0.4" 2026-07-21
 ```
+
+> 🐣 **Beginner note.** `java -version` prints to **stderr**, not stdout. That is normal and not an
+> error — it is a long-standing quirk of the JDK. If you pipe this command somewhere and see
+> nothing, that is why.
 
 > 💡 **Why this is here and not in Setup Guide 02.** QNX Software Center *bundles* its own JRE in most
 > builds, so this may be redundant. It is installed anyway because when the bundled JRE fails, the
@@ -385,11 +391,11 @@ host$ sudo apt install -y \
 host$ qemu-system-x86_64 --version
 ```
 
-✅ **Expected output** (version will differ; **6.0 or newer** is fine):
+✅ **Expected output** — real value observed on Ubuntu 26.04 (**6.0 or newer** is fine):
 
 ```text
-QEMU emulator version 9.1.0 (Debian 1:9.1.0+ds-1ubuntu1)
-Copyright (c) 2003-2024 Fabrice Bellard and the QEMU Project developers
+QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3)
+Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers
 ```
 
 ```bash
@@ -399,8 +405,8 @@ host$ qemu-img --version
 ✅ **Expected output:**
 
 ```text
-qemu-img version 9.1.0 (Debian 1:9.1.0+ds-1ubuntu1)
-Copyright (c) 2003-2024 Fabrice Bellard and the QEMU Project developers
+qemu-img version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3)
+Copyright (c) 2003-2025 Fabrice Bellard and the QEMU Project developers
 ```
 
 ---
@@ -523,16 +529,44 @@ This starts QEMU with KVM, using a deliberately empty machine, and immediately q
 nothing — it only proves acceleration initialises.
 
 ```bash
-host$ qemu-system-x86_64 -enable-kvm -machine q35 -m 128 -nographic -no-reboot \
-      -kernel /dev/null 2>&1 | head -5
+host$ qemu-system-x86_64 -enable-kvm -machine q35 -m 128 -nographic -no-reboot
 ```
 
-✅ **Expected output** — an error about the *kernel file* is exactly what we want. It means KVM
-initialised successfully and QEMU got as far as trying to boot:
+> 🚪 **How to quit.** Press **`Ctrl+A`**, release both keys, then press **`X`**. This is QEMU's
+> escape sequence in `-nographic` mode; plain `Ctrl+C` goes to the *guest*, not to QEMU.
+
+✅ **Expected output** — QEMU boots its firmware, finds no disk, and gives up. **That failure is the
+pass.** It proves KVM initialised and the virtual machine actually started. Real output from Ubuntu
+26.04 / WSL2, abridged:
 
 ```text
-qemu-system-x86_64: Error loading uncompressed kernel without PVH ELF Note
+SeaBIOS (version 1.17.0-debian-1.17.0-1ubuntu1)
+iPXE (https://ipxe.org) 00:02.0 CA00 PCI2.10 PnP PMM+06FC8B60+06F08B60 CA00
+
+Booting from Hard Disk...
+Boot failed: could not read the boot disk
+
+Booting from DVD/CD...
+Boot failed: Could not read from CDROM (code 0003)
+Booting from ROM...
+iPXE (PCI 00:02.0) starting execution...ok
+net0: 52:54:00:12:34:56 using 82574l on 0000:00:02.0 (Ethernet) [open]
+Configuring (net0 52:54:00:12:34:56)...... ok
+net0: 10.0.2.15/255.255.255.0 gw 10.0.2.2
+Nothing to boot: No such file or directory (https://ipxe.org/2d03e13b)
+No more network devices
+
+Booting from Floppy...
+Boot failed: could not read the boot disk
+
+No bootable device.
 ```
+
+> 💡 **Read that output again — it is a preview of the whole course.** `SeaBIOS` is the virtual
+> firmware. It tried the hard disk, the CD, the network (via **iPXE**, which even picked up a
+> DHCP address of `10.0.2.15` from QEMU's built-in NAT), then the floppy, and found nothing
+> bootable. In Setup Guide 03 you will hand this same machine a QNX image, and instead of
+> *"No bootable device"* you will get a `qnx#` prompt.
 
 ❌ **Bad output** — this means KVM did **not** initialise:
 
@@ -600,13 +634,21 @@ drwxr-xr-x 2 tyrostir tyrostir 4096 Aug 25 13:10 vms
 Run the environment check again.
 
 ```bash
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
-✅ **Expected output** — sections 1–5 should now be all green:
+✅ **Expected output** — sections 1–5 should now be all green. This is the **real report** from a
+completed Setup Guide 01 run on Ubuntu 26.04 / WSL2:
 
 ```text
+1. Host system
+────────────────────────────────────────────────────────────────
+  ✅ OS                     Ubuntu 26.04 LTS
+  ✅ Kernel                 6.18.33.2-microsoft-standard-WSL2
+  ✅ Environment            WSL2 (Windows Subsystem for Linux)
+  ✅ Architecture           x86_64
+
 2. CPU & virtualization
 ────────────────────────────────────────────────────────────────
   ✅ CPU cores              16 logical
@@ -614,21 +656,39 @@ host$ ./tools/check-environment.sh
   ✅ HW virtualization      supported (VT-x / AMD-V)
   ✅ /dev/kvm               present and accessible — KVM acceleration available 🚀
 
+3. Memory & disk
+────────────────────────────────────────────────────────────────
+  ✅ RAM                    23 GiB total
+  ✅ Free disk ($HOME)      951 GB — plenty (need ~25 GB)
+
 4. Required host tools
 ────────────────────────────────────────────────────────────────
   ✅ git                    git version 2.53.0
-  ✅ curl                   curl 8.18.0 ...
+  ✅ curl                   curl 8.18.0 (x86_64-pc-linux-gnu) libcurl/8.18.0 Ope
   ✅ make                   GNU Make 4.4.1
-  ✅ gcc                    gcc (Ubuntu 14.2.0-4ubuntu2) 14.2.0
+  ✅ gcc                    gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
   ✅ tar                    tar (GNU tar) 1.35
-  ✅ ssh                    OpenSSH_10.2p1 ...
-  ✅ java                   openjdk version "21.0.5" ...
+  ✅ ssh                    OpenSSH_10.2p1 Ubuntu-2ubuntu3.5, OpenSSL 3.5.5 27 J
+  ✅ java                   openjdk version "25.0.4" 2026-07-21
 
 5. QEMU (lab environment)
 ────────────────────────────────────────────────────────────────
-  ✅ qemu-system-x86_64     QEMU emulator version 9.1.0 ...
-  ✅ qemu-img               qemu-img version 9.1.0 ...
+  ✅ qemu-system-x86_64     QEMU emulator version 10.2.1 (Debian 1:10.2.1+ds-1ub
+  ✅ qemu-img               qemu-img version 10.2.1 (Debian 1:10.2.1+ds-1ubuntu3
 ```
+
+The summary line should read:
+
+```text
+  19 passed   6 warnings   0 failed
+
+  👍 Ready to proceed. Warnings above are for optional or not-yet-installed items.
+```
+
+> 💡 **Compare with where you started.** Before Setup Guide 01, this same script reported
+> **13 passed · 9 warnings · 3 failed**. The three failures were `gcc`, `make` and
+> `qemu-system-x86_64`; one of the warnings was `/dev/kvm` present but **not writable**. All four
+> are now resolved. **Zero failures is the bar for moving on.**
 
 **Still expected to be ⚠️ at this point** — these are Setup Guide 02's job:
 
@@ -854,5 +914,6 @@ Your host is ready. 🎉
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.0 | 2026-08-26 | **Verified end to end on the real host.** All `[UNVERIFIED]` markers cleared. Expected-output blocks replaced with real observed output: GCC 15.2.0, Make 4.4.1, OpenJDK 25.0.4, QEMU 10.2.1. §9.2 KVM proof rewritten around the command actually run (SeaBIOS → iPXE → *No bootable device*), with an explanation of why that failure is the pass. §11 now shows the real 19/6/0 report. Repo path corrected to `~/exercises/qnx-zero-to-hero`. Risk R9 recorded as not materialised — every documented package name still exists on 26.04. |
 | 1.1 | 2026-08-26 | Corrected the `verified_on` claim: only the host readiness check was ever run, not the install steps. Added the `[UNVERIFIED]` notice (ADR-024). |
 | 1.0 | 2026-08-25 | Created. Verified against Ubuntu 26.04 / WSL2 / i7-11850H. Documents the Ubuntu 26.04 package-name divergence from QNX's documented 22.04/24.04 lists (risk R9). |

@@ -31,7 +31,7 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 - **Course:** *QNX Zero to Hero* — 6 parts, 34 chapters, ~21 labs, 1 capstone.
 - **Repo:** `https://github.com/Tyrostir/qnx-zero-to-hero`
-- **Local path:** `~/exercises/qnx/qnx-zero-to-hero`
+- **Local path:** `~/exercises/qnx-zero-to-hero`
 - **Deliverable:** a Markdown book + runnable labs, exportable to PDF.
 
 ## WHERE WE ARE
@@ -41,26 +41,26 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 | Phase | **1 — Environment setup** |
 | Plan | ✅ **Approved** 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **2 / 5** (01 Prerequisites, 02 Licence+SDP) |
-| QNX installed | ❌ — learner to do Setup 01 + 02 now |
+| Setup guides published | **2 / 5** — 01 ✅ **verified**, 02 `[UNVERIFIED]` |
+| Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
+| QNX installed | ❌ — blocked on the licence |
 | VM booting | ❌ |
-| Blocker | None |
-| Next (me) | Clear the `[UNVERIFIED]` markers from the learner's reported output |
-| Next (learner) | **Request the QNX licence today** (Risk R1), then Setup 01 (incl. `kvm` group fix) — reporting output per `VerificationRuns.md` |
+| Blocker | 🔴 **QNX licence not yet requested** (V2.1) — everything downstream waits on it |
+| Next (me) | Clear Setup 02's markers once blocks V2–V4 are reported |
+| Next (learner) | 🔴 **Request the QNX licence** — `qnx.com/getqnx` (V2.1). Setup 01 is done. |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
 
 ```text
 Ubuntu 26.04 LTS on WSL2 · kernel 6.18.33.2-microsoft-standard-WSL2
-Intel i7-11850H · 16 logical CPUs · VT-x · /dev/kvm PRESENT ✅
-  ⚠️ user NOT in `kvm` group → device not writable → T-008: sudo usermod -aG kvm $USER
-23 GiB RAM (21 free) · 952 GB disk free
-installed: git 2.53 · curl 8.18 · tar · ssh
-NOT installed: gcc/make (build-essential), qemu, java, QNX SDP, QNX licence,
-               VS Code QNX Toolkit, pandoc/TeX
-Disk budget needed: ~25 GB
-Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
+Intel i7-11850H · 16 logical CPUs · VT-x · /dev/kvm PRESENT AND ACCESSIBLE ✅
+23 GiB RAM · 951 GB disk free  (need ~25 GB)
+Repo: ~/exercises/qnx-zero-to-hero
+installed ✅: gcc 15.2.0 · make 4.4.1 · git 2.53.0 · curl 8.18.0 · tar 1.35
+              ssh 10.2p1 · openjdk 25.0.4 · qemu 10.2.1 · qemu-img 10.2.1
+NOT installed: QNX SDP, QNX licence, VS Code QNX Toolkit, pandoc/TeX
+Check any time: ./tools/check-environment.sh   (last: 19 pass / 6 warn / 0 FAIL ✅)
 ```
 
 ## KEY QNX FACTS (verified 2026-08-25 — much online info is stale)
@@ -77,7 +77,8 @@ Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
 - **QSTI** = *Quick Start Target Image* — official **pre-built** images for **QEMU** and **RPi 4/5**.
   **This is how we boot QNX (ADR-004).**
 - **CTI** = *Custom Target Image* — official **build-your-own** flow (RPi + QEMU). Used in Ch 21.
-- QSTI-for-QEMU is documented for **Ubuntu 22.04/24.04**; our host is **26.04** → risk **R9**.
+- QSTI-for-QEMU is documented for **Ubuntu 22.04/24.04**; our host is **26.04**. Risk **R9** tested
+  at Setup 01 and **did not materialise** — every documented package name still exists on 26.04.
 - Non-commercial **allows**: learning, academia, hobby/maker, **writing training material or books
   (even commercially)**, interoperable OSS.
 - Non-commercial **forbids**: production use, distribution, commercial products, customer demos.
@@ -166,17 +167,17 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ## OPEN ITEMS
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
-- **Learner's open actions:** **T-003 request licence (urgent)** · T-013 `git pull` · T-008 `kvm` group ·
-  T-009 Setup 01 · T-010 accept+deploy · T-011 install SDP · **T-012 report verification output**
-  (blocks V1–V4 in `docs/internal/VerificationRuns.md` — 18 checkpoints).
+- **Learner's open actions:** 🔴 **T-003 request licence (V2.1 — the only blocker)** · T-010 accept+deploy ·
+  T-011 install SDP · T-012 report blocks V2–V4. ✅ Done: T-008, T-009, Block V1.
 - **Doubts logged:** 5 (D-001…D-005, all answered)
-- **Top risks:** R1 licence latency (mitigated: Part 0 needs no software) · R9 Ubuntu 26.04 newer than
-  QNX-documented 22.04/24.04 · R10 three-path authoring cost.
+- **Top risks:** **R1 licence latency — now the only live blocker** · R10 three-path authoring cost.
+  ~~R9 (Ubuntu 26.04 newer than documented)~~ tested and closed. ~~R3 (KVM)~~ closed.
 
 ## CHANGELOG
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | Regenerated after Session 004: Block V1 verified, host now all-green, R9 and R3 closed, licence request is the sole blocker. |
 | 1.2 | 2026-08-26 | Regenerated after Session 003 (author handover): ADR-022/023/024 added; next actions rewritten around the verification protocol; Chapter 00 on hold. |
 | 1.1 | 2026-08-25 | Regenerated after Session 002: plan approved, ADR-004 revised (QSTI), ADR-008 strengthened, ADR-019/020/021 added, Setup Guides 01–02 published, QNX facts expanded. |
 | 1.0 | 2026-08-25 | Created at end of Session 001. |

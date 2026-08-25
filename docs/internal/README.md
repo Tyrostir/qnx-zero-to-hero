@@ -23,7 +23,7 @@ audience: "AI author agents and the learner only — never the end reader"
 |------|----------|----------|------|
 | 📗 **Tier 1 — Course** | `README.md`, `docs/PLAN.md`, `docs/TableOfContents.md`, `docs/chapters/`, `docs/guides/`, `docs/reference/` | **The end reader.** Anyone who finds this repo. | Describes **exactly one machine**: the learner's laptop, Ubuntu 26.04 on WSL2. |
 | 📘 **Tier 2 — Course bookkeeping** | `docs/meta/` | The learner, and readers curious how the course is made. Included in the PDF book. | Progress, decisions, doubts. **Must stay reader-safe** — no authoring-infrastructure detail. |
-| 🔒 **Tier 3 — Internal** | **this directory**, plus `PROMPTS.md` and `COPILOT_PROMPT_HISTORY.md` at the repo root | **AI agents and the learner only.** | Everything else: the two-machine authoring split, agent handover, session mechanics, raw prompt logs. |
+| 🔒 **Tier 3 — Internal** | **this directory**, plus `PROMPTS.md`, `COPILOT_PROMPT_HISTORY.md` and `toAgent/` at the repo root | **AI agents and the learner only.** | Everything else: the two-machine authoring split, agent handover, session mechanics, raw prompt logs, learner-captured output. |
 
 **Tier 3 is excluded from the PDF book automatically** — `tools/build-pdf.sh` enumerates Tier 1 and
 Tier 2 by explicit path and never globs `docs/internal/`.
@@ -38,6 +38,7 @@ Tier 2 by explicit path and never globs `docs/internal/`.
 | [`NewAgentOnboardingGuide.md`](NewAgentOnboardingGuide.md) | How a brand-new agent takes over this project: what to read, in what order, what it may and may not do, and how to verify it is properly oriented. | You are a new agent |
 | [`NewAgentOnboardingPrompts.md`](NewAgentOnboardingPrompts.md) | Copy-paste prompts **the learner** sends to a new agent to bootstrap it in one message. | You are the learner, starting a new agent |
 | [`VerificationRuns.md`](VerificationRuns.md) | The `[UNVERIFIED]` clearance protocol: what the learner must run on the laptop, and where results get pasted. | Clearing `[UNVERIFIED]` markers |
+| [`../../toAgent/`](../../toAgent/) | Raw output the learner captures on the host and drops in for the author. | Reading reported results |
 
 ---
 

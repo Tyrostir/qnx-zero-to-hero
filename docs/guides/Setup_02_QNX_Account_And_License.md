@@ -747,7 +747,7 @@ host$ rm -f /tmp/hello_qnx /tmp/hello_qnx.c
 ### 11.5 Run the full environment check
 
 ```bash
-host$ cd ~/exercises/qnx/qnx-zero-to-hero
+host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 

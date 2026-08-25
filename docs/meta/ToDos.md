@@ -23,13 +23,13 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Depends on | Notes |
 |----|-----|------|--------|-----------|-------|
-| T-008 | 🔴 | **Add yourself to the `kvm` group** — `sudo usermod -aG kvm $USER`, then `wsl --shutdown` from Windows | ⬜ | — | Without this the VM runs 10–50× slower. [Setup 01 §8](../guides/Setup_01_Prerequisites.md#8-step-6--enable-kvm-hardware-acceleration-) |
-| T-009 | 🔴 | **Do [Setup Guide 01](../guides/Setup_01_Prerequisites.md)** — install QEMU, build tools, Java (~40 min) | ⬜ | — | Nothing needs a QNX account. Do it now. |
+
+
 | T-003 | 🔴 | **Create a myQNX account and REQUEST the QNX Everywhere licence** | ⬜ | — | ⚠️ **Highest priority.** [Setup 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence). Approval latency is Risk R1. |
 | T-010 | 🟠 | **Accept AND deploy** the licence in the myQNX License Manager | ⬜ | T-003 | The step everyone misses — [Setup 02 §5](../guides/Setup_02_QNX_Account_And_License.md#5-step-3--accept-and-deploy-the-licence-) |
 | T-011 | 🟠 | Install QNX Software Center + SDP 8.0 (~10 GB) | ⬜ | T-010 | [Setup 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) |
 | T-012 | 🟠 | **Report back the output of every verification checkpoint** | ⬜ | T-011 | Follow [`VerificationRuns.md`](../internal/VerificationRuns.md) — blocks V1–V4, 18 checkpoints. Only your pasted output can clear an `[UNVERIFIED]` marker (ADR-024). |
-| T-013 | 🟠 | `git pull` on your laptop before starting Setup 01 | ⬜ | — | The repository has moved on since you last worked there. |
+| T-013 | 🟠 | `git pull` before each work session | ⬜ | — | The authoring side moves between your sessions. |
 | T-006 | 🔵 | Decide whether to buy a Raspberry Pi 4/5 for the hardware track | ⬜ | Ch 31 | Not needed until Part 6 |
 | T-007 | 🔵 | Tell me your realistic weekly time budget (P-06) | ⬜ | — | Lets me calibrate chapter size. Default assumption: ~5 h/week |
 
@@ -41,6 +41,7 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Notes |
 |----|-----|------|--------|-------|
+| T-144 | 🟠 | Clear the Setup **02** markers once blocks V2–V4 are reported | ⏸️ | Blocked on T-003/T-011/T-012 |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | 🔴 | **Clear the `[UNVERIFIED]` markers** once the learner reports back — paste in real output, fix anything that failed | ⏸️ | Blocked on T-012. This is the gate before Chapter 00. |
 | T-102 | 🟠 | Write `Chapter00_HowToUseThisCourse.md` | ⏸️ | **On hold by learner instruction (Session 003)** until onboarding + verification are complete. |
@@ -115,6 +116,9 @@ update_trigger: "Continuously"
 | T-140 | Create the `docs/internal/` tier (4 documents) | 2026-08-26 | 003 |
 | T-142 | Absorb full project context at author handover and report back | 2026-08-26 | 003 |
 | T-143 | Create `PROMPTS.md` and establish the prompt+response logging rule (ADR-023) | 2026-08-26 | 003 |
+| T-008 | Add the user to the `kvm` group | 2026-08-25 | 003 |
+| T-009 | Complete Setup Guide 01 on the host | 2026-08-25 | 003 |
+| T-145 | Clear the Setup Guide 01 `[UNVERIFIED]` markers with real output → v2.0 | 2026-08-26 | 003 |
 | T-001 | Learner read and **approved** `PLAN.md` | 2026-08-25 | 002 |
 | T-002 | Learner confirmed the chapter list | 2026-08-25 | 002 |
 | T-004 | Pending decisions P-01…P-05 resolved | 2026-08-25 | 002 |
@@ -139,6 +143,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | **Block V1 verified.** T-008 and T-009 closed; T-145 added and closed (Setup Guide 01 → v2.0). T-013 re-scoped to every session. T-144 added for Setup Guide 02. |
 | 1.2 | 2026-08-26 | Session 003: author handover. T-140/142/143 closed. New learner items T-012 (rewritten) and T-013. New author item T-141 (clear the markers). **T-102 Chapter 00 put on hold** by learner instruction until onboarding and verification are complete. T-200 re-scoped to ADR-024. |
 | 1.1 | 2026-08-25 | Session 002: plan approved; T-001/002/004/005/100/101/104 closed. New learner items T-008…T-012 (KVM group, Setup 01, licence request/accept/deploy, SDP install, verification feedback). Next author item: Chapter 00. |
 | 1.0 | 2026-08-25 | Created. 7 learner items, 26 author items, 4 blocked, 9 completed. |

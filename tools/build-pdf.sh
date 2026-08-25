@@ -202,7 +202,7 @@ fi
 #
 # ADR-022 — document tiers. This list contains Tier 1 (course) and Tier 2
 # (docs/meta bookkeeping) ONLY. Tier 3 lives in docs/internal/ plus the
-# root-level PROMPTS.md and COPILOT_PROMPT_HISTORY.md; it is internal working
+# root-level PROMPTS.md, COPILOT_PROMPT_HISTORY.md and toAgent/; it is internal working
 # material and must never appear in the book. Do not add it here.
 mapfile -t ORDERED < <(
     printf '%s\n' \

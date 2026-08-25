@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.2
+version: 1.3
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -524,10 +524,79 @@ unprompted. Recorded here so the deferral is a decision on the record rather tha
 
 ---
 
+## 2026-08-26 — Session 004 (Block V1 verified on the host)
+
+### 🔍 VERIFIED — Setup Guide 01 executed end to end
+
+The learner ran the full host-preparation sequence on **Ubuntu 26.04 LTS / WSL2** and reported the
+output. `tools/check-environment.sh` went from **13 passed · 9 warnings · 3 failed** to
+**19 passed · 6 warnings · 0 failed**.
+
+Real versions observed — now the documented expected output, and the reference for chapter front
+matter:
+
+| Component | Version |
+|-----------|---------|
+| GCC | 15.2.0 | 
+| GNU Make | 4.4.1 |
+| OpenJDK | 25.0.4 |
+| QEMU / qemu-img | 10.2.1 |
+| Git · curl · tar · OpenSSH | 2.53.0 · 8.18.0 · 1.35 · 10.2p1 |
+
+Setup Guide 01 is promoted to **v2.0**, its `[UNVERIFIED]` notice removed, and every
+expected-output block replaced with real observed output.
+
+---
+
+### 🔍 VERIFIED — Risk R9 did not materialise
+
+**R9** anticipated that QNX's QEMU instructions — written for Ubuntu 22.04/24.04 — might not
+translate to 26.04. Tested in practice: **every package installed under its documented name**, with
+no substitutions and no "Unable to locate package" errors. R9 is closed for host preparation.
+
+**Why record a risk that did not happen.** Future readers on 26.04 need to know the guide was proven
+there, not merely believed to work.
+
+---
+
+### 🔍 VERIFIED — KVM acceleration works under nested virtualization
+
+`/dev/kvm` is now present **and accessible** (T-008 closed). QEMU launched with `-enable-kvm`,
+initialised acceleration, and ran its firmware to completion: SeaBIOS → iPXE (which obtained a DHCP
+lease of `10.0.2.15` from QEMU's built-in NAT) → *"No bootable device."* No KVM error at any point.
+**Risk R3 closed.**
+
+Setup Guide 01 §9.2 previously documented a different invocation (`-kernel /dev/null`) that was never
+run. It has been rewritten around the command actually executed, with the boot trace explained —
+it is a useful preview of what Setup Guide 03 will replace with a `qnx#` prompt.
+
+---
+
+### 🔍 VERIFIED — Repository path was documented incorrectly
+
+Every document recorded the checkout as `~/exercises/qnx/qnx-zero-to-hero`. The real path is
+**`~/exercises/qnx-zero-to-hero`** — no intermediate `qnx/` directory. Corrected in Setup Guides 01
+and 02, `CompactContext.md`, and `VerificationRuns.md`. `COPILOT_PROMPT_HISTORY.md` is left as-is; it
+is a historical transcript, not a live instruction.
+
+**Why this mattered.** Every verification block opens with a `cd` to that path. A wrong path is a
+copy-paste failure on the first line of the first command.
+
+---
+
+### 🆕 DECIDED — Git identity for this repository
+
+Commit identity set to **`Karthikeyan Kasvishwanathan <Karthikeyan.KLU@gmail.com>`** at the
+learner's request. Earlier commits remain under `Tyrostir <19234119+Tyrostir@users.noreply.github.com>`;
+history is not rewritten.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | Session 004 appended: 4 verifications (Setup Guide 01 executed, R9 closed, R3/KVM closed, repo path corrected) and 1 decision (Git identity). |
 | 1.2 | 2026-08-26 | Session 003 appended: author handover (Copilot → Claude), 2 verifications, 3 new decisions (ADR-022/023/024), 1 deferral. Setup Guide 01's verification claim corrected. |
 | 1.1 | 2026-08-25 | Session 002 appended: 2 verifications, 1 revision (ADR-004), 1 strengthening (ADR-008), 3 new decisions (ADR-019/020/021), plan approved, 1 new risk (R9), 1 deferral (P-06). |
 | 1.0 | 2026-08-25 | Log created. Session 001: 2 verifications, 18 decisions, 5 deferrals. |
