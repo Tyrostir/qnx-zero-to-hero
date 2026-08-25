@@ -148,8 +148,19 @@ all of Part 0 while your QNX licence request is being processed.*
 |---|---------|-------|------|--------|
 | 31 | [Running QNX on Real Hardware](chapters/Chapter31_RealHardware.md) | 🐣🚶🏃 | 90 m | 📄 |
 | 32 | [Bringing Up a Custom Board](chapters/Chapter32_CustomBoardBringUp.md) | 🚶🏃 | 150 m | 📄 |
-| 33 | [Capstone Project](chapters/Chapter33_CapstoneProject.md) | 🚶🏃 | 15–25 h | 📄 |
+| 33 | [Capstone Project](chapters/Chapter33_CapstoneProject.md) — *three flavours* | 🚶🏃 | 15–25 h | 📄 |
 | 34 | [Ecosystem, Career & Next Steps](chapters/Chapter34_EcosystemAndCareer.md) | 🐣🚶🏃 | 45 m | 📄 |
+
+### Capstone flavours (Chapter 33)
+
+One shared architecture and rubric — pick the domain that interests you. **All three are fully
+documented**; you are not locked in.
+
+| Track | Project | Domain |
+|-------|---------|--------|
+| 🤖 **33-R** | Motor-control loop + sensor fusion + telemetry | Robotics / physical AI |
+| 🚗 **33-A** | Sensor → control → actuator chain with CAN-style messaging + cluster display | Automotive |
+| 🏥 **33-M** | Dose/setpoint controller with alarm supervision and safe-state fallback | Medical device / industrial PLC |
 
 ---
 
@@ -159,9 +170,9 @@ all of Part 0 while your QNX licence request is being processed.*
 
 | # | Guide | What it gets you | Status |
 |---|-------|------------------|--------|
-| 01 | [Prerequisites & Host Preparation](guides/Setup_01_Prerequisites.md) | Ubuntu/WSL2 packages, QEMU, KVM check, disk space, Git | 📄 |
-| 02 | [QNX Account, Licence & SDP 8.0 Install](guides/Setup_02_QNX_Account_And_License.md) | myQNX account → QNX Everywhere licence → QNX Software Center → SDP 8.0 | 📄 |
-| 03 | [Building & Running the QNX VM on QEMU](guides/Setup_03_QEMU_VM.md) ⭐ | A booting QNX 8.0 x86_64 VM with networking and a shared folder | 📄 |
+| 01 | [Prerequisites & Host Preparation](guides/Setup_01_Prerequisites.md) | Ubuntu/WSL2 packages, QEMU, KVM enabled, disk space, Git | 📕 |
+| 02 | [QNX Account, Licence & SDP 8.0 Install](guides/Setup_02_QNX_Account_And_License.md) | myQNX account → request/accept/**deploy** licence → QNX Software Center → SDP 8.0 | 📕 |
+| 03 | [Building & Running the QNX VM on QEMU](guides/Setup_03_QEMU_VM.md) ⭐ | A booting QNX 8.0 x86_64 VM (QSTI) with networking and a shared folder | 📄 |
 | 04 | [IDE & Tooling](guides/Setup_04_IDE_And_Tooling.md) | VS Code + QNX Toolkit, Momentics IDE, `qconn`, remote gdb | 📄 |
 | 05 | [Troubleshooting Catalogue](guides/Setup_05_Troubleshooting.md) | Symptom → cause → fix, for every install/boot failure seen | 📄 |
 
@@ -240,7 +251,9 @@ all of Part 0 while your QNX licence request is being processed.*
 | L25.1 | 25 | Diagnose a hung system with `pidin` | ⭐ | 📄 |
 | L26.1 | 26 | Capture and read a kernel trace | | 📄 |
 | L27.1 | 27 | Adaptive partitioning under CPU load | | 📄 |
-| L33 | 33 | 🎓 Capstone | ⭐ | 📄 |
+| L33-R | 33 | 🎓 Capstone — 🤖 Robotics flavour | ⭐ | 📄 |
+| L33-A | 33 | 🎓 Capstone — 🚗 Automotive flavour | ⭐ | 📄 |
+| L33-M | 33 | 🎓 Capstone — 🏥 Medical / industrial flavour | ⭐ | 📄 |
 
 ---
 
@@ -248,4 +261,5 @@ all of Part 0 while your QNX licence request is being processed.*
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-25 | Chapter 33 split into three documented capstone flavours (ADR-019). Setup Guides 01–02 published. |
 | 1.0 | 2026-08-25 | Initial TOC: 6 parts, 34 chapters, 5 setup guides, 2 hardware guides, 7 cheat sheets, 21 labs. |

@@ -62,7 +62,13 @@ update_trigger: "Every time a chapter cites a new external source"
 | 🥇 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxsdp.nav/topic/bookset.html | SDP bookset: System Architecture, Programmer's Guide, Utilities, C Library, Building Embedded Systems. | 2026-08-25 |
 | 🥇 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxtoolkit.user_guide/topic/about_this_guide.html | **QNX Toolkit for VS Code** — our primary IDE (ADR-006). | 2026-08-25 |
 | 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.ide.userguide/topic/about.html | QNX Momentics IDE User's Guide (Eclipse-based alternative). | 2026-08-25 |
-| 🥈 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.qdd/topic/about.html | **QNX Developer Desktop** — self-hosted QNX 8.0 desktop. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.qdd/topic/about.html | **QNX Developer Desktop** — self-hosted QNX 8.0 XFCE desktop; build on QNX without cross-compiling. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/qnxeverywhere/introduction.html | QNX Everywhere introduction — licence acquisition and official support paths, in QNX's own words. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxsdp.quickstart/topic/install_host.html | SDP 8.0 Quick Start — installation prerequisites (host requirements, no macOS, no ARM hosts). | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.neutrino.sys_arch/topic/about.html | **System Architecture guide** — the best conceptual QNX writing that exists. Read alongside Part 2. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.neutrino.building/topic/bsp/bsp_about.html | "Working with QNX BSPs" — Building Embedded Systems. Chapters 22, 31, 32. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxsdp.migration/topic/about.html | **Migrating to QNX OS 8.0** — the definitive 7.1 → 8.0 delta. Source for the ⚠️ version boxes. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.security.system/topic/manual/about.html | System Security Guide — Chapter 28. | 2026-08-25 |
 | 🥈 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.hypervisor.nav/topic/bookset.html | QNX Hypervisor — background for Chapter 30. | 2026-08-25 |
 | 🥉 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.containers.user_guide/topic/about.html | QNX Containers. | 2026-08-25 |
 | 🥉 | https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxcloud.nav/topic/bookset.html | Running QNX on AWS / Azure. | 2026-08-25 |
@@ -80,6 +86,12 @@ update_trigger: "Every time a chapter cites a new external source"
 | Rank | Link | What it's for | Verified |
 |:---:|------|---------------|----------|
 | 🥇🔒 | https://www.qnx.com/account/login.html | **myQNX account** — login / create. Step 1 of getting QNX. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/getqnx | **The canonical licence entry point** (ADR-021). Request → accept → deploy your free non-commercial SDP 8.0 licence here. | 2026-08-25 |
+| 🥇🔒 | https://www.qnx.com/account/dashboard | **myQNX License Manager.** Where you *accept* and — critically — ***deploy*** the licence to yourself. Skipping deploy is the #1 setup failure. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qsc/com.qnx.doc.qsc.user_guide/topic/install_and_launch.html | **QNX Software Center — install and launch.** Used directly by Setup Guide 02. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qsc/com.qnx.doc.qsc.user_guide/topic/install_qnx_sdp.html | **Installing QNX SDP via the Software Center.** | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/qsc/com.qnx.doc.qsc.user_guide/topic/manage_licenses.html | "Manage Your Product Licenses" — the accept/deploy procedure in QNX's own words. | 2026-08-25 |
+| 🥇 | https://support.qnx.com/developers/docs/relnotes8.0/com.qnx.doc.release_notes/topic/sdp8_rn.html | **SDP 8.0 Release Notes** — authoritative list of supported host OS versions. | 2026-08-25 |
 | 🥇 | https://qnx.software/en/developers/get-started/qnx-everywhere/licensing | **Licence comparison**: non-commercial vs commercial, with the explicit permitted/forbidden lists. Read before Chapter 04. | 2026-08-25 |
 | 🥇 | https://www.qnx.com/legal/licensing/document_archive/current_matrix.pdf | The official, authoritative licence matrix PDF. In case of any conflict, this wins. | 2026-08-25 |
 | 🥈 | https://licensing.qnx.com/ | QNX Development Licence (QDL) terms portal. | 2026-08-25 |
@@ -92,8 +104,16 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Rank | Link | What it's for | Verified |
 |:---:|------|---------------|----------|
-| 🥇 | https://gitlab.com/qnx/quick-start-images/raspberry-pi-qnx-8.0-quick-start-image | **Free QNX 8.0 image for Raspberry Pi** — the cheapest route to real QNX hardware. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti_qemu/about.html | **QSTI for QEMU Guide** — QNX's official pre-built QEMU image. The basis of Setup Guide 03 (ADR-004). | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti_qemu/getting_started.html | QSTI for QEMU — getting started (download, run, log in). | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti_qemu/troubleshooting.html | QSTI for QEMU — **official troubleshooting page**. Feeds Setup Guide 05. | 2026-08-25 |
+| 🥈 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti_qemu/additional_specs.html | QSTI for QEMU — image specifications (RAM, disk, ports). | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/cti/about.html | **CTI — Custom Target Image Guide** for Raspberry Pi and QEMU. Build your own image. Used in Chapter 21. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti/intro.html | **QSTI for Raspberry Pi 4/5 Guide.** The hardware track's main reference. | 2026-08-25 |
+| 🥇 | https://gitlab.com/qnx/quick-start-images/raspberry-pi-qnx-8.0-quick-start-image | Free QNX 8.0 quick-start image for Raspberry Pi — download location. | 2026-08-25 |
 | 🥇 | https://qnx.software/en/developers/get-started/board-support-packages | **BSP catalogue** — which boards QNX officially supports. Essential for Chapters 22, 31, 32. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.interfacing/topic/interfacing-hardware.html | **Hardware Interfacing Guide** — talking to GPIO/I2C/SPI etc. Feeds Chapter 19 and the hardware track. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.ddk/topic/about.html | **Driver Development Kit (DDK) Developer's Guide.** Primary source for Chapters 19–20. | 2026-08-25 |
 | 🥈 | https://qnx.software/en/partner | Silicon partners (AMD, Intel, NVIDIA, NXP, Qualcomm, Renesas, TI) — who ships QNX-supported SoCs. | 2026-08-25 |
 
 ---
@@ -103,7 +123,9 @@ update_trigger: "Every time a chapter cites a new external source"
 | Rank | Link | What it's for | Verified |
 |:---:|------|---------------|----------|
 | 🥇 | https://github.com/qnx-ports | **Official QNX open-source ports.** Real, idiomatic QNX build recipes — excellent reading material. | 2026-08-25 |
+| 🥇 | https://gitlab.com/qnx/ports | QNX open-source ports on **GitLab** — referenced from the QNX Everywhere docs. Check both hosts. | 2026-08-25 |
 | 🥇 | https://oss.qnx.com/ | QNX Open-Source Dashboard: every port, its testing level, and where it's hosted. | 2026-08-25 |
+| 🥇 | https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.qpg/topic/about.html | **QNX Porting Guide (Linux → QNX).** Directly useful given your Linux background; source material for several chapters. | 2026-08-25 |
 
 ---
 
@@ -111,9 +133,12 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Rank | Link | What it's for | Verified |
 |:---:|------|---------------|----------|
-| 🥇 | https://discord.com/invite/Jj4EkkrFTT | **Official QNX Discord.** The fastest place to get a real answer in 2026. | 2026-08-25 |
+| 🥇 | https://discord.com/invite/nF3UE97RND | **QNX Everywhere Discord** — the invite given in the official QNX Everywhere docs. Use this one. | 2026-08-25 |
+| 🥈 | https://discord.com/invite/Jj4EkkrFTT | General QNX Discord invite (from the marketing site footer). Different invite code — both were live at time of check. | 2026-08-25 |
+| 🥈 | https://www.reddit.com/r/qnx | **r/qnx** — the subreddit cited by QNX's own support-path documentation. | 2026-08-25 |
+| 🥈 | https://stackoverflow.com/questions/tagged/qnx | Stack Overflow `qnx` tag — also cited as an official support path. Check answer dates: many target QNX 6.x. | 2026-08-25 |
 | 🥈 | https://qnx.software/en/developers/support-and-community/support | Official support portal. | 2026-08-25 |
-| 🥈 | https://www.reddit.com/user/QNXEmbeddedSoftware/ | QNX on Reddit. | 2026-08-25 |
+| 🥉 | https://www.reddit.com/user/QNXEmbeddedSoftware/ | QNX's own Reddit account. | 2026-08-25 |
 | 🥉 | https://qnx.software/en/resources-knowledge-hub/validation-success-stories/resource-center | Whitepapers, case studies — useful for Chapter 03 (where QNX is used). | 2026-08-25 |
 
 ---
@@ -177,6 +202,7 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-08-25 | Second pass — QNX Everywhere doc set read directly | ✅ Added 15 links. **Discovered QSTI (pre-built images for QEMU + Raspberry Pi) and CTI (custom images)** — these did not exist in older QNX material and changed ADR-004. Also found the **QNX Porting Guide** and **DDK Developer's Guide**, and a *different* Discord invite (`nF3UE97RND`) cited in the official docs vs. the marketing footer (`Jj4EkkrFTT`). Both live. |
 | 2026-08-25 | Initial verification of all links in this document | ✅ All reachable. **Notable:** `blackberry.qnx.com/*` now 301-redirects to `qnx.software`. All QNX links recorded in their post-migration form. |
 
 ### Known-stale patterns to watch for
@@ -194,4 +220,5 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-25 | +15 links from the QNX Everywhere doc set: QSTI (QEMU + Raspberry Pi), CTI, Porting Guide, DDK Guide, Hardware Interfacing, `getqnx`, QSC User's Guide, Release Notes, System Architecture, Migration Guide, GitLab ports, r/qnx, SO tag. Discord invite corrected. |
 | 1.0 | 2026-08-25 | Created. 45 links across 10 categories, all verified 2026-08-25. |

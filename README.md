@@ -181,9 +181,12 @@ part of the course material. Chapters cross-reference doubts where relevant.
 
 | | |
 |---|---|
-| **Phase** | 0 — Planning & scaffolding |
+| **Phase** | 1 — Environment setup |
+| **Plan** | ✅ Approved (2026-08-25) |
 | **Chapters published** | 0 / 34 |
-| **Next action** | Approve `PLAN.md`, then Setup Guides 01–03 + Chapter 00/01 |
+| **Setup guides published** | 2 / 5 — [01 Prerequisites](docs/guides/Setup_01_Prerequisites.md), [02 Licence & SDP](docs/guides/Setup_02_QNX_Account_And_License.md) |
+| **Your next action** | Do Setup Guide 01, then **request your free QNX licence today** (approval takes time) |
+| **My next action** | Write Chapter 00 |
 
 ---
 

@@ -23,14 +23,14 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Depends on | Notes |
 |----|-----|------|--------|-----------|-------|
-| T-001 | 🔴 | **Read and approve [`PLAN.md`](../PLAN.md)** — or request changes | ⬜ | — | Everything else waits on this |
-| T-002 | 🔴 | **Read [`TableOfContents.md`](../TableOfContents.md)** and confirm the chapter list | ⬜ | — | Add/remove/reorder topics now, it's cheapest |
-| T-003 | 🟠 | **Create a myQNX account** and submit the QNX Everywhere licence request | ⬜ | Setup 02 published | ⚠️ Do this on day 1 — approval takes time (Risk R1) |
-| T-004 | 🟡 | Answer pending decisions **P-01 … P-05** in [`Decisions.md`](Decisions.md#-pending-decisions-need-your-input) | ⬜ | — | Safe defaults apply if you don't |
-| T-005 | 🟡 | Confirm your learning path (default 🚶 **B**) | ⬜ | T-001 | Changeable per part |
-| T-006 | 🔵 | Decide whether to buy a Raspberry Pi 4/5 for the hardware track | ⬜ | Ch 31 / Hardware 01 | Not needed until Part 6 |
-| T-007 | 🔵 | Tell me your realistic weekly time budget | ⬜ | — | Lets me calibrate chapter size |
-| T-008 | 🟠 | **Add yourself to the `kvm` group** so QEMU can use hardware acceleration | ⬜ | — | `sudo usermod -aG kvm $USER`, then restart WSL (`wsl --shutdown` from Windows). Detected by `check-environment.sh`: `/dev/kvm` exists but is not writable by you. Without this the VM falls back to slow TCG emulation. |
+| T-008 | 🔴 | **Add yourself to the `kvm` group** — `sudo usermod -aG kvm $USER`, then `wsl --shutdown` from Windows | ⬜ | — | Without this the VM runs 10–50× slower. [Setup 01 §8](../guides/Setup_01_Prerequisites.md#8-step-6--enable-kvm-hardware-acceleration-) |
+| T-009 | 🔴 | **Do [Setup Guide 01](../guides/Setup_01_Prerequisites.md)** — install QEMU, build tools, Java (~40 min) | ⬜ | — | Nothing needs a QNX account. Do it now. |
+| T-003 | 🔴 | **Create a myQNX account and REQUEST the QNX Everywhere licence** | ⬜ | — | ⚠️ **Highest priority.** [Setup 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence). Approval latency is Risk R1. |
+| T-010 | 🟠 | **Accept AND deploy** the licence in the myQNX License Manager | ⬜ | T-003 | The step everyone misses — [Setup 02 §5](../guides/Setup_02_QNX_Account_And_License.md#5-step-3--accept-and-deploy-the-licence-) |
+| T-011 | 🟠 | Install QNX Software Center + SDP 8.0 (~10 GB) | ⬜ | T-010 | [Setup 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) |
+| T-012 | 🟡 | Report back which `[UNVERIFIED]` steps worked / didn't | ⬜ | T-011 | Lets me remove the markers and paste real output |
+| T-006 | 🔵 | Decide whether to buy a Raspberry Pi 4/5 for the hardware track | ⬜ | Ch 31 | Not needed until Part 6 |
+| T-007 | 🔵 | Tell me your realistic weekly time budget (P-06) | ⬜ | — | Lets me calibrate chapter size. Default assumption: ~5 h/week |
 
 ---
 
@@ -40,12 +40,11 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Notes |
 |----|-----|------|--------|-------|
-| T-100 | 🔴 | Write `Setup_01_Prerequisites.md` | ⬜ | Host packages, QEMU install, KVM verification, disk check |
-| T-101 | 🔴 | Write `Setup_02_QNX_Account_And_License.md` | ⬜ | myQNX signup → licence → QNX Software Center → SDP 8.0, with WSL2 GUI notes |
-| T-102 | 🟠 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | Conventions, symbols, lab mechanics, path selection |
+| T-102 | 🔴 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | **Next turn.** Conventions, symbols, lab mechanics, path selection |
 | T-103 | 🟠 | Write `Chapter01_WhatIsARealTimeSystem.md` | ⬜ | Hard/soft real-time, determinism, latency, jitter, WCET |
-| T-104 | 🟡 | Write `tools/check-environment.sh` | ⬜ | One command → full host readiness report |
-| T-105 | 🟡 | Commit and push the scaffolding | ⬜ | Initial commit to GitHub |
+| T-112 | 🟠 | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/` scripts | ⬜ | ⭐ Critical. Blocked until T-011 gives us a real SDP to test against |
+| T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
+| T-105 | ✅ | Commit and push the scaffolding | ✅ | Done, Session 001 |
 
 ### 2.2 Short term (Part 0 + Part 1)
 
@@ -106,6 +105,14 @@ update_trigger: "Continuously"
 
 | ID | Task | Completed | Session |
 |----|------|-----------|---------|
+| T-001 | Learner read and **approved** `PLAN.md` | 2026-08-25 | 002 |
+| T-002 | Learner confirmed the chapter list | 2026-08-25 | 002 |
+| T-004 | Pending decisions P-01…P-05 resolved | 2026-08-25 | 002 |
+| T-005 | Learning path confirmed: 🚶 **Path B** | 2026-08-25 | 002 |
+| T-100 | Write `Setup_01_Prerequisites.md` | 2026-08-25 | 002 |
+| T-101 | Write `Setup_02_QNX_Account_And_License.md` | 2026-08-25 | 002 |
+| T-104 | Write `tools/check-environment.sh` (and run it) | 2026-08-25 | 002 |
+| T-910 | Discover QSTI/CTI; revise ADR-004 | 2026-08-25 | 002 |
 | T-900 | Verify host environment (OS, CPU, KVM, RAM, disk) | 2026-08-25 | 001 |
 | T-901 | Research current QNX product/licensing state (post-rebrand) | 2026-08-25 | 001 |
 | T-902 | Create GitHub repo `Tyrostir/qnx-zero-to-hero` | 2026-08-25 | 001 |
@@ -122,4 +129,5 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-25 | Session 002: plan approved; T-001/002/004/005/100/101/104 closed. New learner items T-008…T-012 (KVM group, Setup 01, licence request/accept/deploy, SDP install, verification feedback). Next author item: Chapter 00. |
 | 1.0 | 2026-08-25 | Created. 7 learner items, 26 author items, 4 blocked, 9 completed. |

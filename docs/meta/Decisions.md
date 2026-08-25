@@ -28,11 +28,11 @@ update_trigger: "Whenever a decision is made, changed, or superseded"
 | [ADR-001](#adr-001) | Target QNX SDP 8.0 as the primary version | Product | ✅ |
 | [ADR-002](#adr-002) | Use the QNX Everywhere free non-commercial licence | Licensing | ✅ |
 | [ADR-003](#adr-003) | QEMU + KVM is the primary lab environment | Environment | ✅ |
-| [ADR-004](#adr-004) | Use `mkqnximage` to build the VM | Environment | ✅ |
+| [ADR-004](#adr-004) | Use the official **QSTI for QEMU** image to get booting fast; build our own later | Environment | ✅ (revised) |
 | [ADR-005](#adr-005) | `x86_64` is the default target architecture for labs | Environment | ✅ |
 | [ADR-006](#adr-006) | VS Code + QNX Toolkit is the primary IDE | Tooling | ✅ |
 | [ADR-007](#adr-007) | Teach raw `qcc` first, QNX recursive Makefiles second | Pedagogy | ✅ |
-| [ADR-008](#adr-008) | Three learning paths implemented as in-chapter markers, not separate files | Pedagogy | ✅ |
+| [ADR-008](#adr-008) | Three learning paths implemented as in-chapter markers, **all three fully authored** | Pedagogy | ✅ (revised) |
 | [ADR-009](#adr-009) | Message passing (Ch 13/14) is the pedagogical centre of the course | Pedagogy | ✅ |
 | [ADR-010](#adr-010) | Mermaid for all diagrams | Docs | ✅ |
 | [ADR-011](#adr-011) | Pandoc + XeLaTeX + Eisvogel for PDF export | Docs | ✅ |
@@ -42,7 +42,10 @@ update_trigger: "Whenever a decision is made, changed, or superseded"
 | [ADR-015](#adr-015) | No GitHub-only Markdown syntax | Docs | ✅ |
 | [ADR-016](#adr-016) | One chapter = one commit; repo is the deliverable | Process | ✅ |
 | [ADR-017](#adr-017) | Course content CC BY-SA 4.0, lab code MIT | Legal | ✅ |
-| [ADR-018](#adr-018) | Default learner path is 🚶 Path B | Pedagogy | 🔄 |
+| [ADR-018](#adr-018) | Learner's path is 🚶 Path B | Pedagogy | ✅ (confirmed) |
+| [ADR-019](#adr-019) | The capstone ships in **all three domain flavours**; the reader chooses | Pedagogy | ✅ |
+| [ADR-020](#adr-020) | Deliver **one chapter per turn**, auto-committed and pushed | Process | ✅ |
+| [ADR-021](#adr-021) | Use `https://www.qnx.com/getqnx` as the canonical licence entry point | Setup | ✅ |
 
 ---
 
@@ -131,24 +134,41 @@ WSL2/Ubuntu host. No physical hardware is required for Chapters 00–30.
 
 ## ADR-004
 
-### Use `mkqnximage` to build the VM
+### Use the official QSTI for QEMU image to get booting fast; build our own later
 
 | | |
 |---|---|
-| **Status** | ✅ Active |
+| **Status** | ✅ Active — **revised 2026-08-25** (originally: "use `mkqnximage`") |
 | **Date** | 2026-08-25 |
 | **Category** | Environment |
 
-**Decision.** The lab VM is created with **`mkqnximage`**, the official image-builder shipped with
-QNX SDP, rather than hand-rolled `qemu-img` + manual IFS assembly.
+**Decision.** The lab VM is obtained in **two stages**:
 
-**Why.** It is the supported, reproducible path; it configures networking, SSH, a host shared
-directory and `qconn` for us; and it is what QNX's own documentation and support assume.
+| Stage | Method | Where | Why |
+|-------|--------|-------|-----|
+| 1. Get booting fast | **QSTI** — QNX's official *Quick Start Target Image* for QEMU | Setup Guide 03, Chapter 06 | Pre-built, supported, includes sample apps. Shortest path from "installed" to "`qnx#` prompt". |
+| 2. Build your own | **CTI** — *Custom Target Image*, and later raw `mkifs` | Chapter 21 | You cannot claim to know QNX until you have built the image yourself. |
+
+**Why this changed.** The original decision assumed `mkqnximage` was the only sanctioned route. Live
+verification of the QNX Everywhere documentation revealed two officially documented image products
+that did not exist in older material:
+
+- **QSTI (Quick Start Target Image)** — pre-built images for **QEMU** and **Raspberry Pi 4/5**
+- **CTI (Custom Target Image)** — a build-your-own flow, also for QEMU and Raspberry Pi
+
+QSTI is explicitly the beginner on-ramp, is documented by QNX, and has its own troubleshooting page.
+Starting there removes an entire class of first-day failures.
 
 **Consequences.**
-- Chapter 06 explains *what `mkqnximage` did for us* rather than treating it as magic — otherwise it
-  violates course rule #4 ("nothing is a black box").
-- Chapter 21 later removes the training wheels: the learner builds an IFS by hand with `mkifs`.
+- Setup Guide 03 follows the official QSTI-for-QEMU guide, annotated with the extra explanation this
+  course demands (course rule #4: nothing is a black box).
+- ⚠️ QNX documents QSTI for QEMU as supported on **Ubuntu 22.04 / 24.04**. The learner's host is
+  **Ubuntu 26.04** — newer than documented. Setup Guide 01 handles the package-name differences and
+  Setup Guide 05 records anything that breaks. Tracked as risk **R9**.
+- Chapter 21 gains extra weight: it now covers CTI *and* raw `mkifs`, making the progression
+  QSTI → CTI → `mkifs` explicit.
+- `mkqnximage` is still taught (it remains the SDP-native tool) but as an alternative, not the
+  primary route.
 
 ---
 
@@ -218,24 +238,45 @@ newcomers; understanding the underlying command makes it legible instead of magi
 
 ## ADR-008
 
-### Three learning paths implemented as in-chapter markers, not separate files
+### Three learning paths implemented as in-chapter markers, all three fully authored
 
 | | |
 |---|---|
-| **Status** | ✅ Active |
+| **Status** | ✅ Active — **strengthened 2026-08-25** |
 | **Date** | 2026-08-25 |
 | **Category** | Pedagogy |
 
 **Decision.** Paths 🐣 A / 🚶 B / 🏃 C are implemented as **tags and boxes inside a single chapter
 file**, not as three parallel documents.
 
-**Why.** Three copies of 34 chapters = 102 documents that drift out of sync. A single source keeps
-content correct and lets a reader switch paths (or peek at a deeper path) without leaving the page.
+**And — added at the learner's explicit request — content for *all three paths* is written in full for
+every chapter, even though the learner personally follows Path B.**
 
-**Consequences.**
-- Every chapter must carry a `🏃 Fast-Track Summary` box at the top and clear path tags on labs.
-- PDF path-filtering (producing a Path-A-only book) becomes a build-time filter, not a content
-  problem — listed as a stretch goal in `PDF_Export.md`.
+> 💬 *Learner's words (2026-08-25):* "My learning path will be Path B. But this repo course should
+> have contents of Path A and Path C also. So that in future, someone else can start from the path
+> that suits them. … you should not skip creating contents for Path A and C as well."
+
+**Why.** Two reasons, one per half of the decision:
+
+1. *Single file:* three copies of 34 chapters = 102 documents that drift out of sync. A single source
+   keeps content correct and lets a reader switch paths (or peek at a deeper path) without leaving
+   the page.
+2. *All three authored:* the repository is a **public course**, not a private tutoring log. Omitting
+   Path A and Path C content because the current learner doesn't need it would make the repo useless
+   to the next reader.
+
+**Consequences — mandatory per chapter, no exceptions:**
+
+| Element | Required content |
+|---------|-----------------|
+| 🏃 **Fast-Track Summary** | A genuine ≤1-page "here is the QNX delta vs. what you already know" box at the top. Not a teaser — a professional must be able to read *only* this and be productive. |
+| 🐣 **Path A Activity** | Every chapter with a lab also has a no-coding, observe-and-answer version with pre-built binaries in `labs/*/prebuilt/`. |
+| 🐣 **Beginner notes** | Extra hand-holding boxes wherever a term or step assumes background. |
+| 🚶 **Full labs** | Skeleton + solution + expected output. |
+| ⭐ **Core lab tagging** | Marks the Path C minimum set. |
+
+A chapter is **not complete** until all three paths are usable through it. This is enforced in the
+Definition of Done ([`PLAN.md` §17](../PLAN.md#17-definition-of-done)).
 
 ---
 
@@ -436,34 +477,131 @@ own projects.
 
 ## ADR-018
 
-### Default learner path is 🚶 Path B
+### Learner's path is 🚶 Path B
 
 | | |
 |---|---|
-| **Status** | 🔄 Provisional |
+| **Status** | ✅ Active — **confirmed by the learner 2026-08-25** |
 | **Date** | 2026-08-25 |
 | **Category** | Pedagogy |
 
-**Decision.** Unless the learner says otherwise, chapters are paced and delivered for **🚶 Path B —
-Self-Learner**: full theory, all labs, all break-it exercises.
+**Decision.** Chapters are paced and delivered for **🚶 Path B — Self-Learner**: full theory, all
+labs, all break-it exercises.
 
 **Why.** Matches the stated profile: starting-level embedded engineer with solid C/C++ and strong
-Python, no RTOS background, wanting depth from scratch.
+Python, no RTOS background, wanting depth from scratch. Confirmed directly by the learner.
 
-**Revisit if.** The learner says the pace is too slow (→ Path C for some parts) or the theory is too
-dense (→ Path A framing for some chapters). Path can be changed per part, not just globally.
+**Note.** This governs *pacing and emphasis* only. Per **ADR-008**, Path A and Path C content is
+still written in full for every chapter.
+
+**Revisit if.** The learner says the pace is too slow or too dense. Path can be changed per part,
+not just globally.
 
 ---
 
-## ⏳ Pending decisions (need your input)
+## ADR-019
 
-| ID | Question | Default if you don't choose | Asked |
-|----|----------|------------------------------|-------|
-| P-01 | Do you want **Hindi/Tamil/other-language** glossary hints alongside English terms? | No — English only | 2026-08-25 |
-| P-02 | Should the capstone be **automotive-flavoured** (sensor→control→actuator, CAN-like) or **robotics-flavoured** (motor control + telemetry)? | Robotics — more relatable, no CAN hardware needed | 2026-08-25 |
-| P-03 | Do you want **weekly quizzes** as a separate `quizzes/` folder in addition to per-chapter mastery checks? | No — per-chapter checks only | 2026-08-25 |
-| P-04 | Should I **auto-commit and push** after every chapter, or batch and let you review first? | Auto-commit and push per chapter | 2026-08-25 |
-| P-05 | Do you want Raspberry Pi hardware guidance written **early** (so you can order a board now) or when you reach Part 6? | Early — a short "should I buy?" note now, full guide later | 2026-08-25 |
+### The capstone ships in all three domain flavours; the reader chooses
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-25 |
+| **Category** | Pedagogy |
+
+**Decision.** Chapter 33 (Capstone) is not one project. It is **one shared architecture and rubric**
+with **three interchangeable domain skins**:
+
+| Track | Project | Domain flavour |
+|-------|---------|----------------|
+| 🤖 **33-R Robotics** | Motor-control loop + sensor fusion + telemetry link | Robotics / physical AI |
+| 🚗 **33-A Automotive** | Sensor → control → actuator chain with CAN-style messaging and an instrument-cluster consumer | Automotive |
+| 🏥 **33-M Medical / Industrial** | Dose/setpoint controller with alarm supervision and safe-state fallback | Medical device / PLC |
+
+**Why.** Requested explicitly by the learner:
+
+> 💬 *"Have all 3 flavours in this repo course, so that user can keep reading whichever he/she is
+> interested in. Do not skip any flavour. Plan to have all three flavours and let the reader decide."*
+
+It is also good pedagogy. The *QNX* content of a capstone — resource manager, message passing,
+priority assignment, custom IFS, timing verification — is identical across domains. Only the domain
+vocabulary and the safety story differ. Offering three skins costs far less than three projects and
+makes the course relevant to three different audiences.
+
+**Consequences.**
+- Chapter 33 is structured as: shared architecture → shared rubric → three domain briefs → three
+  reference solutions.
+- Domain flavour is also used **earlier**, as example variety: worked examples across Parts 2–4 rotate
+  between robotics, automotive and medical framings so no reader feels the course is "not for them".
+- Labs directory gains `labs/lab33_capstone/{robotics,automotive,medical}/`.
+
+---
+
+## ADR-020
+
+### Deliver one chapter per turn, auto-committed and pushed
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-25 |
+| **Category** | Process |
+
+**Decision.** Confirmed by the learner. Per working turn: write **one** chapter (or one guide) to
+full Definition-of-Done quality, update the affected meta documents, commit, **push to GitHub**, then
+report and hand back for reading.
+
+**Why.** Maximises depth per chapter and keeps a tight feedback loop — the learner reads, hits
+friction, asks questions, and those questions become `D-NNN` entries that improve the chapter before
+we move on. Batching would defer that feedback until it is expensive to act on.
+
+**Exception.** Tightly coupled *setup guides* may be delivered in pairs where splitting them would
+leave the learner blocked (for example, Setup 01 + Setup 02, because Setup 02 starts the
+long-latency licence request).
+
+**Consequences.** Resolves pending decision **P-04**. `CourseState.md` is updated every turn.
+
+---
+
+## ADR-021
+
+### Use `https://www.qnx.com/getqnx` as the canonical licence entry point
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-25 |
+| **Category** | Setup |
+
+**Decision.** All course material directs the reader to **`https://www.qnx.com/getqnx`** to obtain
+the free non-commercial licence.
+
+**Why.** Verified against the official QNX Everywhere documentation, which states the licence flow
+as: *request → **accept** → **deploy*** at that URL. The marketing pages link to several longer,
+less stable URLs. `getqnx` is short, official, and stated in the docs themselves.
+
+**Consequences.**
+- The three-step **request → accept → deploy** wording is taught explicitly. Many people request a
+  licence and then cannot install anything because they never *deployed* it to their account in the
+  **myQNX License Manager** — a top support issue this course pre-empts.
+
+---
+
+## ✅ Resolved pending decisions
+
+| ID | Question | Resolution | Resolved |
+|----|----------|-----------|----------|
+| P-01 | Glossary hints in other languages? | **No** — English only (default applied; not raised by learner) | 2026-08-25 |
+| P-02 | Capstone domain flavour? | **All three** — robotics, automotive, medical/industrial → **ADR-019** | 2026-08-25 |
+| P-03 | Separate `quizzes/` folder? | **No** — per-chapter mastery checks only (default applied) | 2026-08-25 |
+| P-04 | Auto-push or review-first? | **Auto-commit and push per chapter** → **ADR-020** | 2026-08-25 |
+| P-05 | How early to write the Raspberry Pi guidance? | Short "should I buy?" note in Chapter 03; full guide at Part 6 | 2026-08-25 |
+
+## ⏳ Still pending
+
+| ID | Question | Default if unanswered | Asked |
+|----|----------|------------------------|-------|
+| P-06 | Realistic weekly time budget? Lets me calibrate chapter length. | Assume ~5 h/week (Path B baseline) | 2026-08-25 |
 
 ---
 
@@ -471,4 +609,5 @@ dense (→ Path A framing for some chapters). Path can be changed per part, not 
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-25 | Learner approved the plan. ADR-004 revised (QSTI for QEMU). ADR-008 strengthened (all three paths fully authored). ADR-018 confirmed. Added ADR-019 (three capstone flavours), ADR-020 (one chapter per turn, auto-push), ADR-021 (`getqnx` licence flow). P-01…P-05 resolved; P-06 opened. |
 | 1.0 | 2026-08-25 | Initial 18 ADRs + 5 pending decisions recorded. |

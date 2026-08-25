@@ -20,9 +20,12 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 - **Learner:** Tyrostir. Starting-level **embedded engineer**. **C/C++ solid**, **Python strong**.
   **No OS-internals or RTOS background** — teach from first principles.
-- **Active path:** 🚶 **Path B** (full course: theory + all labs). Paths A 🐣 / C 🏃 also maintained.
+- **Learner's path:** 🚶 **Path B** (full course: theory + all labs). **But 🐣 A and 🏃 C content must be
+  written in full in every chapter** — explicit learner requirement (ADR-008), so future readers can
+  enter by any path.
 - **Wants:** everything explained from scratch, every step spelled out, nothing assumed, everything
   documented, every question logged with its answer.
+- **Cadence:** **one chapter per turn**, auto-committed and **pushed** (ADR-020).
 
 ## WHAT
 
@@ -35,13 +38,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 | | |
 |---|---|
-| Phase | **0 — Planning & scaffolding** |
+| Phase | **1 — Environment setup** |
+| Plan | ✅ **Approved** 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **0 / 5** |
-| QNX installed | ❌ |
+| Setup guides published | **2 / 5** (01 Prerequisites, 02 Licence+SDP) |
+| QNX installed | ❌ — learner to do Setup 01 + 02 now |
 | VM booting | ❌ |
-| Blocker | None — awaiting approval of `PLAN.md` |
-| Next | Approve plan → Setup 01 → Setup 02 → Ch 00 → Ch 01 |
+| Blocker | None |
+| Next (me) | **Chapter 00 — How To Use This Course** |
+| Next (learner) | Setup 01 (incl. `kvm` group fix), then **request the QNX licence today** (Risk R1) |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
 
@@ -61,17 +66,29 @@ Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
 
 - BlackBerry QNX rebranded: **`blackberry.qnx.com` → `qnx.software`**.
 - Current product: **QNX SDP 8.0 / QNX OS 8.0**.
-- Free tier: **QNX Everywhere** — free **non-commercial** licence. Flow: myQNX account → licence
-  form → licence issued → install **QNX Software Center** → install SDP 8.0.
+- Free tier: **QNX Everywhere**, free **non-commercial**. Canonical URL: **`qnx.com/getqnx`**.
+- ⚠️ Licence flow has **THREE verbs: request → accept → DEPLOY**. Deploy happens in the myQNX License
+  Manager (`qnx.com/account/dashboard`). **Skipping deploy = "no products available" in QSC** — the #1
+  setup failure.
+- Install chain: myQNX account + deployed licence → **QNX Software Center (QSC)** → **SDP 8.0**
+  (`~/qnx800`) → IDE.
+- ⚠️ Host support: x86-64 **Windows or Linux only**. **No macOS. No ARM hosts.**
+- **QSTI** = *Quick Start Target Image* — official **pre-built** images for **QEMU** and **RPi 4/5**.
+  **This is how we boot QNX (ADR-004).**
+- **CTI** = *Custom Target Image* — official **build-your-own** flow (RPi + QEMU). Used in Ch 21.
+- QSTI-for-QEMU is documented for **Ubuntu 22.04/24.04**; our host is **26.04** → risk **R9**.
 - Non-commercial **allows**: learning, academia, hobby/maker, **writing training material or books
   (even commercially)**, interoperable OSS.
 - Non-commercial **forbids**: production use, distribution, commercial products, customer demos.
 - **SDP 7.1 is NOT in the free programme.**
-- Free **QNX Quick Start Image for Raspberry Pi** (4/5) on GitLab: `gitlab.com/qnx/quick-start-images/`
-- New: **QNX Developer Desktop** (self-hosted QNX 8.0 desktop).
-- OSS ports: `github.com/qnx-ports` · dashboard `oss.qnx.com`
+- New: **QNX Developer Desktop** (self-hosted QNX 8.0 XFCE desktop).
+- OSS ports: `github.com/qnx-ports` **and** `gitlab.com/qnx/ports` · dashboard `oss.qnx.com`
 - Docs: `qnx.com/developers/docs/8.0/` and `qnx.com/developers/docs/qnxeverywhere/`
-- Official **Discord** community exists.
+- Also exist: **QNX Porting Guide (Linux→QNX)**, **DDK Developer's Guide**, **Hardware Interfacing
+  Guide** — source material for Ch 19, 20, 22.
+- Community per official docs: **Discord `nF3UE97RND`** · **r/qnx** · Stack Overflow `qnx` tag.
+- `$QNX_HOST` = Linux-side tools (`qcc`, `mkifs`); `$QNX_TARGET` = QNX-side headers/libs.
+  `source ~/qnx800/qnxsdp-env.sh`.
 
 ## TECHNICAL DECISIONS (full list → `Decisions.md`)
 
@@ -80,11 +97,11 @@ Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
 | ADR-001 | QNX **SDP 8.0** only (7.1 as ⚠️ delta boxes) |
 | ADR-002 | **QNX Everywhere** free non-commercial licence |
 | ADR-003 | Labs run on **QEMU + KVM** — no hardware needed for Ch 00–30 |
-| ADR-004 | VM built with **`mkqnximage`** (official SDP tool) |
+| ADR-004 | VM image: **QSTI (pre-built) → CTI → raw `mkifs`** — revised from `mkqnximage` |
 | ADR-005 | Default target arch **`x86_64`** (KVM speed); `aarch64le` in hardware track |
 | ADR-006 | **VS Code + QNX Toolkit** primary IDE; Momentics documented; labs must work from bare terminal |
 | ADR-007 | Teach raw **`qcc`** first → simple Makefile → QNX recursive Makefiles → CMake appendix |
-| ADR-008 | 3 paths = **markers inside one file**, not 3 copies |
+| ADR-008 | 3 paths = markers in **one file**, and **all three authored in full** |
 | ADR-009 | **Message passing (Ch 13/14) is the centre of the course** |
 | ADR-010 | **Mermaid** diagrams + 1-line text description each |
 | ADR-011 | PDF via **Pandoc + XeLaTeX + Eisvogel** |
@@ -94,7 +111,10 @@ Check any time: ./tools/check-environment.sh   (last: 13 pass / 9 warn / 3 fail)
 | ADR-015 | **No GitHub-only Markdown** (breaks PDF): no `> [!NOTE]`, no raw HTML, relative links only |
 | ADR-016 | **One chapter = one commit**, pushed |
 | ADR-017 | Content **CC BY-SA 4.0**, lab code **MIT** |
-| ADR-018 | Default path **🚶 B** (provisional) |
+| ADR-018 | Learner's path **🚶 B** (confirmed) |
+| ADR-019 | Capstone ships in **three flavours**: 🤖 robotics · 🚗 automotive · 🏥 medical/industrial |
+| ADR-020 | **One chapter per turn**, auto-commit + push |
+| ADR-021 | Licence entry point **`qnx.com/getqnx`**; teach request → accept → **deploy** |
 
 ## COURSE SHAPE
 
@@ -140,11 +160,19 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 ## OPEN ITEMS
 
-- **Pending learner input:** P-01 glossary language hints · P-02 capstone theme (robotics vs
-  automotive) · P-03 separate quizzes folder · P-04 auto-push policy · P-05 how early to write RPi
-  guidance. *(Safe defaults exist for all five; see `Decisions.md`.)*
-- **Doubts logged:** 0
-- **Top risk:** R1 — QNX Everywhere licence approval latency (mitigated: Part 0 needs no software).
+- **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
+- **Learner's open actions:** T-008 `kvm` group · T-009 Setup 01 · **T-003 request licence (urgent)** ·
+  T-010 accept+deploy · T-011 install SDP · T-012 report `[UNVERIFIED]` results.
+- **Doubts logged:** 5 (D-001…D-005, all answered)
+- **Top risks:** R1 licence latency (mitigated: Part 0 needs no software) · R9 Ubuntu 26.04 newer than
+  QNX-documented 22.04/24.04 · R10 three-path authoring cost.
+
+## CHANGELOG
+
+| Version | Date | Change |
+|---------|------|--------|
+| 1.1 | 2026-08-25 | Regenerated after Session 002: plan approved, ADR-004 revised (QSTI), ADR-008 strengthened, ADR-019/020/021 added, Setup Guides 01–02 published, QNX facts expanded. |
+| 1.0 | 2026-08-25 | Created at end of Session 001. |
 
 ## SESSION-START CHECKLIST
 
@@ -158,6 +186,4 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 ## 📝 Changelog
 
-| Version | Date | Change |
-|---------|------|--------|
-| 1.0 | 2026-08-25 | Created at end of Session 001. |
+*(See the CHANGELOG section above.)*

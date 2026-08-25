@@ -285,8 +285,165 @@ globally or per part at any time; that change will be logged here as a `🔄 REV
 
 ---
 
+## 2026-08-25 — Session 002 (Plan approved; QSTI discovered)
+
+### 🔍 VERIFIED — Host readiness, via `tools/check-environment.sh`
+
+**Context.** The environment-check script was written and run against the learner's actual machine.
+
+**Result.** `13 passed · 9 warnings · 3 failed`
+
+**Significant finding.** `/dev/kvm` **exists but is not writable by the user** — they are not a member
+of the `kvm` group. The Session 001 record said only "present", which was incomplete and would have
+led to a confusing "why is my VM so slow?" experience.
+
+**Consequence.** New action item **T-008**: `sudo usermod -aG kvm $USER`, then `wsl --shutdown` from
+Windows. Recorded in `CourseState.md`, `CompactContext.md`, and Setup Guide 01.
+
+**Lesson recorded.** "Present" is not the same as "usable". The environment check now tests
+readability *and* writability, not just existence.
+
+---
+
+### 🔍 VERIFIED — QNX Everywhere ships official target images (QSTI and CTI)
+
+**Context.** While researching the exact SDP installation procedure, the QNX Everywhere
+documentation set was read directly rather than relying on prior knowledge.
+
+**Findings (verified 2026-08-25).**
+
+| Fact | Detail |
+|------|--------|
+| **QSTI** | *Quick Start Target Image* — official **pre-built** QNX 8.0 images, with dedicated guides for **QEMU** and for **Raspberry Pi 4/5**. Includes sample apps. Has its own getting-started, specifications and troubleshooting pages. |
+| **CTI** | *Custom Target Image* — official **build-your-own** image flow, for Raspberry Pi **and** QEMU (x86_64). |
+| **Licence flow** | **request → accept → deploy** at `https://www.qnx.com/getqnx`. Deployment happens in the **myQNX License Manager** (`qnx.com/account/dashboard`). |
+| **Install order** | myQNX account + deployed licence → **QNX Software Center (QSC)** → **QNX SDP 8.0** → IDE (QNX Toolkit for VS Code, or Momentics). |
+| **Host support** | x86-based Windows or Linux. **No macOS.** **No ARM hosts.** Authoritative list in the SDP 8.0 Release Notes. |
+| **QSTI-for-QEMU host OS** | Documented for **Ubuntu 22.04 or 24.04**. |
+| **QEMU packages (Ubuntu 24.04)** | `qemu-system qemu-utils qemu-user qemu-user-binfmt qemu-block-extra libvirt-daemon-system libvirt-clients libguestfs-tools bridge-utils` |
+| **QEMU packages (Ubuntu 22.04)** | `qemu qemu-system-x86 qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils` |
+| **QNX Everywhere Discord** | `https://discord.com/invite/nF3UE97RND` — *distinct from* the general QNX Discord invite found on the marketing site |
+| **Community, per the docs** | Stack Overflow `qnx` tag · Reddit **r/qnx** · the Discord above |
+| **Additional OSS ports host** | `gitlab.com/qnx/ports` — in addition to `github.com/qnx-ports` |
+| **Other QNX Everywhere guides** | Self-Hosted Developer Desktop · Hardware Interfacing · **QNX Porting Guide (Linux → QNX)** · **Driver Development Kit (DDK) Developer's Guide** |
+
+**Why this matters.** The QSTI-for-QEMU guide did not exist in older QNX material. Following the
+pre-`mkqnximage` plan would have sent the learner down a longer, less-supported path on day one,
+with no official troubleshooting page to fall back on.
+
+**Consequences.**
+- **ADR-004 revised** (below).
+- Two previously unknown guides — the **QNX Porting Guide** and the **DDK Developer's Guide** —
+  are now source material for Chapters 19–20 and 22.
+- `ReferenceLinks.md` gained 15 links; the QNX Everywhere Discord invite was corrected.
+- \u26a0\ufe0f **New risk R9 registered:** QSTI-for-QEMU is documented for Ubuntu 22.04/24.04; the learner's
+  host is **Ubuntu 26.04**. Package names and library versions may differ.
+
+---
+
+### 🔄 REVISED — ADR-004: `mkqnximage` → QSTI first, then CTI, then `mkifs`
+
+**Superseded text.** *"The lab VM is created with `mkqnximage`, the official image-builder shipped
+with QNX SDP."*
+
+**New decision.** A staged progression:
+
+| Stage | Method | Where | Purpose |
+|-------|--------|-------|---------|
+| 1 | **QSTI** (pre-built) | Setup 03 / Ch 06 | Boot QNX today. Minimise first-day failure modes. |
+| 2 | **CTI** (build your own) | Ch 21 | Understand what is in the image. |
+| 3 | **`mkifs`** (raw build file) | Ch 21 | Full control; how real products are built. |
+
+`mkqnximage` remains taught as the SDP-native alternative.
+
+**Why the change.** New evidence. QSTI is QNX's own documented beginner on-ramp for exactly our
+scenario (QEMU on Ubuntu), and it comes with an official troubleshooting page — which directly
+reduces Risk R2.
+
+**Pedagogically better, too.** The QSTI → CTI → `mkifs` progression mirrors the course philosophy:
+get a working system first, then remove one layer of magic at a time (course rule #4).
+
+---
+
+### 🆕 DECIDED — Learner approved the plan, with two amendments
+
+The learner approved `PLAN.md` and the 34-chapter table of contents **as drafted**, and answered the
+five deferred questions. Two answers changed the plan materially.
+
+#### Amendment 1 → ADR-008 strengthened: all three paths authored in full
+
+> 💬 *Learner:* "My learning path will be Path B. But this repo course should have contents of Path A
+> and Path C also. So that in future, someone else can start from the path that suits them. … you
+> should not skip creating contents for Path A and C as well."
+
+**What changed.** ADR-008 previously guaranteed only *structure* for three paths (markers and a
+Fast-Track box). It now guarantees *content*: every chapter must ship a genuine Path C fast-track
+summary and a genuine Path A no-coding activity with pre-built binaries — even though the learner
+personally uses neither.
+
+**Why this is right.** The repository is a public course, not a private tutoring log. A path that
+exists only as a marker is a broken promise to the next reader.
+
+**Cost accepted.** Roughly 20–30 % more work per chapter, plus maintaining `labs/*/prebuilt/`
+binaries. Added to the Definition of Done so it cannot quietly lapse.
+
+#### Amendment 2 → ADR-019: the capstone ships in three domain flavours
+
+> 💬 *Learner:* "Have all 3 flavours in this repo course… Do not skip any flavour. Plan to have all
+> three flavours and let the reader decide which one to take."
+
+**What changed.** Chapter 33 was to be a single robotics project. It becomes one shared architecture
+and rubric with three domain briefs and three reference solutions: **robotics**, **automotive**,
+**medical/industrial**.
+
+**Why this is cheap and good.** The QNX content of a capstone — resource manager, message passing,
+priority assignment, custom IFS, timing verification — is identical across domains. Only vocabulary
+and the safety story differ. Three skins cost far less than three projects.
+
+**Bonus consequence.** Worked examples throughout Parts 2–4 will now deliberately rotate between the
+three domains, so no reader ever feels the course is "not for my industry".
+
+---
+
+### 🆕 DECIDED — ADR-020: one chapter per turn, auto-committed and pushed
+
+**Learner's choices.** Delivery: *"Write → auto-commit → push, then tell you."* Batch size:
+*"1 chapter at a time."*
+
+**Why it's the right call.** Depth per chapter is maximised and the feedback loop stays tight: the
+learner reads, hits friction, asks a question, and that question becomes a `D-NNN` entry that
+improves the chapter *before* we build the next one on top of it. Batching defers that feedback until
+acting on it is expensive.
+
+**One exception carved out.** Tightly coupled setup guides may ship in pairs where splitting would
+leave the learner blocked — specifically Setup 01 + Setup 02, because Setup 02 initiates the
+long-latency licence request that Risk R1 is about.
+
+---
+
+### 🆕 DECIDED — ADR-021: `qnx.com/getqnx`, and teach "request → accept → **deploy**"
+
+**Evidence.** The QNX Everywhere introduction states the flow as *request, accept, and deploy* a free
+non-commercial licence at `https://www.qnx.com/getqnx`, with deployment performed in the myQNX
+License Manager.
+
+**Why it gets its own ADR.** The **deploy** step is the one people miss. A licence that has been
+requested and accepted but never *deployed to your account* leaves QNX Software Center unable to
+install anything — and the resulting error message does not say why. Teaching the three verbs
+explicitly pre-empts a top support issue.
+
+---
+
+### ❓ DEFERRED — P-06: weekly time budget
+
+Not yet answered. Default assumption: **~5 h/week** (the Path B baseline used in the `PLAN.md`
+timeline). Affects only chapter sizing, so it does not block anything.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-25 | Session 002 appended: 2 verifications, 1 revision (ADR-004), 1 strengthening (ADR-008), 3 new decisions (ADR-019/020/021), plan approved, 1 new risk (R9), 1 deferral (P-06). |
 | 1.0 | 2026-08-25 | Log created. Session 001: 2 verifications, 18 decisions, 5 deferrals. |

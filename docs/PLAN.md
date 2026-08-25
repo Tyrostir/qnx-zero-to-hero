@@ -1,8 +1,8 @@
 ---
 title: "QNX Zero to Hero — Master Course Plan"
 document_id: PLAN
-version: 1.0
-status: Draft — awaiting learner approval
+version: 1.1
+status: "✅ Approved by the learner, 2026-08-25"
 created: 2026-08-25
 last_updated: 2026-08-25
 owner: Course Author (AI) + Learner (Tyrostir)
@@ -114,6 +114,10 @@ flowchart TD
 Three parallel tracks through the same material. **The chapters are identical files** — paths are
 implemented as *markers inside* each chapter, so you never have to read a different document.
 
+> ⚠️ **Mandate (ADR-008).** Content for **all three paths is written in full for every chapter**,
+> regardless of which path the current learner follows. A path that exists only as a marker is a
+> broken promise to the next reader. Enforced by the [Definition of Done](#17-definition-of-done).
+
 ### 3.1 🐣 Path A — Absolute Beginner (no coding)
 
 | | |
@@ -161,6 +165,18 @@ implemented as *markers inside* each chapter, so you never have to read a differ
 | Part 4 — System building & images | Concepts only | Full + labs | Full (this is where pros get stuck) |
 | Part 5 — Debug, safety, production | Full concepts | Full + labs | Full |
 | Part 6 — Hardware & career | Full | Full | Optional |
+
+### 3.5 What every chapter owes each path
+
+| Path | Guaranteed deliverable in every chapter | Where it lives |
+|------|----------------------------------------|----------------|
+| 🐣 **A** | A **no-coding activity**: run a pre-built binary, observe, answer questions. Plus 🐣 beginner notes wherever background is assumed. | `## 🧪 Labs → 🐣 Path A Activity`, binaries in `labs/labNN_*/prebuilt/` |
+| 🚶 **B** | Full theory, skeleton-to-solution labs, a 💥 break-it exercise, mastery check. | Whole chapter |
+| 🏃 **C** | A genuine **≤1-page Fast-Track Summary** — "here is the QNX delta vs. what you already know" — plus the chapter cheat sheet and `⭐ core` lab tagging. | `## 🏃 Fast-Track Summary` at the top |
+
+> 💡 **Insight.** The Path C box is the hardest thing to write well. It must be a *complete* mental
+> model for a professional, not a teaser for the full chapter. If a senior engineer could not do
+> their job from it, it isn't finished.
 
 ---
 
@@ -235,8 +251,24 @@ implemented as *markers inside* each chapter, so you never have to read a differ
 |---|---------|------------------------|
 | 31 | Running QNX on Real Hardware | Raspberry Pi 4/5, Intel x86 boards, NXP/TI/Qualcomm/Renesas SoCs. |
 | 32 | Bringing Up a Custom Board | From schematic to `procnto` prompt: IPL, startup, minimal BSP, debugging a dead board. |
-| 33 | Capstone Project | Build a complete multi-process real-time system with a resource manager, IPC, timing guarantees, and a custom boot image. |
+| 33 | Capstone Project — **three domain flavours** | Build a complete multi-process real-time system. One shared architecture and rubric, three interchangeable domain briefs: 🤖 robotics, 🚗 automotive, 🏥 medical/industrial. **You pick one; all three are documented.** |
 | 34 | Ecosystem, Career & Next Steps | Open-source ports, QNX certifications, job market, community, what to learn next. |
+
+### 4.0.1 The capstone, in three flavours (ADR-019)
+
+The *QNX* content is identical in all three. Only the domain vocabulary and the safety story change.
+
+| Track | Project | Real-time hook | Safety framing |
+|-------|---------|----------------|----------------|
+| 🤖 **33-R Robotics** | Motor-control loop + sensor fusion + telemetry link | 1 kHz control loop must not jitter | Emergency stop, safe torque off |
+| 🚗 **33-A Automotive** | Sensor → control → actuator chain with CAN-style messaging and an instrument-cluster consumer | Bounded end-to-end latency from sensor to actuator | ISO 26262 framing, freedom from interference |
+| 🏥 **33-M Medical / Industrial** | Dose/setpoint controller with alarm supervision and safe-state fallback | Alarm must be raised within a hard deadline | IEC 62304 / IEC 61508 framing, fail-safe design |
+
+Shared across all three: a resource manager, synchronous message passing, deliberate priority
+assignment, a custom IFS that boots into your application, and measured timing evidence.
+
+> 💡 Worked examples throughout Parts 2–4 deliberately **rotate** between these three domains, so no
+> reader feels the course is "not for my industry".
 
 ### 4.1 Dependency graph
 
@@ -368,8 +400,9 @@ labs/lab13_message_passing/
 | QNX version | **QNX SDP 8.0** (QNX OS 8.0) | Current generation; free via QNX Everywhere; what new projects use. QNX 7.1 noted where relevant. |
 | Licence | **QNX Everywhere** (free, non-commercial) | Zero cost, legal, covers learning + hobby projects. |
 | Host OS | **Ubuntu 26.04 on WSL2** (your machine) | Already installed and verified; KVM available. |
-| Virtualization | **QEMU + KVM** | Free, scriptable, near-native speed, matches `mkqnximage` output. |
-| VM creation | **`mkqnximage`** (ships with SDP) | Official, reproducible, handles networking + shared dirs automatically. |
+| Virtualization | **QEMU + KVM** | Free, scriptable, near-native speed. |
+| VM image (stage 1) | **QSTI** — QNX's official pre-built *Quick Start Target Image* for QEMU | Officially documented for exactly our scenario, includes sample apps, and has its own troubleshooting page. Shortest path to a `qnx#` prompt. |
+| VM image (stage 2) | **CTI** — *Custom Target Image*, then raw **`mkifs`** | You don't know QNX until you've built the image yourself. Taught in Chapter 21. |
 | Target arch | **`x86_64`** for all labs | Uses KVM → fast. `aarch64le` covered in the hardware track. |
 | Editor / IDE | **VS Code + QNX Toolkit** primary; **Momentics IDE** documented as alternative | You already live in VS Code. Momentics is Eclipse-based and heavier. |
 | Build system | **QNX recursive Makefiles** (`common.mk`) primary; plain `qcc` command lines shown first | Teaches what's really happening before hiding it. CMake shown in Ch 08 appendix. |
@@ -385,7 +418,7 @@ labs/lab13_message_passing/
 | 2 | myQNX account + QNX Everywhere licence | — | Setup Guide 02 |
 | 3 | QNX Software Center | ~300 MB | Setup Guide 02 |
 | 4 | QNX SDP 8.0 (host tools + target images) | ~8–12 GB | Setup Guide 02 |
-| 5 | QNX VM image built by `mkqnximage` | ~2–4 GB | Setup Guide 03 |
+| 5 | QSTI — QNX Quick Start Target Image for QEMU | ~2–4 GB | Setup Guide 03 |
 | 6 | VS Code QNX Toolkit extension | ~50 MB | Setup Guide 04 |
 | 7 | Pandoc + TeX Live + Node/mermaid-cli (PDF only) | ~2–4 GB | PDF_Export.md |
 
@@ -606,11 +639,12 @@ Categories used in the index: `Concept` · `Setup/Install` · `Toolchain` · `Ke
 | Per-section | 🐣 "Check your understanding" — 1 question | Inline |
 | Per-chapter | ✅ **Mastery Check** — 5 questions (2 recall, 2 apply, 1 design) with collapsed answers | End of chapter |
 | Per-part | 🏁 **Part Review** — a mini-project combining the part's chapters | End of each part |
-| Course | 🎓 **Capstone** (Ch 33) — full system, graded against a rubric | Ch 33 |
+| Course | 🎓 **Capstone** (Ch 33) — full system in your chosen domain flavour, graded against a shared rubric | Ch 33 |
 
-**Capstone rubric preview** (details in Ch 33): correctness · real-time behaviour · use of QNX
-idioms (resmgr + message passing, not sockets-everywhere) · error handling · custom IFS builds and
-boots · documentation.
+**Capstone rubric preview** (details in Ch 33, applies identically to all three flavours):
+correctness · real-time behaviour with measured evidence · use of QNX idioms (resmgr + message
+passing, not sockets-everywhere) · error handling and fault recovery · custom IFS builds and boots ·
+documentation.
 
 ---
 
@@ -647,6 +681,8 @@ Estimated for **🚶 Path B at ~5 h/week**. Adjust freely — the course is self
 | R6 | Course stalls / long gaps between sessions | Medium | Medium | `CompactContext.md` + `CourseState.md` let any session resume instantly with zero re-explanation. |
 | R7 | Scope creep (34 chapters is a lot) | Medium | Medium | Strict chapter template; `⭐ core` subset defined; parts are independently valuable. |
 | R8 | Learner accidentally uses the non-commercial licence for commercial work | Low | **Legal** | Explicit, repeated licensing warnings in Ch 04 and Hardware_02. |
+| R9 | **Host OS is newer than QNX documents.** QNX documents QSTI-for-QEMU on Ubuntu 22.04/24.04; the learner runs **Ubuntu 26.04**. Package names and library versions may differ. | Medium | Medium | Setup Guide 01 maps QNX's documented package lists onto Ubuntu 26.04 names and verifies each. Any divergence is recorded in Setup Guide 05 and reported upstream via Discord. |
+| R10 | Authoring all three paths in full (ADR-008) inflates per-chapter effort ~20–30 % | High | Low | Accepted deliberately. Mitigated by the strict chapter template and by reusing lab code across path variants (same binary serves 🐣 `prebuilt/` and 🏃 `solution/`). |
 
 ---
 
@@ -656,11 +692,14 @@ The course is **done** when every box below is ticked.
 
 ### Per chapter
 - [ ] Follows the §5 template exactly
-- [ ] All three path markers present (🐣/🚶/🏃)
-- [ ] ≥1 Mermaid diagram
+- [ ] **🏃 Fast-Track Summary is a genuine standalone ≤1-page brief** — a professional could work from it alone
+- [ ] **🐣 Path A activity present**, with a pre-built binary in `labs/labNN_*/prebuilt/` where the chapter has a lab
+- [ ] **🚶 Path B full labs present** (skeleton + solution + expected output)
+- [ ] ≥1 Mermaid diagram, each followed by a one-line text description
 - [ ] ≥1 lab with verified expected output (run on the actual VM)
 - [ ] ≥1 "💥 Break it" exercise
-- [ ] Mastery check with 5 questions + answers
+- [ ] ≥1 🐧 "In Linux this would be…" comparison box
+- [ ] Mastery check with 5 questions + collapsed answers
 - [ ] Cheat-sheet table
 - [ ] New terms added to `Glossary.md`
 - [ ] New links added to `ReferenceLinks.md` with verification date
@@ -671,6 +710,7 @@ The course is **done** when every box below is ticked.
 - [ ] 34 chapters complete
 - [ ] 4 setup guides + 2 hardware guides complete
 - [ ] All labs run clean on a fresh VM
+- [ ] **All three capstone flavours documented** with reference solutions (ADR-019)
 - [ ] `build-pdf.sh` produces the complete book
 - [ ] Capstone completed by the learner
 - [ ] `Doubts.md` has zero `Open` entries
@@ -681,13 +721,23 @@ The course is **done** when every box below is ticked.
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
+| 1.1 | 2026-08-25 | **Approved by the learner.** Amendments: all three paths authored in full (§3, §17); capstone ships in three domain flavours (§4.0.1); VM strategy revised to QSTI → CTI → `mkifs` (§7); risks R9 (host newer than documented) and R10 (three-path authoring cost) added. | AI Author |
 | 1.0 | 2026-08-25 | Initial complete plan drafted; 6 parts / 34 chapters / 3 paths defined. | AI Author |
 
 ---
 
 ## ✅ Approval
 
-> **Status: awaiting your approval.**
-> Reply with any of: *approve as-is* · *change X* · *add Y* · *reorder Z*.
-> Once approved, this document's status changes to `Approved` and Chapter 00 + Setup Guides 01–03
-> are written first (so you can start installing while reading Part 0).
+> **Status: ✅ Approved by the learner on 2026-08-25.**
+>
+> Approved *as-is*, with two amendments requested and incorporated:
+> 1. **All three learning paths must be authored in full** — not just the learner's Path B — so that
+>    future readers can enter by whichever path suits them. → ADR-008 strengthened, §3.5 added.
+> 2. **All three capstone flavours must be present** — robotics, automotive and medical/industrial —
+>    with the reader choosing. → ADR-019, §4.0.1 added.
+>
+> Delivery mode: **one chapter per turn, auto-committed and pushed** (ADR-020).
+> Learner's path: **🚶 Path B** (ADR-018).
+>
+> This plan may still be amended at any time. Amendments are recorded here and in
+> [`meta/DecisionsLog.md`](meta/DecisionsLog.md).

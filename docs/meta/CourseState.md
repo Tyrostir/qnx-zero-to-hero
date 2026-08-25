@@ -23,15 +23,16 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Course** | QNX Zero to Hero |
 | **Repository** | https://github.com/Tyrostir/qnx-zero-to-hero |
 | **Learner** | Tyrostir — starting-level embedded engineer (C/C++ solid, Python strong) |
-| **Active path** | 🚶 **Path B — Self-Learner** *(default; change any time)* |
-| **Current phase** | **Phase 0 — Planning & scaffolding** |
+| **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
+| **Current phase** | **Phase 1 — Environment setup** |
+| **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **0 / 5** |
+| **Setup guides published** | **2 / 5** (01, 02) |
 | **Labs completed** | **0 / 21** |
-| **QNX software installed?** | ❌ Not yet |
+| **QNX software installed?** | ❌ Not yet — **you can start now** |
 | **QNX VM booting?** | ❌ Not yet |
-| **Blocked on** | Nothing — awaiting plan approval |
-| **Last session** | 2026-08-25 |
+| **Blocked on** | Nothing |
+| **Last session** | 2026-08-25 (Session 002) |
 
 ### Progress bar
 
@@ -53,12 +54,16 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You** | Read [`PLAN.md`](../PLAN.md) and [`TableOfContents.md`](../TableOfContents.md). Approve, or request changes. |
-| 🤖 **Me (on approval)** | Write, in this order: `Setup_01_Prerequisites.md` → `Setup_02_QNX_Account_And_License.md` → `Chapter00` → `Chapter01`. |
+| 👤 **You — do today** | 1. Follow **[Setup Guide 01](../guides/Setup_01_Prerequisites.md)** (~40 min) — includes the `kvm` group fix (T-008).<br>2. Start **[Setup Guide 02 Part A](../guides/Setup_02_QNX_Account_And_License.md#part-a--get-the-licence)** — create your myQNX account and **request the licence**. ⚠️ Do this even if you stop there; approval takes time. |
+| 🤖 **Me — next turn** | Write **Chapter 00 — How To Use This Course** (no software needed; read it while your licence is processing). |
 
-> 💡 **Why setup guides come first:** the QNX Everywhere licence request can take time to be
-> processed. Starting that request on day 1 means you are never blocked. Meanwhile you read Part 0,
-> which needs no software at all.
+> 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
+> it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
+> (Chapters 00–03) then fills the waiting time productively — it requires no software at all.
+
+> ⚠️ **One correction from Session 001.** Your `/dev/kvm` exists but is **not writable by your user**.
+> Without fixing this, your QNX VM would run 10–50× slower under software emulation. Setup Guide 01
+> §8 fixes it: `sudo usermod -aG kvm $USER`, then `wsl --shutdown` from Windows.
 
 ---
 
@@ -174,14 +179,14 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 
 | Guide | Doc status | Notes |
 |-------|-----------|-------|
-| Setup 01 — Prerequisites | 📄 | Written first after approval |
-| Setup 02 — Account, Licence, SDP | 📄 | Written first after approval |
-| Setup 03 — QEMU VM ⭐ | 📄 | |
+| Setup 01 — Prerequisites | � **Published** | Verified against your machine. Includes the `kvm` group fix and Ubuntu 26.04 package deltas. |
+| Setup 02 — Account, Licence, SDP | 📕 **Published** | Steps marked `[UNVERIFIED]` until we run them together. Teaches request → accept → **deploy**. |
+| Setup 03 — QEMU VM ⭐ | 📄 | Will follow QNX's official **QSTI for QEMU** guide (ADR-004) |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
 | Hardware 01 — Public Boards | 📄 | |
 | Hardware 02 — Custom Board | 📄 | |
-| PDF Export | 📄 | |
+| PDF Export | 📙 Drafted | Untested until chapters exist (T-203) |
 
 ---
 
@@ -203,6 +208,17 @@ Failures are all expected at this stage: `gcc`, `make`, `qemu-system-x86_64` —
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 002 — 2026-08-25
+
+| | |
+|---|---|
+| **Goal** | Get the plan approved and unblock the learner's licence request. |
+| **Done** | • Ran `check-environment.sh` against the real host → found `/dev/kvm` **not writable** (T-008)<br>• Researched the QNX Everywhere doc set → **discovered QSTI and CTI official target images**, the QNX Porting Guide, and the DDK Guide<br>• **Plan approved** by the learner, with two amendments<br>• Revised ADR-004 (`mkqnximage` → QSTI → CTI → `mkifs`)<br>• Strengthened ADR-008 (all three paths authored in full)<br>• Added ADR-019 (three capstone flavours), ADR-020 (one chapter/turn, auto-push), ADR-021 (`getqnx` → request/accept/**deploy**)<br>• Published **Setup Guide 01** and **Setup Guide 02**<br>• +15 verified reference links; risks R9, R10 registered |
+| **Learner decisions** | Path **B**; all three paths must be authored; all three capstone flavours; auto-push; one chapter per turn |
+| **Questions logged** | None new (D-001…D-005 already answered) |
+| **Blockers** | None |
+| **Next session** | **Chapter 00 — How To Use This Course** |
 
 ### Session 001 — 2026-08-25
 
