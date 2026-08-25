@@ -1,0 +1,32 @@
+---
+# Pandoc metadata shared by every PDF built from this repository.
+# Used by tools/build-pdf.sh via --metadata-file.
+# Documented in docs/guides/PDF_Export.md
+
+lang: en-GB
+subject: "QNX Real-Time Operating System"
+keywords: [QNX, RTOS, embedded, microkernel, real-time, QEMU, SDP 8.0, resource manager, message passing]
+
+# ── Eisvogel template variables ───────────────────────────────────────────────
+titlepage: true
+titlepage-color: "0D1B2A"
+titlepage-text-color: "FFFFFF"
+titlepage-rule-color: "1E88E5"
+titlepage-rule-height: 4
+toc-own-page: true
+book: true
+listings-disable-line-numbers: false
+listings-no-page-break: true
+code-block-font-size: \small
+table-use-row-colors: true
+footnotes-pretty: true
+disable-header-and-footer: false
+header-left: "QNX: Zero to Hero"
+footer-left: "github.com/Tyrostir/qnx-zero-to-hero"
+footer-center: "\\thepage"
+
+# ── Typography ────────────────────────────────────────────────────────────────
+fontsize: 10pt
+linestretch: 1.15
+links-as-notes: false
+---

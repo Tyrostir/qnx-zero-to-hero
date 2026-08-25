@@ -1,0 +1,64 @@
+# ── Build artefacts ────────────────────────────────────────────────────────────
+build/
+*.pdf
+!docs/**/*.pdf
+.puppeteer.json
+mermaid-images/
+*.mmd.png
+
+# ── QNX / lab build output ─────────────────────────────────────────────────────
+# QNX recursive Makefiles create arch/variant directories full of objects.
+labs/**/x86_64/
+labs/**/aarch64/
+labs/**/arm/
+labs/**/o-le/
+labs/**/*.o
+labs/**/*.so
+labs/**/*.a
+labs/**/core
+labs/**/core.*
+!labs/**/prebuilt/
+
+# ── VM images & QNX artefacts (large binaries — never commit) ──────────────────
+*.img
+*.qcow2
+*.vmdk
+*.iso
+*.ifs
+*.build.gen
+vm/
+qnx-vm/
+output/
+
+# ── QNX SDP / licences (never commit licences or serials) ─────────────────────
+.qnx/
+*.lic
+licenses
+qnxsdp-env.sh
+
+# ── Editors & OS ──────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Logs & temp ───────────────────────────────────────────────────────────────
+*.log
+pandoc.log
+tmp/
+.tmp/
+
+# ── Node (only used by the PDF toolchain) ─────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+venv/
