@@ -1,8 +1,8 @@
 ---
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
-version: 1.2
-status: Active — Blocks V1 and V2 ✅ complete; V3–V4 pending
+version: 1.3
+status: ✅ Blocks V1–V4 all complete. Setup Guides 01 and 02 verified.
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -97,11 +97,25 @@ Worked / Failed. Notes: ...
 |-------|-------|
 | **V1** — host preparation | ✅ **Verified 2026-08-25.** `19 passed · 6 warnings · 0 failed` |
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
-| **V3** — Software Center + SDP | 👉 **Next.** Nothing gates it |
-| **V4** — toolchain proof | After V3 |
+| **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
+| **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
 
-> 🎉 **Risk R1 is closed.** Licence latency was the only unquantified blocker in the project, and the
-> licence is now deployed to the learner's account. Every remaining step is under our own control.
+> 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
+> `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
+
+### Two small things still wanted (non-blocking)
+
+Neither gates anything; both improve the course.
+
+| # | What | Why it matters |
+|---|------|----------------|
+| **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
+| **R2 / T-014** | Did QNX Software Center install via the **graphical** installer under WSLg, or did you need the **headless** route (`-- --unattended`)? Plus the licence approval latency and the portal's real accept/deploy button labels. | Setup Guide 02 §8 currently offers two routes as equals. It should state which one actually works and keep the other as a fallback. |
+
+### Next verification block
+
+**Setup Guide 03 — the QEMU VM.** Not yet written (T-112); it was blocked on having a real SDP to
+test against, and now is not. That block ends at a `qnx#` prompt.
 
 ---
 
@@ -384,18 +398,18 @@ host$ ./tools/check-environment.sh
 | V1.6 | Workspace + re-check | 👤 | V1.1–V1.5 | **T-009** | ✅ 19 pass · 6 warn · **0 fail** |
 | V2.2 | Approval received | 👤 | V2.1 | **T-003** · Risk R1 | ✅ |
 | V2.3 | Accept **and deploy** | 👤 | V2.2 | **T-010** · Setup 02 §5 | ✅ **deployed** |
-| V3.1 | Download QSC | 👤 | V2.3 | Setup 02 §7 | ⬜ **next** |
-| V3.2 | Install QSC | 👤 | V3.1 | Setup 02 §8 · Risk R2 | ⬜ |
-| V3.3 | Install SDP 8.0 | 👤 | V3.2 | **T-011** · Setup 02 §9 · **T-202** | ⬜ |
-| V4.1 | Environment + `qcc -V` | 👤 | V3.3 | Setup 02 §10 | ⬜ |
-| V4.2 | Cross-compile | 👤 | V4.1 | Setup 02 §11 | ⬜ |
-| V4.3 | Prove it will not run on Linux | 👤 | V4.2 | Setup 02 §11.4 | ⬜ |
-| V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ⬜ |
-| — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ⏸️ |
-| — | Write `Setup_03_QEMU_VM.md` | 🤖 | V4.4 | **T-112** | ⏸️ |
+| V3.1 | Download QSC | 👤 | V2.3 | Setup 02 §7 | ✅ |
+| V3.2 | Install QSC | 👤 | V3.1 | Setup 02 §8 · Risk R2 | ✅ *(route not reported)* |
+| V3.3 | Install SDP 8.0 | 👤 | V3.2 | **T-011** · Setup 02 §9 | ✅ `~/qnx800` · ~43 GB · **T-202 still open** |
+| V4.1 | Environment + `qcc -V` | 👤 | V3.3 | Setup 02 §10 | ✅ GCC **12.2.0** · 6 targets |
+| V4.2 | Cross-compile | 👤 | V4.1 | Setup 02 §11 | ✅ *(found a bug in the guide)* |
+| V4.3 | Prove it will not run on Linux | 👤 | V4.2 | Setup 02 §11.4 | ✅ failed exactly as predicted |
+| V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ✅ **24 pass · 3 warn · 0 fail** |
+| — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ✅ Setup 02 → v2.0 |
+| — | Write `Setup_03_QEMU_VM.md` | 🤖 | V4.4 | **T-112** | ⬜ **unblocked** |
 
-> ✅ **Blocks V1 and V2 are complete.** The host is prepared and the licence is **deployed**.
-> **V3.1 is the next action** — nothing gates it any more.
+> ✅ **All blocks complete.** Host prepared, licence deployed, SDP installed, cross-compile proven.
+> Setup Guides 01 and 02 are verified. The next verification block belongs to Setup Guide 03.
 
 ---
 
@@ -428,6 +442,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V3 + V4 (all)** | ✅ **Complete** | SDP 8.0 installed at `~/qnx800`; cross-compile proven; `24 passed · 3 warnings · 0 failed`. **T-011 and T-012 cleared; T-200 closed.** Setup Guide 02 → **v2.0**, all markers removed. **Risk R2 closed.** Two real bugs found in the guide — see below. **Still open:** T-202 (SDP build number) and the QSC install route. |
 | 2026-08-26 | **V2 (all)** | ✅ **Complete** | Licence requested, accepted and **deployed** (learner-attested). **T-003 and T-010 cleared. Risk R1 closed.** Setup Guide 02 §§3–5 markers cleared; Part B (§§7–11) still `[UNVERIFIED]`. Approval latency and portal button labels not captured — still wanted for Chapter 04, but non-blocking. |
 | 2026-08-25 | **V1 (all)** | ✅ **Passed** | `19 passed · 6 warnings · 0 failed`. **T-008** and **T-009** cleared. Setup Guide 01 → v2.0, `[UNVERIFIED]` removed, all expected-output blocks replaced with real output. **Risk R9 did not materialise** — every documented package installed under its documented name on Ubuntu 26.04. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
 
@@ -450,12 +465,38 @@ future readers than a step that silently worked.
 > 💡 **Use this table when writing chapters.** Front matter records the exact toolchain each chapter
 > was written against; these are the host-side values.
 
+### QNX SDP toolchain observed (2026-08-26)
+
+| Item | Value |
+|------|-------|
+| SDP root | `/home/tyrostir/qnx800` |
+| `$QNX_HOST` | `/home/tyrostir/qnx800/host/linux/x86_64` |
+| `$QNX_TARGET` | `/home/tyrostir/qnx800/target/qnx` |
+| Licence file | `~/.qnx/license/licenses` |
+| Cross-compiler | **GCC 12.2.0** (not the host's 15.2.0) |
+| Targets | `gcc_ntox86_64` *(default)*, `gcc_ntox86_64_gpp`, `gcc_ntox86_64_cxx`,<br>`gcc_ntoaarch64le`, `gcc_ntoaarch64le_gpp`, `gcc_ntoaarch64le_cxx` |
+| Dynamic linker | `/usr/lib/ldqnx-64.so.2` |
+| Disk consumed | **~43 GB** (951 GB free → 908 GB) |
+| SDP build number | ⬜ **not captured — T-202** |
+
+### Bugs this block found in Setup Guide 02
+
+| # | Bug | Fix |
+|---|-----|-----|
+| 1 | §11.2's sample program called `getpid()` with no `#include <unistd.h>`, producing `warning: implicit declaration of function 'getpid'` — while the guide claimed the expected output was "nothing at all". | Include added. The warning is now documented as a teaching moment: `<sys/neutrino.h>` is for QNX-specific calls; ordinary POSIX calls live in the standard POSIX headers. |
+| 2 | §11.3 told the reader to look for the word **"QNX"** in `file` output. `file` never prints it — QNX uses the System V ELF ABI, so it reports `SYSV`. | Corrected. The real tell is the interpreter `/usr/lib/ldqnx-64.so.2`; the section now also explains `pie executable` and `with debug_info`. |
+| 3 | The install was documented as ~8–12 GB (~25 GB total budget). Measured: **~43 GB** (~50 GB total). | New §12.1; `PLAN.md` §7.1 corrected. |
+
+> 💡 **This is why the protocol exists.** All three were plausible, well-researched, and wrong. No
+> amount of reading the documentation would have caught them — only running the commands did.
+
 ---
 
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** SDP toolchain table added; three guide bugs recorded; R2 closed; T-202 and the QSC install route flagged as the only open detail. |
 | 1.2 | 2026-08-26 | **Block V2 complete.** Licence deployed; Risk R1 closed; V3 unblocked and is now the next action. §3 rewritten as a status board. |
 | 1.1 | 2026-08-26 | **Block V1 verified.** All six V1 checkpoints ✅; T-008 and T-009 cleared; real host versions recorded; V1.5's documented output replaced with the real SeaBIOS/iPXE result. |
 | 1.0 | 2026-08-26 | Created in Session 003. Defines the ADR-024 clearance protocol and enumerates blocks V1–V4 (18 checkpoints) against Setup Guides 01 and 02. |

@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.4
+version: 1.5
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -641,10 +641,81 @@ public repository. Fixing it silently would leave no record of which commits car
 
 ---
 
+## 2026-08-26 — Session 006 (SDP verified; setup guides complete)
+
+### 🔍 VERIFIED — QNX SDP 8.0 installs and cross-compiles
+
+Blocks **V3** and **V4** executed on the host. `check-environment.sh` reports
+**24 passed · 3 warnings · 0 failed** — the three warnings are the optional PDF toolchain.
+
+| Item | Observed |
+|------|----------|
+| SDP root | `/home/tyrostir/qnx800` |
+| `$QNX_HOST` | `/home/tyrostir/qnx800/host/linux/x86_64` |
+| `$QNX_TARGET` | `/home/tyrostir/qnx800/target/qnx` |
+| Licence file | `~/.qnx/license/licenses` |
+| Cross-compiler | **GCC 12.2.0** |
+| Targets | `gcc_ntox86_64` *(default)*, `_gpp`, `_cxx`; `gcc_ntoaarch64le`, `_gpp`, `_cxx` |
+| Dynamic linker | `/usr/lib/ldqnx-64.so.2` |
+
+The cross-compile proof behaved exactly as designed: the binary built, `file` identified the QNX
+interpreter, and Linux refused to execute it with `cannot execute: required file not found`.
+
+**Setup Guide 02 is promoted to v2.0**, verified end to end, with no `[UNVERIFIED]` markers
+remaining anywhere in the course. **T-011, T-012, T-141, T-144 and T-200 are closed.**
+
+---
+
+### 🔍 VERIFIED — Three real bugs in Setup Guide 02, found only by running it
+
+| # | Bug | Correction |
+|---|-----|-----------|
+| 1 | §11.2's sample program called `getpid()` with no `#include <unistd.h>`. It emitted `warning: implicit declaration of function 'getpid'` while the guide claimed the expected output was *"nothing at all"*. | Include added. The warning is now documented as a teaching moment: `<sys/neutrino.h>` carries QNX-specific calls; ordinary POSIX functions live in the standard POSIX headers, exactly as on Linux. |
+| 2 | §11.3 told the reader to look for the word **"QNX"** in `file` output. `file` never prints it — QNX uses the System V ELF ABI, so it reports `SYSV`. | Corrected. The real tell is the interpreter `/usr/lib/ldqnx-64.so.2`. The section now also explains `pie executable` (forward reference to ASLR, Ch 28) and `with debug_info` (Ch 08). |
+| 3 | The install was documented as **~8–12 GB**, with a ~25 GB total budget. | Measured: free space fell 951 GB → 908 GB, i.e. **~43 GB**. New §12.1; `PLAN.md` §7.1 total budget corrected to **~50 GB**. |
+
+**Why this entry matters more than the others.** All three were plausible, sourced from official
+documentation, and wrong. No amount of further reading would have caught them — only execution did.
+This is the concrete justification for **ADR-024**, and the reason `[UNVERIFIED]` is not bureaucracy.
+
+---
+
+### ⛔ CLOSED — Risk R2: QNX Software Center install on WSL2
+
+QNX Software Center and SDP 8.0 both installed successfully under WSL2. **R2 is closed.**
+
+⚠️ **One detail was not captured:** whether the *graphical* installer worked under WSLg or whether the
+headless route (`-- --unattended`) was needed. Setup Guide 02 §8 still presents both routes as
+equals; it should name the one that works and keep the other as a fallback. Tracked as **T-014**.
+
+With R1, R2, R3 and R9 all closed, **no risk in this project now has an external dependency.**
+
+---
+
+### ❓ OPEN — T-202: the SDP build number was never captured
+
+`PLAN.md` §5 requires every chapter's front matter to record the exact SDP build it was written
+against — the mitigation for **Risk R5** (version drift between SDP 8.0 patch releases). Block V3.3
+would have produced it via `qnxsoftwarecenter_clt -listAvailablePackages`, but that output was not
+reported.
+
+**Consequence.** Chapters can be written, but their front matter cannot yet state the build. Promoted
+to a learner action item and recorded as hazard **H-8** so it is not silently skipped.
+
+---
+
+### 🔍 VERIFIED — Commits are now published
+
+The learner pushed `main` to GitHub manually. Commits 1–2 are authored as `Tyrostir`; commits 3
+onward as `Karthikeyan Kasivishwanathan`. **History is now published and must not be rewritten.**
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | Session 006 appended: SDP verified, 3 guide bugs recorded, R2 closed, T-202 opened, history published. |
 | 1.4 | 2026-08-26 | Session 005 appended: licence flow verified, Risk R1 closed, Git identity spelling revised. |
 | 1.3 | 2026-08-26 | Session 004 appended: 4 verifications (Setup Guide 01 executed, R9 closed, R3/KVM closed, repo path corrected) and 1 decision (Git identity). |
 | 1.2 | 2026-08-26 | Session 003 appended: author handover (Copilot → Claude), 2 verifications, 3 new decisions (ADR-022/023/024), 1 deferral. Setup Guide 01's verification claim corrected. |

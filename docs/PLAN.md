@@ -1,7 +1,7 @@
 ---
 title: "QNX Zero to Hero — Master Course Plan"
 document_id: PLAN
-version: 1.1
+version: 1.2
 status: "✅ Approved by the learner, 2026-08-25"
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -417,12 +417,14 @@ labs/lab13_message_passing/
 | 1 | Build essentials, `qemu-system-x86`, `bridge-utils` | ~500 MB | Setup Guide 01 |
 | 2 | myQNX account + QNX Everywhere licence | — | Setup Guide 02 |
 | 3 | QNX Software Center | ~300 MB | Setup Guide 02 |
-| 4 | QNX SDP 8.0 (host tools + target images) | ~8–12 GB | Setup Guide 02 |
+| 4 | QNX SDP 8.0 (host tools + target images) | **~43 GB** ⚠️ *(measured; QNX's own figure of 8–12 GB is optimistic)* | Setup Guide 02 |
 | 5 | QSTI — QNX Quick Start Target Image for QEMU | ~2–4 GB | Setup Guide 03 |
 | 6 | VS Code QNX Toolkit extension | ~50 MB | Setup Guide 04 |
 | 7 | Pandoc + TeX Live + Node/mermaid-cli (PDF only) | ~2–4 GB | PDF_Export.md |
 
-**Total disk budget: ~25 GB.** You have ~950 GB free. ✅
+**Total disk budget: ~50 GB** — revised upward from ~25 GB after measuring a real install
+(Setup Guide 02 §12.1). A full SDP pulls both `x86_64` and `aarch64le` targets plus debug symbols
+for everything. ✅ Verified against the host: 951 GB free before, 908 GB after.
 
 ---
 
@@ -721,6 +723,7 @@ The course is **done** when every box below is ticked.
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
+| 1.2 | 2026-08-26 | Disk budget corrected from ~25 GB to ~50 GB after measuring a real SDP install (§7.1). |
 | 1.1 | 2026-08-25 | **Approved by the learner.** Amendments: all three paths authored in full (§3, §17); capstone ships in three domain flavours (§4.0.1); VM strategy revised to QSTI → CTI → `mkifs` (§7); risks R9 (host newer than documented) and R10 (three-path authoring cost) added. | AI Author |
 | 1.0 | 2026-08-25 | Initial complete plan drafted; 6 parts / 34 chapters / 3 paths defined. | AI Author |
 

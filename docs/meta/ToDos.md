@@ -27,9 +27,10 @@ update_trigger: "Continuously"
 
 
 
-| T-011 | 🔴 | **Install QNX Software Center + SDP 8.0** (~10 GB) — blocks **V3** | ⬜ | — | ✅ Unblocked: the licence is deployed. [Setup 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software) |
-| T-014 | 🔵 | *When convenient:* report the licence approval latency and the real portal button labels | ⬜ | — | Non-blocking. Chapter 04 currently cannot tell a reader what to expect. |
-| T-012 | 🟠 | **Report back the output of every verification checkpoint** | ⬜ | T-011 | Follow [`VerificationRuns.md`](../internal/VerificationRuns.md) — blocks V1–V4, 18 checkpoints. Only your pasted output can clear an `[UNVERIFIED]` marker (ADR-024). |
+
+| T-202 | 🟠 | **Report the exact SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
+| T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
+
 | T-013 | 🟠 | `git pull` before each work session | ⬜ | — | The authoring side moves between your sessions. |
 | T-006 | 🔵 | Decide whether to buy a Raspberry Pi 4/5 for the hardware track | ⬜ | Ch 31 | Not needed until Part 6 |
 | T-007 | 🔵 | Tell me your realistic weekly time budget (P-06) | ⬜ | — | Lets me calibrate chapter size. Default assumption: ~5 h/week |
@@ -42,12 +43,12 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Notes |
 |----|-----|------|--------|-------|
-| T-144 | 🟠 | Clear the Setup **02** markers once blocks V2–V4 are reported | ⏸️ | Blocked on T-003/T-011/T-012 |
+| T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
-| T-141 | 🔴 | **Clear the `[UNVERIFIED]` markers** once the learner reports back — paste in real output, fix anything that failed | ⏸️ | Blocked on T-012. This is the gate before Chapter 00. |
-| T-102 | 🟠 | Write `Chapter00_HowToUseThisCourse.md` | ⏸️ | **On hold by learner instruction (Session 003)** until onboarding + verification are complete. |
+| T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | Done — Setup Guides 01 and 02 both verified. **The gate on Chapter 00 is lifted.** |
+| T-102 | 🔴 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | ✅ **Off hold** — onboarding and verification are both complete. Awaiting the learner's go-ahead. |
 | T-103 | 🟠 | Write `Chapter01_WhatIsARealTimeSystem.md` | ⬜ | Hard/soft real-time, determinism, latency, jitter, WCET |
-| T-112 | 🟠 | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/` scripts | ⬜ | ⭐ Critical. Blocked until T-011 gives us a real SDP to test against |
+| T-112 | 🔴 | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/` scripts | ⬜ | ⭐ Critical. **Unblocked** — a real SDP now exists to test against. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
 | T-105 | ✅ | Commit and push the scaffolding | ✅ | Done, Session 001 |
 
@@ -95,9 +96,9 @@ update_trigger: "Continuously"
 
 | ID | Item | Blocked by | Unblocks when |
 |----|------|-----------|---------------|
-| T-200 | Verify every install command actually works | The author cannot execute commands (ADR-024) | The learner completes [`VerificationRuns.md`](../internal/VerificationRuns.md) blocks V1–V4 |
+| ~~T-200~~ | ✅ **Closed 2026-08-26.** Setup Guides 01 and 02 verified end to end; blocks V1–V4 complete | — | — |
 | T-201 | Verify every lab's expected output | No VM yet | Setup 03 completes |
-| T-202 | Record exact SDP 8.0 build number in chapter front matter | SDP not installed | T-003 → Setup 02 |
+| ~~T-202~~ | Moved to §1 — SDP is installed; only the build number is still unreported | — | — |
 | T-203 | Test `build-pdf.sh` end to end | Needs real chapters + Pandoc/TeX installed | T-102/T-103 + PDF deps |
 
 > ⚠️ **Important honesty note.** Until T-200/T-201 clear, install commands and expected outputs in
@@ -120,6 +121,11 @@ update_trigger: "Continuously"
 | T-003 | Request the QNX Everywhere licence | 2026-08-26 | 004 |
 | T-010 | Accept **and deploy** the licence | 2026-08-26 | 004 |
 | T-146 | Clear Setup Guide 02 §§3–5 markers (Part A confirmed) | 2026-08-26 | 004 |
+| T-011 | Install QNX Software Center + SDP 8.0 | 2026-08-26 | 005 |
+| T-012 | Report verification output for blocks V1–V4 | 2026-08-26 | 005 |
+| T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
+| T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
+| T-200 | Verify every install command actually works | 2026-08-26 | 005 |
 | T-008 | Add the user to the `kvm` group | 2026-08-25 | 003 |
 | T-009 | Complete Setup Guide 01 on the host | 2026-08-25 | 003 |
 | T-145 | Clear the Setup Guide 01 `[UNVERIFIED]` markers with real output → v2.0 | 2026-08-26 | 003 |
@@ -147,6 +153,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** T-011, T-012, T-141, T-144, T-200 closed. T-202 promoted to a learner item (SDP build number still unreported). T-112 (Setup Guide 03) unblocked and 🔴. **T-102 Chapter 00 off hold.** |
 | 1.4 | 2026-08-26 | **Block V2 complete.** T-003, T-010 and T-146 closed; Risk R1 closed. T-011 promoted to 🔴 and unblocked. T-014 added (optional licence-flow detail for Chapter 04). |
 | 1.3 | 2026-08-26 | **Block V1 verified.** T-008 and T-009 closed; T-145 added and closed (Setup Guide 01 → v2.0). T-013 re-scoped to every session. T-144 added for Setup Guide 02. |
 | 1.2 | 2026-08-26 | Session 003: author handover. T-140/142/143 closed. New learner items T-012 (rewritten) and T-013. New author item T-141 (clear the markers). **T-102 Chapter 00 put on hold** by learner instruction until onboarding and verification are complete. T-200 re-scoped to ADR-024. |

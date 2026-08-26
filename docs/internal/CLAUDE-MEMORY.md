@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.2
+version: 1.3
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -171,16 +171,17 @@ filesystem costume.
 | Phase | **1 — Environment setup** |
 | Plan | ✅ Approved 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **2 / 5** — 01 ✅ **verified**, 02 Part A ✅ confirmed / Part B `[UNVERIFIED]` |
+| Setup guides published | **2 / 5** — **both ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
-| QNX installed on the execution box | ❌ Not yet — **nothing blocks it**; block V3 is the next action |
+| QNX SDP | ✅ **8.0 installed** at `~/qnx800` · cross-compiler **GCC 12.2.0** · cross-compile proven |
+| QNX VM booting | ❌ Not yet — Setup Guide 03 is unwritten (T-112, unblocked) |
 | VM booting | ❌ Not yet |
 | Doubts logged | 5 (D-001…D-005, all answered) |
 | ADRs | 24 (ADR-001…ADR-024) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
-| Commits | 5 on `main` |
-| Blocker | **None external.** ⏸️ Chapter 00 remains on hold by the learner's instruction (SI-8) until Setup Guide 02 Part B's markers clear. |
+| Commits | 6 on `main`; the learner pushes manually |
+| Blocker | **None.** SI-8's condition is satisfied — onboarding and verification are both complete, so **Chapter 00 is off hold**. Awaiting the learner's choice between Chapter 00 and Setup Guide 03. |
 
 **Always confirm against [`docs/meta/CourseState.md`](../meta/CourseState.md) — it is authoritative.**
 
@@ -312,6 +313,7 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **006** | 2026-08-26 | Claude (Opus 5) | **Blocks V3 + V4 complete — all verification done.** QNX SDP 8.0 installed at `~/qnx800`; cross-compile proven (`ldqnx-64.so.2` interpreter; Linux refuses to run the binary); `24 passed · 3 warnings · 0 failed`. Setup Guide 02 → **v2.0**, all markers cleared. **Three real bugs found by running the guide**: missing `#include <unistd.h>`, a false claim that `file` prints "QNX", and a disk estimate ~4× low (~43 GB actual). `PLAN.md` disk budget corrected to ~50 GB. **Risk R2 closed.** T-202 (SDP build number) still open. Learner pushed to GitHub manually. |
 | **005** | 2026-08-26 | Claude (Opus 5) | **Block V2 complete.** Learner confirmed the QNX Everywhere licence is requested, accepted and **deployed**. T-003 and T-010 cleared; **Risk R1 closed** — no external blocker remains anywhere in the project. Setup Guide 02 → v1.1, `[UNVERIFIED]` cleared from §§3–5 and scoped to Part B. Block V3 (QSC + SDP install) promoted to the next action. Git author name spelling corrected. |
 | **004** | 2026-08-26 | Claude (Opus 5) | **Block V1 verified.** Learner ran Setup Guide 01 on the host and reported output: `19 passed · 6 warnings · 0 failed` (was 13/9/3). T-008 and T-009 cleared; Risk R9 closed (no package-name drift on 26.04); Risk R3 closed. Setup Guide 01 → **v2.0**, all `[UNVERIFIED]` removed and every expected-output block replaced with real observed output. Repo path corrected to `~/exercises/qnx-zero-to-hero`. Git identity updated. |
 | **003** | 2026-08-26 | **Claude (Opus 5)** | **Handover.** Copilot credit limit reached; project moved to the writing-desk box. Full context absorbed and reported. `PROMPTS.md` created. `docs/internal/` tier established with this file, the onboarding guide, the onboarding prompts, and the verification protocol. ADR-022/023/024 added. Chapter 00 held. |
@@ -330,9 +332,10 @@ that is precisely why the onboarding documents exist.
 |---|--------|--------|
 | **H-1** | The Git remote in `.git/config` embeds a **plaintext GitHub PAT**. Not in any tracked file. | ⏸️ **Deliberately deferred by the learner (SI-7). Do not raise again.** |
 | **H-2** | Two working copies exist. Divergence is possible if the learner edits on the execution box. | ⚠️ Always `git status` / `git log --oneline -3` before writing. Pull before editing if the learner has been working. |
-| **H-3** | Setup Guide 02 **Part B** (§§7–11: QSC, SDP, environment, verification) still contains steps never executed. Part A and Setup Guide 01 are confirmed. | 🔄 [`VerificationRuns.md`](VerificationRuns.md) blocks V3–V4 |
+| ~~H-3~~ | Setup Guides 01 and 02 are both verified end to end. Three real bugs were found in Setup Guide 02 by running it. | ✅ Closed 2026-08-26 |
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
+| **H-8** | **T-202 — the SDP build number was never captured.** `PLAN.md` §5 requires every chapter's front matter to record the SDP build it was written against (Risk R5). No chapter can state it today. Ask the learner for `qnxsoftwarecenter_clt -listAvailablePackages` before writing chapters that depend on it. | ⬜ Open |
 | **H-6** | Risk **R10** — authoring all three paths in full costs ~20–30 % more effort per chapter. | ✅ Accepted deliberately |
 | **H-7** | `CompactContext.md` (Tier 2) must never gain Tier 3 detail, even though it is the "re-prime a session" document. **This file is the Tier 3 equivalent.** | ⚠️ Ongoing discipline |
 
@@ -342,6 +345,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | Session 006: SDP verified, both setup guides done, H-3 closed, H-8 added (SDP build number), Chapter 00 off hold. |
 | 1.2 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, R1 closed, hazards H-3/H-5 updated, Git identity spelling fixed. |
 | 1.1 | 2026-08-26 | Session 004: Block V1 verified; host state, hazards H-3/H-4/H-5 and the session table updated. |
 | 1.0 | 2026-08-26 | Created in Session 003 at the Copilot → Claude handover. Captures the two-machine split, standing instructions SI-1…SI-8, ADR-022/023/024, and the full project history. |

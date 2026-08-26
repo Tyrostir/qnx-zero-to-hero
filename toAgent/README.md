@@ -53,6 +53,7 @@ toAgent/<n>.<WhatItIs>.md
 | # | File | Block | Date | Outcome |
 |---|------|-------|------|---------|
 | 1 | `1.BlockV1Output.md` | **V1** — host preparation | 2026-08-25 | ✅ `19 passed · 6 warnings · 0 failed`. T-008 and T-009 cleared; Setup Guide 01 → v2.0; Risks R3 and R9 closed. |
+| 2 | `2.BlockV2V3V4Output.md` | **V2 · V3 · V4** — licence, SDP install, toolchain proof | 2026-08-26 | ✅ `24 passed · 3 warnings · 0 failed`. SDP 8.0 at `~/qnx800`; cross-compile proven; Setup Guide 02 → v2.0; Risk R2 closed. **Found 3 real bugs in the guide.** T-202 (SDP build number) not captured. |
 
 ---
 
@@ -60,4 +61,5 @@ toAgent/<n>.<WhatItIs>.md
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Drop 2 indexed (blocks V2–V4). |
 | 1.0 | 2026-08-26 | Created after the first drop (Block V1). |

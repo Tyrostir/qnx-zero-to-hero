@@ -57,6 +57,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#2](#prompt2) | 2026-08-26 | Claude (Opus 5) | Six instructions: log responses too · leave the token · write the 3 onboarding docs · hide the two-machine split from readers · list the verification to-dos · hold Chapter 00 | ✅ All six done · ADR-022/023/024 · `docs/internal/` created |
 | [PROMPT#3](#prompt3) | 2026-08-26 | Claude (Opus 5) | Block V1 output delivered in `toAgent/1.BlockV1Output.md`; update the Git identity | ✅ Block V1 verified · Setup Guide 01 → v2.0 · repo path corrected · identity set |
 | [PROMPT#4](#prompt4) | 2026-08-26 | Claude (Opus 5) | Correct the name spelling; licence already deployed — mark V2.1–V2.3 complete | ✅ Block V2 complete · **Risk R1 closed** · Setup Guide 02 → v1.1 · V3 unblocked |
+| [PROMPT#5](#prompt5) | 2026-08-26 | Claude (Opus 5) | Commits pushed manually; blocks V2–V4 complete, output in `toAgent/2.BlockV2V3V4Output.md` | ✅ **All verification done** · Setup Guide 02 → v2.0 · 3 guide bugs fixed · R2 closed · Chapter 00 off hold |
 
 ---
 
@@ -586,10 +587,142 @@ Once V3 and V4 land, Part B's markers clear and **Chapter 00 comes off hold**.
 
 ---
 
+## PROMPT#5
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 006 |
+| **Context** | The learner completed the remaining verification blocks and pushed the repository to GitHub. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> FYI: I manually pushed the commits. I have completed Block V2, V3, and V4. You can check toAgent/2.BlockV2V3V4Output.md file for confirmation.
+
+### Standing instructions
+
+| # | Instruction | Consequence |
+|---|-------------|-------------|
+| SI-12 | The learner pushes to GitHub themselves. The author commits; it does not push. | History is published from commit `79029c2` onward — **do not rewrite it.** |
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+Read it. **All four verification blocks are done, both setup guides are verified end to end, and the course now has zero `[UNVERIFIED]` markers.**
+
+`check-environment.sh`: **24 passed · 3 warnings · 0 failed** — and the three warnings are just the optional PDF toolchain.
+
+```text
+13 · 9 · 3   →   19 · 6 · 0   →   24 · 3 · 0
+   start        after Setup 01     now
+```
+
+## ✅ What you proved
+
+| | |
+|---|---|
+| **SDP 8.0** | `~/qnx800` · licence at `~/.qnx/license/licenses` |
+| `$QNX_HOST` | `~/qnx800/host/linux/x86_64` |
+| `$QNX_TARGET` | `~/qnx800/target/qnx` |
+| **Cross-compiler** | **GCC 12.2.0** — not your host's 15.2.0; a completely separate compiler |
+| **Targets** | `gcc_ntox86_64` *(default)*, `_gpp`, `_cxx` · `gcc_ntoaarch64le`, `_gpp`, `_cxx` |
+| **The proof** | Binary built → `file` shows `interpreter /usr/lib/ldqnx-64.so.2` → Linux refuses: `cannot execute: required file not found` |
+
+**That last line is the whole point of the setup.** You built a program your own computer cannot run. It needs `ldqnx-64.so.2`, QNX's dynamic linker, which doesn't exist on Linux. It will run the moment you have a QNX target — which is Setup Guide 03.
+
+Your `qcc -V` output was more informative than I'd predicted, so I expanded §11.1 around it: **only two architectures exist** in QNX 8.0 (`x86_64`, `aarch64le`), and the `_gpp`/`_cxx` suffixes are the two C++ front ends. That's the entire target world of the OS, visible in six lines.
+
+## 🐛 Running the guide found three real bugs
+
+This is the `[UNVERIFIED]` protocol earning its keep. All three were plausible, sourced from official documentation, and **wrong** — no amount of further reading would have caught them.
+
+**1. My sample program was broken.** §11.2 called `getpid()` with no `#include <unistd.h>`, and the guide claimed the expected output was *"nothing at all"*. You got:
+
+```text
+warning: implicit declaration of function 'getpid' [-Wimplicit-function-declaration]
+```
+
+Fixed — and I turned it into a lesson worth having early, because it's a misconception that costs QNX beginners real time:
+
+> `<sys/neutrino.h>` is the **QNX-specific** header — `MsgSend`, `ChannelCreate`, `InterruptAttach`. Ordinary POSIX calls like `getpid`, `read`, `write` and `sleep` live in the **standard** POSIX headers, exactly where they do on Linux. QNX is POSIX-compliant; reach for `<sys/neutrino.h>` only when you want something Linux doesn't have.
+
+**2. I told you to look for the word "QNX" in `file` output. It never prints it.** QNX uses the System V ELF ABI, so `file` says `SYSV` — the same as Linux. The *only* difference `file` can see is the interpreter path. Corrected, and I added the two other details your output revealed: `pie executable` (that's what makes ASLR possible — Chapter 28) and `with debug_info, not stripped` (that's why you'll be able to set breakpoints by function name in Chapter 08 without rebuilding).
+
+**3. The disk estimate was off by about 4×.** Documented as 8–12 GB; you went from **951 GB free to 908 GB — about 43 GB**. A full SDP pulls both target architectures plus debug symbols for everything. New §12.1 in Setup Guide 02, and `PLAN.md`'s total budget corrected from ~25 GB to **~50 GB**.
+
+## 🎉 Risk register — four of five closed
+
+| Risk | Status |
+|---|---|
+| ~~R1 licence latency~~ | ✅ closed |
+| ~~R2 QSC install on WSL2~~ | ✅ **closed this session** |
+| ~~R3 KVM under WSL2~~ | ✅ closed |
+| ~~R9 Ubuntu 26.04 package drift~~ | ✅ closed |
+| **R5 version drift** | ⬜ open — needs the SDP build number |
+
+**No risk in this project has an external dependency any more.**
+
+## 📌 Two things you didn't capture
+
+Neither blocks anything, both are worth a minute when convenient.
+
+**1. The SDP build number — T-202, and this one has teeth.** `PLAN.md` §5 requires every chapter's front matter to record the exact SDP build it was written against; that's the entire mitigation for Risk R5. Right now no chapter can state it.
+
+```bash
+host$ ~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages
+```
+
+**2. Did QNX Software Center install graphically or headlessly?** §8 still offers both routes as equals. It should state the one that actually works under WSLg and keep the other as a fallback. (Same item: how long licence approval took, and the real accept/deploy button labels.)
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_02_QNX_Account_And_License.md` | → **v2.0 verified.** All markers cleared; real output throughout; 3 bugs fixed; new §12.1 on disk cost |
+| `docs/PLAN.md` | → v1.2. Disk budget ~25 GB → **~50 GB** |
+| `docs/internal/VerificationRuns.md` | V3/V4 → ✅; SDP toolchain reference table; the three bugs recorded |
+| `docs/meta/DecisionsLog.md` | Session 006: SDP verified · 3 bugs · **R2 closed** · T-202 opened · history published |
+| `docs/meta/CourseState.md` | Session 006 log; SDP row ✅; both guides verified; nothing blocking |
+| `docs/meta/CompactContext.md` | Regenerated with the full SDP toolchain block |
+| `docs/meta/ToDos.md` | T-011, T-012, T-141, T-144, T-200 closed · T-202 promoted · **T-102 off hold** · T-112 unblocked |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 006 row; H-3 closed; **H-8 added** (SDP build number) |
+| `toAgent/README.md` | Drop 2 indexed |
+
+Leak scan across Tier 1 and Tier 2: **clean**.
+
+---
+
+## 👉 Your call — Chapter 00 or Setup Guide 03?
+
+The gate you set in PROMPT#2 is satisfied: onboarding is done, and every `[UNVERIFIED]` marker is cleared. **Chapter 00 is off hold.** Setup Guide 03 is also unblocked — it was waiting for exactly this, a real SDP to test against.
+
+| | | |
+|---|---|---|
+| **A** | 📕 **Chapter 00 — How To Use This Course** | The planned next step. Conventions, symbols, how labs work, how to pick a path. No software needed, and it sets the template every later chapter follows. |
+| **B** | ⭐ **Setup Guide 03 — The QEMU VM** | The shortest path to a `qnx#` prompt. It's the critical-path document (T-112, ⭐ core lab L06) and turns your `No bootable device` from Block V1 into a booting QNX system. |
+
+**My recommendation: B, Setup Guide 03.** You have momentum, a fully working toolchain, and a binary sitting there that nothing can run yet. Booting the VM closes that loop and reaches milestone **M2 "It boots" 🎉**. Chapter 00 is short, needs nothing, and reads better once you've actually seen the system it describes.
+
+Say the word — or "A" if you'd rather have the map before the territory.
+
+### Artefacts changed
+
+*(See the table above.)*
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.3 | 2026-08-26 | PROMPT#5 logged: blocks V2–V4 complete, all `[UNVERIFIED]` markers cleared. |
 | 2.2 | 2026-08-26 | PROMPT#4 logged: name spelling correction and Block V2 completion. |
 | 2.1 | 2026-08-26 | PROMPT#3 logged: Block V1 verification results and the Git identity change. |
 | 2.0 | 2026-08-26 | **ADR-023 adopted:** full agent responses are now logged alongside prompts. PROMPT#1's response back-filled; PROMPT#2 added. Marked Tier 3 per ADR-022. |

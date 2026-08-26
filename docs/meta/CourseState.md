@@ -24,15 +24,15 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Repository** | https://github.com/Tyrostir/qnx-zero-to-hero |
 | **Learner** | Tyrostir — starting-level embedded engineer (C/C++ solid, Python strong) |
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
-| **Current phase** | **Phase 1 — Environment setup** |
+| **Current phase** | **Phase 1 — Environment setup** *(host + toolchain done; VM remaining)* |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **2 / 5** — 01 ✅ **verified**, 02 Part A ✅ confirmed / Part B `[UNVERIFIED]` |
+| **Setup guides published** | **2 / 5** — **both ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs completed** | **0 / 21** |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
-| **QNX software installed?** | ❌ Not yet — **nothing blocks it now** |
+| **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ❌ Not yet |
-| **Blocked on** | ⏸️ Chapter 00 only — held until Part B's markers clear. **No external blockers remain.** |
+| **Blocked on** | **Nothing.** Chapter 00 is off hold; Setup Guide 03 is unblocked. |
 | **Last session** | 2026-08-26 (Session 004) |
 
 ### Progress bar
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 🔴 **Block V3 — install QNX Software Center, then QNX SDP 8.0** (~60–90 min, ~10 GB). [Setup Guide 02 Part B](../guides/Setup_02_QNX_Account_And_License.md#part-b--install-the-software). Then **V4** — the cross-compile proof (~10 min). Report output per [`VerificationRuns.md`](../internal/VerificationRuns.md). |
-| 🤖 **Me — next turn** | Clear Setup Guide 02 Part B's markers from your V3/V4 output, then **Chapter 00 comes off hold** (SI-8 satisfied). |
+| 👤 **You — do next** | Nothing is blocking. Two small reports when convenient: **T-202** the SDP build number (`qnxsoftwarecenter_clt -listAvailablePackages`), and **T-014** whether QNX Software Center installed graphically or headlessly. |
+| 🤖 **Me — next turn** | Your call: **Chapter 00** (T-102, off hold) or **Setup Guide 03 — the QEMU VM** (T-112, now unblocked and the shortest path to a `qnx#` prompt). |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -86,13 +86,14 @@ OVERALL                    [                    ]   0 %   (0/34)
 | `build-essential` (gcc, make) | ✅ GCC 15.2.0 · GNU Make 4.4.1 | ✅ |
 | Java runtime | ✅ OpenJDK 25.0.4 | ✅ |
 | QEMU | ✅ 10.2.1 (qemu-system-x86_64 + qemu-img) | ✅ |
-| QNX SDP 8.0 | **not installed** | ⬜ Setup 02 Part B |
+| QNX SDP 8.0 | ✅ `~/qnx800` — cross-compiler **GCC 12.2.0**, targets `x86_64` + `aarch64le` | ✅ |
 | QNX licence | ✅ **requested, accepted and deployed** (2026-08-26) | ✅ |
 | VS Code + QNX Toolkit | **not installed** | ⬜ Setup 04 |
 | Pandoc / TeX (PDF) | **not installed** | ⬜ PDF_Export |
 
-**Latest check (2026-08-25, after Setup Guide 01):** `19 passed · 6 warnings · **0 failed**` ✅
-The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolchain.
+**Latest check (2026-08-26, after Setup Guide 02):** `24 passed · 3 warnings · **0 failed**` ✅
+The three remaining warnings are the optional PDF toolchain (`pandoc`, `xelatex`, `mmdc`).
+Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 > Re-run the environment check any time:
 >
@@ -181,8 +182,8 @@ The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolc
 | Guide | Doc status | Notes |
 |-------|-----------|-------|
 | Setup 01 — Prerequisites | 📕 **Published ✅ verified** | v2.0 — executed end to end on the host. All expected output is real. Risk R9 did not materialise. |
-| Setup 02 — Account, Licence, SDP | 📕 **Published** | **Part A ✅ confirmed** by a real run. Part B (§§7–11) `[UNVERIFIED]` pending blocks V3–V4. |
-| Setup 03 — QEMU VM ⭐ | 📄 | Will follow QNX's official **QSTI for QEMU** guide (ADR-004) |
+| Setup 02 — Account, Licence, SDP | 📕 **Published ✅ verified** | v2.0 — executed end to end. Three real bugs found and fixed. Disk cost corrected to ~43 GB. |
+| Setup 03 — QEMU VM ⭐ | 📄 **Unblocked** | Will follow QNX's official **QSTI for QEMU** guide (ADR-004). A real SDP now exists to test against. |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
 | Hardware 01 — Public Boards | 📄 | |
@@ -209,6 +210,18 @@ The six warnings are QNX SDP/licence (Setup Guide 02) and the optional PDF toolc
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 006 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Verify the SDP install and the cross-compile toolchain; finish the setup guides. |
+| **Done** | • Learner completed **blocks V3 and V4** and reported the output<br>• **QNX SDP 8.0 installed** at `~/qnx800`; licence file at `~/.qnx/license/licenses`<br>• `check-environment.sh`: **24 passed · 3 warnings · 0 failed** (from 19/6/0)<br>• **Cross-compile proven** — binary built, `file` confirms the `ldqnx-64.so.2` interpreter, and Linux refuses to run it exactly as predicted<br>• Cross-compiler is **GCC 12.2.0** with six targets across `x86_64` and `aarch64le`<br>• Setup Guide 02 → **v2.0**, all `[UNVERIFIED]` markers cleared<br>• **Three real bugs found and fixed** in Setup Guide 02: a missing `#include <unistd.h>`, a false claim that `file` prints "QNX", and a disk estimate off by ~4×<br>• `PLAN.md` disk budget corrected: ~25 GB → **~50 GB**<br>• **Risk R2 closed**<br>• Learner pushed commits to GitHub manually |
+| **Learner decisions** | — |
+| **Questions logged** | None new |
+| **Blockers** | **None.** Chapter 00 off hold; Setup Guide 03 unblocked. |
+| **Open detail** | T-202 SDP build number · T-014 QSC install route, licence latency, portal button labels |
+| **Next session** | Learner's choice: **Chapter 00** or **Setup Guide 03 (the QEMU VM)** |
 
 ### Session 005 — 2026-08-26
 
@@ -286,6 +299,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | Session 006: blocks V3/V4 verified, SDP installed, Setup Guide 02 → v2.0, all markers cleared, Chapter 00 off hold. |
 | 1.4 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, Risk R1 closed, V3 is the next action. |
 | 1.3 | 2026-08-26 | Session 004: Block V1 verified. Environment snapshot now all-green. Setup Guide 01 marked verified. Repo path corrected. |
 | 1.2 | 2026-08-26 | Session 003: author handover. Next action rewritten around `VerificationRuns.md`. Setup Guide 01 status corrected. Chapter 00 marked on hold. |

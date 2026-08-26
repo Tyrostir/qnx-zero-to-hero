@@ -41,14 +41,14 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 | Phase | **1 — Environment setup** |
 | Plan | ✅ **Approved** 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **2 / 5** — 01 ✅ **verified**, 02 Part A ✅ / Part B `[UNVERIFIED]` |
+| Setup guides published | **2 / 5** — **both ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
-| QNX installed | ❌ — **nothing blocks it; V3 is next** |
+| QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ❌ |
-| Blocker | **None external.** Chapter 00 held only by SI-8 until Part B's markers clear |
-| Next (me) | Clear Setup 02 **Part B** markers from the V3/V4 output, then Chapter 00 |
-| Next (learner) | 🔴 **Block V3** — install QNX Software Center + SDP 8.0 (~10 GB), then **V4** cross-compile proof |
+| Blocker | **None.** Chapter 00 off hold; Setup Guide 03 unblocked |
+| Next (me) | Learner's choice: **Chapter 00** (T-102) or **Setup Guide 03 — QEMU VM** (T-112) |
+| Next (learner) | Nothing blocking. When convenient: **T-202** SDP build number · **T-014** QSC install route |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -56,12 +56,16 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 ```text
 Ubuntu 26.04 LTS on WSL2 · kernel 6.18.33.2-microsoft-standard-WSL2
 Intel i7-11850H · 16 logical CPUs · VT-x · /dev/kvm PRESENT AND ACCESSIBLE ✅
-23 GiB RAM · 951 GB disk free  (need ~25 GB)
+23 GiB RAM · 908 GB disk free  (SDP cost ~43 GB; budget ~50 GB)
 Repo: ~/exercises/qnx-zero-to-hero
 installed ✅: gcc 15.2.0 · make 4.4.1 · git 2.53.0 · curl 8.18.0 · tar 1.35
               ssh 10.2p1 · openjdk 25.0.4 · qemu 10.2.1 · qemu-img 10.2.1
-licence ✅ deployed  ·  NOT installed: QNX SDP, VS Code QNX Toolkit, pandoc/TeX
-Check any time: ./tools/check-environment.sh   (last: 19 pass / 6 warn / 0 FAIL ✅)
+licence ✅ deployed  ·  QNX SDP 8.0 ✅ ~/qnx800 (~43 GB)
+  $QNX_HOST=~/qnx800/host/linux/x86_64  ·  $QNX_TARGET=~/qnx800/target/qnx
+  cross-compiler GCC 12.2.0 · targets gcc_ntox86_64 (default) + gcc_ntoaarch64le (+_gpp/_cxx)
+  dynamic linker /usr/lib/ldqnx-64.so.2  ·  licence ~/.qnx/license/licenses
+NOT installed: VS Code QNX Toolkit, pandoc/TeX
+Check any time: ./tools/check-environment.sh   (last: 24 pass / 3 warn / 0 FAIL ✅)
 ```
 
 ## KEY QNX FACTS (verified 2026-08-25 — much online info is stale)
@@ -168,17 +172,18 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ## OPEN ITEMS
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
-- **Learner's open actions:** 🔴 **T-011 install QSC + SDP 8.0 (block V3)** · T-012 report V3/V4 output ·
-  T-014 (optional) licence latency + portal button labels for Ch 04.
-  ✅ Done: T-003, T-008, T-009, T-010 · Blocks **V1** and **V2**.
+- **Learner's open actions:** none blocking. **T-202** SDP build number (needed for chapter front
+  matter) · **T-014** QSC install route / licence latency / portal labels.
+  ✅ Done: T-003, T-008, T-009, T-010, T-011, T-012, T-200 · **Blocks V1–V4 all complete.**
 - **Doubts logged:** 5 (D-001…D-005, all answered)
-- **Top risks:** R2 (QSC install on WSL2 — next to be tested) · R10 three-path authoring cost.
-  ~~R1 licence latency~~, ~~R3 KVM~~ and ~~R9 Ubuntu 26.04~~ all **closed**.
+- **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
+  ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
 ## CHANGELOG
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | Regenerated after Session 006: SDP installed and toolchain verified; both setup guides done; R2 closed; nothing blocking. |
 | 1.4 | 2026-08-26 | Regenerated after Session 005: licence deployed, R1 closed, V3 is the next action, no external blockers remain. |
 | 1.3 | 2026-08-26 | Regenerated after Session 004: Block V1 verified, host now all-green, R9 and R3 closed, licence request is the sole blocker. |
 | 1.2 | 2026-08-26 | Regenerated after Session 003 (author handover): ADR-022/023/024 added; next actions rewritten around the verification protocol; Chapter 00 on hold. |

@@ -1,8 +1,8 @@
 ---
 title: "Setup Guide 02 — QNX Account, Licence & SDP 8.0 Install"
 document_id: SETUP-02
-version: 1.1
-status: Published — Part A (licence) ✅ confirmed; Part B (install) [UNVERIFIED]
+version: 2.0
+status: ✅ Published & verified — executed end to end
 created: 2026-08-25
 last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
@@ -19,14 +19,14 @@ prereqs: "Setup Guide 01"
 > the request, then read Part 0 of the course (Chapters 00–03) while you wait — none of it needs
 > software.
 
-> ✅ **Part A (the licence) is confirmed.** The account → request → accept → **deploy** flow in §§3–5
-> has been completed successfully by a real learner. Follow it as written.
+> ✅ **Verified end to end.** This entire guide — account, licence request, accept, **deploy**,
+> QNX Software Center, SDP 8.0 install, environment setup and the cross-compile proof — has been
+> executed on **Ubuntu 26.04 LTS under WSL2** and ends with `24 passed · 3 warnings · 0 failed`.
+> The version numbers, paths and command output shown below are real, not illustrations.
 >
-> 📌 **`[UNVERIFIED]` markers remain on Part B** (§§7–11 — Software Center, SDP install, environment
-> setup, verification). Those steps are written from official QNX documentation but have not yet been
-> executed. As you run them, paste the output back and the real result replaces the marker. Nothing
-> stays in this course that we haven't actually run. *(ADR-024; tracked as T-200 in
-> [ToDos.md](../meta/ToDos.md).)*
+> 💡 **Two figures worth knowing before you start:** the install consumes roughly **43 GB** (see
+> §12.1 — more than QNX's own materials suggest), and the cross-compiler is **GCC 12.2.0**, entirely
+> separate from your host's GCC.
 
 ---
 
@@ -325,7 +325,6 @@ SDP 8.0 into ~/qnx800, containing host tools, target files, and an environment s
 
 ## 7. Step 4 — Download QNX Software Center
 
-`[UNVERIFIED]`
 
 ### 7.1 Get the Linux installer
 
@@ -370,7 +369,6 @@ host$ ls -lh *.run
 
 ## 8. Step 5 — Install QNX Software Center
 
-`[UNVERIFIED]`
 
 ### 8.1 Make the installer executable
 
@@ -469,7 +467,6 @@ Center"](https://www.qnx.com/developers/docs/qsc/com.qnx.doc.qsc.user_guide/topi
 
 ## 9. Step 6 — Install QNX SDP 8.0
 
-`[UNVERIFIED]`
 
 This is the big download: **~8–12 GB**. Use a good connection and don't interrupt it.
 
@@ -555,7 +552,6 @@ host$ du -sh ~/qnx800
 
 ## 10. Step 7 — Set up your environment
 
-`[UNVERIFIED]`
 
 ### 10.1 The problem this solves
 
@@ -672,7 +668,6 @@ host$ echo $QNX_HOST
 
 ## 11. Step 8 — Verify the installation
 
-`[UNVERIFIED]`
 
 ### 11.1 Is the compiler there?
 
@@ -684,14 +679,28 @@ host$ qcc -V
 
 ```text
 cc: targets available in /home/tyrostir/qnx800/host/linux/x86_64/etc/qcc:
-12.2.0,gcc_ntox86_64
-12.2.0,gcc_ntoaarch64le
-...
+        12.2.0,gcc_ntoaarch64le
+        12.2.0,gcc_ntox86_64_gpp
+        12.2.0,gcc_ntox86_64    (default)
+        12.2.0,gcc_ntoaarch64le_gpp
+        12.2.0,gcc_ntox86_64_cxx
+        12.2.0,gcc_ntoaarch64le_cxx
 ```
 
-> 💡 **Read those target names.** `gcc_ntox86_64` = GCC, **n**eu**t**rin**o**, x86_64.
-> `gcc_ntoaarch64le` = GCC, Neutrino, ARM64 little-endian. You'll pass these to `-V` in Chapter 08 to
-> choose what you're building for.
+> 💡 **Read those target names — there is a lot packed into them.**
+>
+> | Part | Meaning |
+> |------|---------|
+> | `12.2.0` | The GCC version QNX SDP 8.0 ships. **Not** your host's GCC (15.2.0) — a completely separate compiler. |
+> | `gcc_nto…` | GCC for **N**eu**t**rin**o**, QNX's kernel. |
+> | `…x86_64` / `…aarch64le` | The two architectures SDP 8.0 targets: 64-bit Intel/AMD, and 64-bit ARM little-endian. |
+> | *(no suffix)* | Plain **C**. This course's default. |
+> | `_gpp` / `_cxx` | **C++** front ends — `_gpp` uses `libstdc++`, `_cxx` is the older QNX C++ library. Chapter 08 covers when each matters. |
+> | `(default)` | What you get if you omit `-V` entirely. Conveniently, it is exactly what this course wants. |
+>
+> **Only two architectures exist here** — that is the whole world of QNX 8.0 targets. `x86_64` is what
+> your QEMU VM runs (ADR-005); `aarch64le` is what a Raspberry Pi or an automotive SoC runs, and it is
+> covered in the hardware track.
 
 ### 11.2 Compile something for QNX
 
@@ -701,6 +710,7 @@ The real test: does the toolchain actually produce a QNX binary?
 host$ cd /tmp
 host$ cat > hello_qnx.c <<'EOF'
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/neutrino.h>
 
 int main(void) {
@@ -714,6 +724,21 @@ host$ qcc -Vgcc_ntox86_64 -o hello_qnx hello_qnx.c
 
 ✅ **Expected output:** *nothing at all.* Silence means success — the Unix convention.
 
+> ⚠️ **If you see `warning: implicit declaration of function 'getpid'`**, you are missing
+> `#include <unistd.h>`. The binary still builds and still runs, which is exactly why this warning is
+> worth understanding rather than ignoring.
+>
+> `getpid()` is declared in `<unistd.h>`, not in `<sys/neutrino.h>`. Without the declaration, C
+> falls back to an ancient rule and *assumes* the function returns `int`. Here that assumption
+> happens to be harmless — `pid_t` is an `int` on QNX x86_64. On a platform where it is not, or for a
+> function returning a pointer, the same assumption silently corrupts the value.
+>
+> 💡 **The lesson, which recurs throughout this course:** `<sys/neutrino.h>` is the *QNX-specific*
+> header — `MsgSend`, `ChannelCreate`, `InterruptAttach`. Ordinary POSIX calls like `getpid`,
+> `read`, `write` and `sleep` live in the *standard* POSIX headers, exactly where they would on
+> Linux. QNX is POSIX-compliant; reach for `<sys/neutrino.h>` only when you want something Linux
+> does not have.
+
 > 🐣 **`<<'EOF'` explained.** That's a *heredoc*: everything up to the line containing `EOF` is fed
 > into the command. Here it writes a file. The quotes around `'EOF'` stop the shell from expanding
 > `$` inside — important when the text contains variables.
@@ -726,14 +751,28 @@ This is where the `file` utility from Setup Guide 01 earns its place:
 host$ file hello_qnx
 ```
 
-✅ **Expected output** — note **`QNX`** and **`SYSV`**:
+✅ **Expected output** — real output from a verified run, wrapped here for readability:
 
 ```text
-hello_qnx: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /usr/lib/ldqnx-64.so.2, BuildID[md5/uuid]=..., not stripped
+hello_qnx: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked,
+interpreter /usr/lib/ldqnx-64.so.2, BuildID[md5/uuid]=3651f8703ae9390046c0df0e23d4c262,
+with debug_info, not stripped
 ```
 
-The giveaway is the interpreter: **`/usr/lib/ldqnx-64.so.2`**. That is QNX's dynamic linker. A Linux
-binary would say `/lib64/ld-linux-x86-64.so.2`.
+> ⚠️ **Notice what is *not* there: the word "QNX".** `file` never says "QNX". It reports `SYSV`,
+> because QNX uses the System V ELF ABI — the same one Linux uses. If you are looking for the word
+> QNX to confirm success, you will not find it.
+>
+> **The giveaway is the interpreter: `/usr/lib/ldqnx-64.so.2`.** `ldqnx` is QNX's dynamic linker. A
+> Linux binary would name `/lib64/ld-linux-x86-64.so.2` instead. That one path is the entire
+> difference `file` can see.
+
+Two other details worth reading:
+
+| Field | Meaning |
+|-------|---------|
+| `pie executable` | **P**osition-**I**ndependent **E**xecutable — it can be loaded at any address. This is what makes **ASLR** possible, and it comes up again in Chapter 28 (Security). |
+| `with debug_info, not stripped` | `qcc` kept the debug symbols. That is why you will be able to set breakpoints by function name in Chapter 08 without rebuilding. |
 
 ### 11.4 Confirm it will NOT run on Linux
 
@@ -764,7 +803,7 @@ host$ cd ~/exercises/qnx-zero-to-hero
 host$ ./tools/check-environment.sh
 ```
 
-✅ **Expected output** — section 6 should now be green:
+✅ **Expected output** — section 6 should now be green. Real output from a verified run:
 
 ```text
 6. QNX SDP
@@ -772,9 +811,24 @@ host$ ./tools/check-environment.sh
   ✅ QNX SDP directory      /home/tyrostir/qnx800
   ✅ $QNX_HOST              /home/tyrostir/qnx800/host/linux/x86_64
   ✅ $QNX_TARGET            /home/tyrostir/qnx800/target/qnx
-  ✅ qcc                    cc: targets available ...
+  ✅ qcc                    cc: targets available in /home/tyrostir/qnx800/host/
   ✅ QNX licence file       ~/.qnx/license/licenses
 ```
+
+And the summary line:
+
+```text
+  24 passed   3 warnings   0 failed
+
+  👍 Ready to proceed. Warnings above are for optional or not-yet-installed items.
+```
+
+> 🎉 **That is the whole toolchain, green.** The three remaining warnings are the optional PDF
+> toolchain (`pandoc`, `xelatex`, `mmdc`) — needed only if you want to build PDFs of this course, and
+> safe to ignore indefinitely.
+>
+> **Where you started:** `13 passed · 9 warnings · 3 failed` before Setup Guide 01.
+> **After Setup Guide 01:** `19 · 6 · 0`. **Now:** `24 · 3 · 0`.
 
 ### ✅ Completion checklist
 
@@ -823,6 +877,32 @@ host$ ./tools/check-environment.sh
 > 💡 **Worth 60 seconds of browsing.** Run `ls $QNX_TARGET/x86_64/usr/bin | head -40`. Those are the
 > actual QNX commands you'll be using on the target from Chapter 07 onwards. Seeing them sitting on
 > your Linux disk makes the host/target relationship click.
+>
+> On a verified install this listing starts: `aac-enc`, `addr2line`, `amixer`, `aomdec`, `aplay`,
+> `arecord`, `audio-decode`, `awk`, `bc`, `bunzip2`, `bzip2`, `calib-touch`, `callgrind_annotate`,
+> `camera_example1_callback`… — audio codecs, a touchscreen calibrator, camera samples and
+> **Valgrind's callgrind tools**. Every second entry ends in `.sym`: those are the separated debug
+> symbol files, which is how you get symbolic backtraces from a stripped target binary (Chapter 25).
+
+### 12.1 ⚠️ How much disk this really takes
+
+**Budget 45 GB, not the 8–12 GB you may have read.**
+
+Measured on a verified install: free space on `$HOME` went from **951 GB to 908 GB** — about
+**43 GB consumed** by QNX Software Center, its downloads, and SDP 8.0 with its target images. That is
+well above the figure QNX's own materials suggest, because a full SDP install pulls both `x86_64` and
+`aarch64le` targets plus debug symbols for everything.
+
+You can see what your own install cost:
+
+```bash
+host$ du -sh ~/qnx800
+host$ df -h ~
+```
+
+> 💡 **Not a problem, just a number to plan around.** If you are tight on space, QNX Software Center
+> lets you deselect target architectures you will not use — but keep `x86_64` (every lab in this
+> course) and think twice before dropping `aarch64le` (the hardware track in Part 6).
 
 ---
 
@@ -940,5 +1020,6 @@ But you have **nowhere to run it**. That's next.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.0 | 2026-08-26 | **Verified end to end.** All `[UNVERIFIED]` markers cleared. Real output throughout: `qcc -V` target list (GCC **12.2.0**, `x86_64` + `aarch64le`, C/`_gpp`/`_cxx`), `$QNX_HOST`/`$QNX_TARGET`, `file` output, and the `24 · 3 · 0` environment report. **Two corrections:** §11.2's sample program was missing `#include <unistd.h>` and emitted an implicit-declaration warning for `getpid()` — fixed, and turned into a lesson on POSIX vs. QNX-specific headers; §11.3 claimed `file` would print "QNX", which it never does — the real tell is the `ldqnx-64.so.2` interpreter. **New §12.1:** the install costs ~43 GB, not the 8–12 GB previously stated. |
 | 1.1 | 2026-08-26 | **Part A confirmed by a real run** — the account → request → accept → deploy flow works as documented; `[UNVERIFIED]` cleared from §§3–5 and now scoped to Part B only. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
 | 1.0 | 2026-08-25 | Created. Documents the request → accept → **deploy** licence flow (ADR-021) and the host/target split. Install steps marked `[UNVERIFIED]` pending first real run. |
