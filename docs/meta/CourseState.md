@@ -27,7 +27,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Current phase** | **Phase 1 — Environment setup** *(host + toolchain done; VM remaining)* |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **3 / 5** — 01 and 02 ✅ verified · **03 published**, `[UNVERIFIED]` pending block V5 |
+| **Setup guides published** | **3 / 5** — 01, 02 ✅ verified · 03 §§4–5 ✅ verified, §§7+ pending V5.3 retry |
 | **Labs completed** | **0 / 21** |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | ⭐ **Run [Setup Guide 03](../guides/Setup_03_QEMU_VM.md)** — boot the QNX VM and run `hello_qnx` on it. Report block **V5** (7 checkpoints). Reaching a `#` prompt is milestone **M2**. V5.1 also delivers the SDP build number (T-202). |
-| 🤖 **Me — next turn** | Clear Setup Guide 03's markers from your V5 output — the boot log becomes documented expected output. Then **Chapter 00**. |
+| 👤 **You — do next** | ⭐ **Retry V5.3:** `cd ~/qnx800/images/qemu/qemu` *(note `qemu` twice)* then `mkqnximage --run`. **Do not use `--force`** — see [D-006](Doubts.md#d-006). Then continue through V5.7. |
+| 🤖 **Me — next turn** | Clear the rest of Setup Guide 03's markers from your V5.3–V5.7 output. Then **Chapter 00**. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -211,6 +211,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 *Newest first. One entry per working session.*
 
+### Session 008 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Unblock the learner at V5.3 and fix what the first real run of Setup Guide 03 exposed. |
+| **Done** | • Diagnosed the V5.3 failure: `unpack_qemu_image.sh` extracts into a **nested `qemu/`**, so the image is at `~/qnx800/images/qemu/qemu`. `mkqnximage` was run one level too high → **D-006**<br>• Warned explicitly against the `--force` the error message suggests — it would build a *new* image and ignore the unpacked one<br>• **`-listAvailablePackages` does not exist** — a bug carried in the course since Setup Guide 02. Replaced everywhere with `-listAccessible` and the real option table → **D-007**<br>• Documented the 47 GB `disk-qemu`, sparse files, and the risk of expanding one by copying it → **D-008**<br>• Recorded what the unpacked tree contains: the **`mkifs` build files** (Chapter 21's source material) and the **instrumented SMP kernel** symbols (Chapter 26)<br>• Setup Guide 03 → v1.1; Setup Guide 02 → v2.1; `tools/qemu/qnx-vm.sh` path corrected<br>• **ADR-025** — `/btw` marks an aside that must become a `D-NNN` entry |
+| **Learner decisions** | — |
+| **Questions logged** | **D-006, D-007, D-008** |
+| **Blockers** | None — the fix is a one-line `cd` |
+| **Next session** | V5.3–V5.7 retry output, then **Chapter 00** |
+
 ### Session 007 — 2026-08-26
 
 | | |
@@ -310,6 +321,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | Session 008: V5.3 diagnosed and fixed; three bugs corrected; D-006/007/008 logged; ADR-025. |
 | 1.6 | 2026-08-26 | Session 007: Setup Guide 03 published; block V5 defined; next action is booting the VM. |
 | 1.5 | 2026-08-26 | Session 006: blocks V3/V4 verified, SDP installed, Setup Guide 02 → v2.0, all markers cleared, Chapter 00 off hold. |
 | 1.4 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, Risk R1 closed, V3 is the next action. |

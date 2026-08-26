@@ -28,8 +28,10 @@ update_trigger: "Continuously"
 
 
 
-| T-015 | 🔴 | **Run [Setup Guide 03](../guides/Setup_03_QEMU_VM.md)** and report block **V5** — boot the VM, SSH in, run `hello_qnx` | ⬜ | — | ⭐ Milestone **M2**. 7 checkpoints in [`VerificationRuns.md`](../internal/VerificationRuns.md) §7a. |
-| T-202 | 🟠 | **Report the exact SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
+| T-015 | 🔴 | **Retry V5.3** — `cd ~/qnx800/images/qemu/qemu` then `mkqnximage --run`, and continue to V5.7 | ⬜ | — | ⭐ Milestone **M2**. The fix is [D-006](Doubts.md#d-006). V5.1–V5.2 ✅ done. |
+| T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
+| T-017 | 🔵 | Paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | Two lines; may contain QNX's own notes on the image. |
+| T-202 | 🟠 | **Report the exact SDP build number** — try `-listInstalledRoots` — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
 | T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
 
 | T-013 | 🟠 | `git pull` before each work session | ⬜ | — | The authoring side moves between your sessions. |
@@ -154,6 +156,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | **V5.1–V5.2 passed, V5.3 blocked and fixed.** T-015 re-scoped to the retry; T-016 (sparse-file measurement) and T-017 (image README) added. |
 | 1.6 | 2026-08-26 | **Setup Guide 03 published.** T-112 closed. New learner item T-015 (run block V5) and author item T-147 (clear its markers). |
 | 1.5 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** T-011, T-012, T-141, T-144, T-200 closed. T-202 promoted to a learner item (SDP build number still unreported). T-112 (Setup Guide 03) unblocked and 🔴. **T-102 Chapter 00 off hold.** |
 | 1.4 | 2026-08-26 | **Block V2 complete.** T-003, T-010 and T-146 closed; Risk R1 closed. T-011 promoted to 🔴 and unblocked. T-014 added (optional licence-flow detail for Chapter 04). |

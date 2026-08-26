@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.0
+version: 1.1
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -36,6 +36,24 @@ update_trigger: "Every time the learner asks a question — no exceptions"
 **Categories:** `Concept` · `Setup/Install` · `Toolchain` · `Kernel/IPC` · `Drivers` ·
 `Build/Image` · `Debug` · `Hardware` · `Licensing` · `Career` · `Course logistics`
 
+### 💬 The `/btw` convention
+
+Prefix any aside with **`/btw`** and it becomes a `D-NNN` entry here — no matter how small, how
+tangential, or how mid-task it arrives.
+
+```text
+/btw why is the disk image 47 GB?
+/btw what does the "instr" in procnto-smp-instr mean?
+```
+
+**Why have a marker at all?** Questions asked in passing are exactly the ones that get answered in
+conversation and then lost. The marker makes the intent unambiguous: *this is a question, and I want
+it in the record.*
+
+You do not have to use it — any question gets logged (ADR-014). The prefix just guarantees nothing
+is read as a rhetorical aside. Questions may also arrive inside a file dropped in `toAgent/`; put
+`/btw` on its own line there too.
+
 ---
 
 ## Index
@@ -47,8 +65,11 @@ update_trigger: "Every time the learner asks a question — no exceptions"
 | [D-003](#d-003) | Concept | Where is QNX used? | ✅ |
 | [D-004](#d-004) | Course logistics | How is QNX used / how will I learn it? | ✅ |
 | [D-005](#d-005) | Licensing | Is QNX free? Can I really do this at zero cost? | ✅ |
+| [D-006](#d-006) | Setup/Install | Why does `mkqnximage --run` say my directory "is neither that of an existing mkqnximage virtual image nor an empty directory"? | ✅ |
+| [D-007](#d-007) | Toolchain | Why does `qnxsoftwarecenter_clt -listAvailablePackages` fail with "Unknown argument"? | ✅ |
+| [D-008](#d-008) | Setup/Install | Why is `disk-qemu` 47 GB, and do I really need that much disk? | ✅ |
 
-**Open questions: 0** · **Needs verification: 0** · **Answered: 5**
+**Open questions: 0** · **Needs verification: 1** *(D-006, pending the learner's next run)* · **Answered: 8**
 
 ---
 
@@ -364,8 +385,221 @@ community.
 
 ---
 
+## D-006
+
+### Why does `mkqnximage --run` say my directory "is neither that of an existing mkqnximage virtual image nor an empty directory"?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, verification block V5.3 — first attempt to boot the VM |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered *(fix pending confirmation on the next run)* |
+
+**Question (verbatim).** *"I have tried to execute V5 and I am stuck at V5.3."*
+
+```text
+The current directory is neither that of an existing mkqnximage virtual image nor is it
+an empty directory. This might be OK but as creating virtual images in random locations
+is often not what is intended, you have to include the --force option to enable it.
+```
+
+**Short answer.**
+Nothing is broken. `unpack_qemu_image.sh` extracts into a **`qemu/` subdirectory**, so the image
+lives at `~/qnx800/images/qemu/qemu` — `qemu` twice. You ran `mkqnximage` one level too high.
+`cd qemu` and run it again. **Do not add `--force`.**
+
+**Full answer.**
+
+**How `mkqnximage` decides what a directory is.** It looks for two subdirectories, `local/` and
+`output/`. Find both, and it treats the directory as an existing image to launch. Find an empty
+directory, and it offers to build a new image there. Find neither — a directory with *other* stuff in
+it — and it stops and asks, because silently scattering 47 GB VM images into arbitrary directories is
+a bad default.
+
+**What your directory actually contains.** After unpacking:
+
+```text
+~/qnx800/images/qemu/              ← you ran mkqnximage HERE
+├── README.md
+├── unpack_qemu_image.sh
+├── qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.0
+├── qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.1
+└── qemu/                          ← the image is HERE
+    ├── local/                     ← ✅ mkqnximage looks for this
+    └── output/                    ← ✅ and this
+```
+
+From the outer directory `mkqnximage` sees two archives and a shell script — not an image, and not
+empty. So it refused. Correctly.
+
+**The fix:**
+
+```bash
+host$ cd ~/qnx800/images/qemu/qemu
+host$ ls                # you should see: local  output
+host$ mkqnximage --run
+```
+
+> 🚨 **Why `--force` is the wrong move**, even though the message names it. `--force` does not mean
+> *"run anyway"*. It means *"yes, create a new virtual image in this unusual location"*. It would
+> start building a **fresh** image beside your archives and ignore the 47 GB one you just unpacked —
+> a long wait ending in the wrong result.
+>
+> 💡 **The general lesson.** An error message tells you what the program *believes*, and offers the
+> escape hatch for the case where the program is wrong. Here the program was right and the working
+> directory was wrong. Reach for a suggested flag only after you understand why the tool objected.
+
+**Why the guide got this wrong.** QNX's official QSTI documentation says to run `unpack_qemu_image.sh`
+and then `mkqnximage --run` from the `qemu` folder, without noting that the script *creates* a nested
+`qemu/`. Written from the documentation alone, the instruction looks complete. Only running it
+reveals the extra level. Setup Guide 03 §5 and §7 now call it out prominently.
+
+**Related.** [Setup Guide 03 §5](../guides/Setup_03_QEMU_VM.md#5-step-2--unpack-the-image-) ·
+[§7](../guides/Setup_03_QEMU_VM.md#7-step-4--boot-qnx-) · [D-008](#d-008)
+
+**Action taken.** Setup Guide 03 → v1.1: the nested layout documented with a tree diagram, §7 now
+`cd`s into the inner directory and carries the error message plus the `--force` warning verbatim.
+`tools/qemu/qnx-vm.sh` default path corrected.
+
+---
+
+## D-007
+
+### Why does `qnxsoftwarecenter_clt -listAvailablePackages` fail with "Unknown argument"?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, verification block V5.1 |
+| **Category** | Toolchain |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *(Implicit, from the reported output.)*
+
+```text
+Error: Unknown argument: -listAvailablePackages
+```
+
+**Short answer.**
+**That option does not exist.** It was wrong in this course's guides — my error, not yours. Use
+**`-listAccessible`** (packages your licence entitles you to) or **`-list`** (everything).
+`./qnxsoftwarecenter_clt -help` is authoritative.
+
+**Full answer.**
+
+The real listing options, verified against QNX Software Center CLT **`2.0.4:v202501021438`**:
+
+| Option | Lists |
+|--------|-------|
+| `-list` | Every package, accessible or not |
+| `-listAccessible` | Packages your licence entitles you to ⭐ usually what you want |
+| `-listQuery <query>` | Packages matching a query |
+| `-listInstalled` | Every installed package |
+| `-listInstalledRoots` | Installed top-level packages only |
+| `-listUpdates` | Available updates |
+| `-listLicenseKeys` | Your licence keys |
+| `-listProfiles` | Installations on this machine |
+
+Two more worth knowing, because the distinction matters:
+
+| Option | Installs |
+|--------|----------|
+| `-installPackage <versionedPackageId>` | **One package** (or several, comma-separated) — what you want for the QEMU quick-start image |
+| `-installBaseline <versionedPackageId>` | **A whole baseline** — an entire SDP, with dependency resolution |
+
+`<versionedPackageId>` is `<packageId>` or `<packageId>/<packageVersion>`.
+
+> 💡 **In this instance you needed neither.** The QEMU quick-start image had *already* been installed
+> along with SDP 8.0 — the archives were sitting in `~/qnx800/images/qemu` with a timestamp from the
+> SDP install. Checking the directory first would have skipped the whole detour, which is why Setup
+> Guide 03 §4.2 now says so.
+
+**Related.** [Setup Guide 02 §9.2](../guides/Setup_02_QNX_Account_And_License.md) ·
+[Setup Guide 03 §4.2](../guides/Setup_03_QEMU_VM.md#42-route-b--command-line)
+
+**Action taken.** The bogus option removed from every live instruction in the course. Setup Guide 02
+→ v2.1 and Setup Guide 03 → v1.1 now carry the real option table with the CLT version it was verified
+against.
+
+---
+
+## D-008
+
+### Why is `disk-qemu` 47 GB, and do I really need that much disk?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, verification block V5.2 — after unpacking the image |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *(Implicit, from the reported output.)*
+
+```text
+-rw-r--r-- 1 tyrostir tyrostir  47G Jun  6 20:31 disk-qemu
+-rw-r--r-- 1 tyrostir tyrostir  171 Jun  6 20:31 disk-qemu.vmdk
+```
+
+**Short answer.**
+That is the VM's virtual hard disk, and 47 GB is its **apparent** size — the size the guest believes
+it has. It is very likely **sparse**, meaning it occupies far fewer real blocks. `du -sh` tells you
+the truth; `ls -lh` does not.
+
+**Full answer.**
+
+**Two files, one disk.** The 171-byte `disk-qemu.vmdk` is a *descriptor* — a few lines of text
+naming the real data file. `disk-qemu` is that data. QEMU reads the descriptor and finds the raw
+image behind it.
+
+**Apparent size versus allocated size.** A sparse file has holes: regions never written consume no
+blocks on disk, yet still count toward the reported length.
+
+```bash
+host$ ls -lh  qemu/output/disk-qemu     # apparent size — what the guest sees
+host$ du -sh  qemu/output/disk-qemu     # allocated size — what your disk actually lost
+host$ df -h ~                           # the honest bottom line
+```
+
+If `du` reports far less than 47 GB, the file is sparse and all is well.
+
+> ⚠️ **Sparseness is fragile.** Copying a sparse file with a naive tool expands every hole into real
+> zeros — a 47 GB copy from a 3 GB original. If you ever need to move it, use `cp --sparse=always`,
+> `rsync -S`, or `tar -S`. This is a genuine way to fill a disk by accident.
+
+**The wider picture — this course's disk budget has grown twice.**
+
+| Stage | Documented | Measured |
+|-------|-----------|----------|
+| Original estimate | ~25 GB total | — |
+| After SDP 8.0 | 8–12 GB | **~43 GB** (951 GB free → 908 GB) |
+| After the QEMU image | not estimated | archives ~1.9 GB + `disk-qemu` up to 47 GB apparent |
+
+`PLAN.md` §7.1 was revised from ~25 GB to ~50 GB after the SDP measurement, and needs revising again
+once `du` and `df` give the real figure here.
+
+> 💡 **Once the VM boots successfully**, the `.tar.gz.0` and `.tar.gz.1` archives (~1.9 GB) can be
+> deleted — you can always reinstall the package from QNX Software Center. **Not before**, though.
+
+**Bonus: what else that listing tells you.** `procnto-smp-instr.sym` is 12 MB of debug symbols for
+the kernel, and its name identifies the kernel variant: **SMP** (multi-core) and **instrumented** —
+the build that supports kernel event tracing, which is what makes Chapter 26's System Analysis
+Toolkit possible. And `output/build/` holds the actual **`mkifs` build files** that produced this
+image: `ifs.build`, `system.build`, `disk.layout`. That is Chapter 21's source material, already on
+your disk.
+
+**Related.** [Setup Guide 03 §5](../guides/Setup_03_QEMU_VM.md#5-step-2--unpack-the-image-) ·
+[Setup Guide 02 §12.1](../guides/Setup_02_QNX_Account_And_License.md) · Chapters 21 and 26
+
+**Action taken.** Setup Guide 03 §5 now shows the real listing, explains all five artefacts, and
+asks for `df -h` before and after. `PLAN.md`'s disk budget flagged for another revision (T-016).
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | +D-006 (the `mkqnximage` nested-directory trap), D-007 (`-listAvailablePackages` does not exist), D-008 (the 47 GB sparse disk image). `/btw` convention documented. |
 | 1.0 | 2026-08-25 | Created. Seeded with D-001…D-005 from the learner's opening request. |

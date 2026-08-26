@@ -45,6 +45,9 @@ toAgent/<n>.<WhatItIs>.md
   needs finding. Errors are as valuable as successes.
 - **Don't hand-edit the transcript.** Line-wrap artefacts and truncation are fine; the author will
   work around them.
+- **Ask questions inline.** Put `/btw <your question>` on its own line anywhere in the drop and it
+  becomes a permanent `D-NNN` entry in `docs/meta/Doubts.md` (ADR-025). Useful for the questions
+  that occur to you mid-lab and would otherwise be forgotten.
 
 ---
 
@@ -53,6 +56,7 @@ toAgent/<n>.<WhatItIs>.md
 | # | File | Block | Date | Outcome |
 |---|------|-------|------|---------|
 | 1 | `1.BlockV1Output.md` | **V1** — host preparation | 2026-08-25 | ✅ `19 passed · 6 warnings · 0 failed`. T-008 and T-009 cleared; Setup Guide 01 → v2.0; Risks R3 and R9 closed. |
+| 3 | `3.BlockV5.1V5.3-StuckAtV5.3.md` | **V5.1–V5.3** — QSTI install, unpack, boot attempt | 2026-08-26 | 🔄 V5.1–V5.2 ✅; **V5.3 blocked** by the nested `qemu/` directory. Three bugs found → **D-006**, **D-007**, **D-008**. Setup Guide 03 → v1.1. |
 | 2 | `2.BlockV2V3V4Output.md` | **V2 · V3 · V4** — licence, SDP install, toolchain proof | 2026-08-26 | ✅ `24 passed · 3 warnings · 0 failed`. SDP 8.0 at `~/qnx800`; cross-compile proven; Setup Guide 02 → v2.0; Risk R2 closed. **Found 3 real bugs in the guide.** T-202 (SDP build number) not captured. |
 
 ---
@@ -61,5 +65,6 @@ toAgent/<n>.<WhatItIs>.md
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Drop 3 indexed (V5.1–V5.3). `/btw` convention documented. |
 | 1.1 | 2026-08-26 | Drop 2 indexed (blocks V2–V4). |
 | 1.0 | 2026-08-26 | Created after the first drop (Block V1). |

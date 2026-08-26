@@ -7,12 +7,17 @@
 #   * remember where the image lives, so you can call it from any directory
 #   * put run / stop / ip / ssh / status behind one verb each
 #
+# NOTE the image directory: unpack_qemu_image.sh extracts into a 'qemu/' SUBDIRECTORY, so the
+# real path is ~/qnx800/images/qemu/qemu (yes, twice). mkqnximage identifies an image directory
+# by the presence of local/ and output/ -- run it one level up and it offers to create a NEW
+# image instead. See Setup Guide 03 section 7.
+#
 # Everything here is [UNVERIFIED] until Setup Guide 03 block V5 is run on a real host.
 # See docs/guides/Setup_03_QEMU_VM.md
 #
 set -uo pipefail
 
-IMAGE_DIR="${QNX_IMAGE_DIR:-$HOME/qnx800/images/qemu}"
+IMAGE_DIR="${QNX_IMAGE_DIR:-$HOME/qnx800/images/qemu/qemu}"
 SDP_ENV="${QNX_SDP_ENV:-$HOME/qnx800/qnxsdp-env.sh}"
 
 GREEN=$'\033[0;32m'; RED=$'\033[0;31m'; YELLOW=$'\033[0;33m'; BOLD=$'\033[1m'; NC=$'\033[0m'
@@ -53,7 +58,7 @@ ensure_sdp() {
 
 ensure_image() {
     [[ -d "$IMAGE_DIR" ]] \
-        || die "Image directory not found: $IMAGE_DIR — install com.qnx.qnx800.quickstart.qemu (Setup Guide 03 §4)"
+        || die "Image directory not found: $IMAGE_DIR — did unpack_qemu_image.sh run? Note the nested qemu/qemu path (Setup Guide 03 §5)"
     [[ -f "$IMAGE_DIR/output/ifs.bin" ]] \
         || die "No boot image at $IMAGE_DIR/output/ifs.bin — run ./unpack_qemu_image.sh (Setup Guide 03 §5)"
 }

@@ -49,6 +49,7 @@ update_trigger: "Whenever a decision is made, changed, or superseded"
 | [ADR-022](#adr-022) | Documents are organised in **three tiers**; `docs/internal/` is excluded from the book | Docs | ✅ |
 | [ADR-023](#adr-023) | `PROMPTS.md` records every learner prompt **and** every full author response | Process | ✅ |
 | [ADR-024](#adr-024) | The author does not execute commands; `[UNVERIFIED]` is cleared only by learner-run output | Process | ✅ |
+| [ADR-025](#adr-025) | `/btw` marks an aside that must become a `D-NNN` entry | Process | ✅ |
 
 ---
 
@@ -679,6 +680,33 @@ behaviour genuinely may differ.
 
 ---
 
+## ADR-025
+
+### `/btw` marks an aside that must become a `D-NNN` entry
+
+| | |
+|---|---|
+| **Status** | ✅ Active |
+| **Date** | 2026-08-26 |
+| **Category** | Process |
+
+**Decision.** A question prefixed with **`/btw`** — in a message, or on its own line inside a file
+dropped in `toAgent/` — is logged as a `D-NNN` entry in [`Doubts.md`](Doubts.md) with a short answer
+and a full answer, however small or tangential it is.
+
+**Why.** ADR-014 already promises that every question becomes a permanent artefact. In practice the
+questions most likely to slip through are the ones asked *in passing*, mid-task, that read like
+rhetorical asides. The marker removes the ambiguity: it says *this is a question, and I want it in
+the record.*
+
+**Consequences.**
+- `/btw` is a guarantee, not a requirement. Questions without it are still logged (ADR-014).
+- It works inside `toAgent/` drops, so a question can be raised at the moment it occurs during a lab
+  rather than being saved for a later message.
+- Documented for the learner in `Doubts.md` under *The `/btw` convention*.
+
+---
+
 ## ✅ Resolved pending decisions
 
 | ID | Question | Resolution | Resolved |
@@ -701,6 +729,7 @@ behaviour genuinely may differ.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | Added ADR-025 (`/btw` marks an aside that must be logged as a doubt). |
 | 1.2 | 2026-08-26 | Author handover (Copilot → Claude). Added ADR-022 (three document tiers, `docs/internal/` excluded from the book), ADR-023 (`PROMPTS.md` logs prompts **and** responses), ADR-024 (the author cannot verify; only learner-run output clears `[UNVERIFIED]`). |
 | 1.1 | 2026-08-25 | Learner approved the plan. ADR-004 revised (QSTI for QEMU). ADR-008 strengthened (all three paths fully authored). ADR-018 confirmed. Added ADR-019 (three capstone flavours), ADR-020 (one chapter per turn, auto-push), ADR-021 (`getqnx` licence flow). P-01…P-05 resolved; P-06 opened. |
 | 1.0 | 2026-08-25 | Initial 18 ADRs + 5 pending decisions recorded. |

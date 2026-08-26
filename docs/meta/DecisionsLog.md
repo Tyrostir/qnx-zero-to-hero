@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.6
+version: 1.7
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -794,10 +794,105 @@ script, which is short and commented.
 
 ---
 
+## 2026-08-26 — Session 008 (First real run of Setup Guide 03; three bugs)
+
+### 🔍 VERIFIED — `unpack_qemu_image.sh` extracts into a nested `qemu/` directory
+
+The learner reached **V5.3** and `mkqnximage --run` refused:
+
+```text
+The current directory is neither that of an existing mkqnximage virtual image nor is it
+an empty directory. ... you have to include the --force option to enable it.
+```
+
+**Cause.** The unpack script does not extract into the current directory; every path it writes begins
+`qemu/`. The image therefore lives at **`~/qnx800/images/qemu/qemu`** — `qemu` twice.
+`mkqnximage` identifies an image directory by the presence of `local/` and `output/`; from one level
+up it sees archives and a script, so it concluded the user wanted to **create a new image** in an
+unusual place and asked for confirmation.
+
+**Fix.** `cd qemu`, then `mkqnximage --run`.
+
+**⚠️ The dangerous part.** The error message names `--force`, and `--force` is the wrong answer.
+It does not mean *run anyway*; it means *yes, create a new virtual image here* — which would build a
+fresh image beside the archives and ignore the 47 GB one just unpacked. Setup Guide 03 §7 now quotes
+the error verbatim and warns against the flag it recommends.
+
+**Why the guide got it wrong.** QNX's official documentation says to run the script and then
+`mkqnximage --run` "from the qemu folder", without mentioning that the script *creates* a nested
+`qemu/`. From the documentation alone the instruction reads as complete. Logged as **D-006**.
+
+---
+
+### 🔍 VERIFIED — `qnxsoftwarecenter_clt -listAvailablePackages` does not exist
+
+```text
+Error: Unknown argument: -listAvailablePackages
+```
+
+**This bug had been in the course since Setup Guide 02 was written**, was carried into Setup Guide 03,
+and was quoted in `ToDos.md`, `VerificationRuns.md` and `CLAUDE-MEMORY.md` as the command that would
+close T-202. It never would have.
+
+Verified against CLT **`2.0.4:v202501021438`**, the real options are `-list`, `-listAccessible`,
+`-listQuery`, `-listInstalled`, `-listInstalledRoots`, `-listUpdates`. Also clarified:
+`-installPackage` installs one package, `-installBaseline` installs a whole SDP baseline.
+
+Corrected in every live instruction. Logged as **D-007**.
+
+> 💡 **The lesson for the author.** Option names are exactly the kind of detail that *looks* verified
+> because it appears in a plausible sentence. `-help` is cheap; guessing is not. Recorded as hazard
+> **H-10**.
+
+---
+
+### 🔍 VERIFIED — What the QSTI image actually contains
+
+| Artefact | Size | Significance |
+|----------|------|--------------|
+| `ifs.bin` | 20 MB | The bootable image — Chapter 21 builds one |
+| `disk-qemu` + `.vmdk` | 47 GB apparent + 171 B descriptor | Likely sparse; see **D-008** |
+| `procnto-smp-instr.sym` | 12 MB | Kernel debug symbols. The name says **SMP** and **instrumented** — the variant supporting kernel event tracing, which is what makes Chapter 26 possible |
+| `output/build/` | — | ⭐ The actual **`mkifs` build files**: `ifs.build`, `system.build`, `disk.layout`, `startup.sh`. **Chapter 21's source material, already on disk** |
+| `output/option_files/`, `local/snippets/` | — | The CTI feature switches: `opt_valgrind`, `opt_secpol`, `opt_python`, `opt_graphics` and dozens more |
+
+The archive is `qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.{0,1}` — a **6 June 2026** build stamp,
+not the `__xxxxxxxx_.tar.gz._xx` pattern the documentation implied.
+
+**Also learned:** the QSTI package was **already installed** with SDP 8.0. The V5.1 detour through
+QNX Software Center was unnecessary. Setup Guide 03 §4.2 now says to check
+`~/qnx800/images/qemu` first.
+
+---
+
+### 🆕 DECIDED — ADR-025: `/btw` marks an aside that must become a `D-NNN` entry
+
+Requested by the learner. ADR-014 already promises every question becomes a permanent artefact; in
+practice the ones that slip through are those asked *in passing*, which read like rhetorical asides.
+The marker removes the ambiguity, and works inside `toAgent/` drops so a question can be raised at
+the moment it occurs during a lab.
+
+> ⚠️ **Note for this session.** The learner asked that the `/btw` questions be documented, but the
+> drop file contained no `/btw` lines. The convention is now established and documented in both
+> `Doubts.md` and `toAgent/README.md`; the three technical questions the run *did* raise were logged
+> as D-006, D-007 and D-008 regardless, under ADR-014.
+
+---
+
+### ❓ OPEN — The disk budget needs a third revision
+
+`PLAN.md` §7.1 has already gone from ~25 GB to ~50 GB. The QEMU image adds ~1.9 GB of archives plus
+`disk-qemu`, whose *real* cost is unknown until `du -sh` is run — `ls -lh` reports apparent size, and
+sparse files make the two very different. Tracked as **T-016**; the figure will be corrected once
+measured rather than guessed again.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | Session 008 appended: the nested `qemu/` trap, the non-existent CLT option, the QSTI image contents, ADR-025, and an open disk-budget revision. |
 | 1.6 | 2026-08-26 | Session 007 appended: QSTI/`mkqnximage` distinction, QSTI's default QEMU configuration, Ubuntu 26.04 advantage, predicted WSL2 bridge failure (H-9), and the `qnx-vm.sh` convention. |
 | 1.5 | 2026-08-26 | Session 006 appended: SDP verified, 3 guide bugs recorded, R2 closed, T-202 opened, history published. |
 | 1.4 | 2026-08-26 | Session 005 appended: licence flow verified, Risk R1 closed, Git identity spelling revised. |

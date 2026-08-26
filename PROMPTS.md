@@ -59,6 +59,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#4](#prompt4) | 2026-08-26 | Claude (Opus 5) | Correct the name spelling; licence already deployed — mark V2.1–V2.3 complete | ✅ Block V2 complete · **Risk R1 closed** · Setup Guide 02 → v1.1 · V3 unblocked |
 | [PROMPT#5](#prompt5) | 2026-08-26 | Claude (Opus 5) | Commits pushed manually; blocks V2–V4 complete, output in `toAgent/2.BlockV2V3V4Output.md` | ✅ **All verification done** · Setup Guide 02 → v2.0 · 3 guide bugs fixed · R2 closed · Chapter 00 off hold |
 | [PROMPT#6](#prompt6) | 2026-08-26 | Claude (Opus 5) | "Go for B" — write Setup Guide 03, the QEMU VM | ✅ **Setup Guide 03 published** (729 lines) · `tools/qemu/qnx-vm.sh` · block V5 defined |
+| [PROMPT#7](#prompt7) | 2026-08-26 | Claude (Opus 5) | Stuck at V5.3; log in `toAgent/3.BlockV5.1V5.3-StuckAtV5.3.md`; document the `/btw` questions | ✅ Diagnosed: nested `qemu/` directory · 3 bugs fixed · **D-006/007/008** · **ADR-025** (`/btw`) |
 
 ---
 
@@ -835,10 +836,144 @@ Once V5 lands, Setup Guide 03's markers clear and **Chapter 00 is next**.
 
 ---
 
+## PROMPT#7
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 008 |
+| **Context** | The learner ran verification block V5 and was blocked at V5.3, the first boot attempt. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I have tried to execute V5 and I am stuck at V5.3. Can you see the log from toAgent/3.BlockV5.1V5.3-StuckAtV5.3.md file? (Try to document the "/btw" questions as well)
+
+### Standing instructions
+
+| # | Instruction | Recorded as |
+|---|-------------|-------------|
+| SI-13 | A question prefixed **`/btw`** — in a message or on its own line in a `toAgent/` drop — becomes a `D-NNN` entry in `Doubts.md`, however small or tangential. | **ADR-025** |
+
+> ⚠️ **Note.** The drop file contained no `/btw` lines. The convention has been established and
+> documented in `Doubts.md` and `toAgent/README.md`; the three technical questions the run raised
+> were logged as D-006/007/008 regardless, under ADR-014.
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+Found it. **Nothing is broken — you're one directory too high.**
+
+## 🎯 The fix
+
+```bash
+host$ cd ~/qnx800/images/qemu/qemu     # ← "qemu" twice
+host$ ls                                # you should see:  local  output
+host$ mkqnximage --run
+```
+
+`unpack_qemu_image.sh` doesn't extract into the current directory — every path it wrote begins `qemu/`. So your image is at `~/qnx800/images/qemu/qemu`, and you ran `mkqnximage` from its parent.
+
+`mkqnximage` identifies an image directory by finding `local/` and `output/` in it. From one level up it saw two archives and a shell script — not an image, not empty — so it stopped and asked.
+
+## 🚨 Do not use `--force`, even though the error tells you to
+
+This is the part worth reading twice.
+
+`--force` doesn't mean *"run anyway"*. It means **"yes, create a brand-new virtual image in this unusual location"**. It would have started building a fresh image beside your archives and ignored the 47 GB one you'd just unpacked — a long wait ending in the wrong result.
+
+> An error message tells you what the program *believes*, and offers the escape hatch for the case where the program is wrong. Here the program was right and your working directory was wrong. Reach for the suggested flag only once you understand why the tool objected.
+
+## 🐛 Your run found three bugs
+
+**1. The nested `qemu/` directory — D-006.** QNX's docs say to unpack and then run `mkqnximage --run` "from the qemu folder", never mentioning the script *creates* a nested `qemu/`. From the documentation alone the instruction looks complete. §5 now carries a tree diagram, and §7 quotes your exact error with the `--force` warning.
+
+**2. `-listAvailablePackages` doesn't exist — D-007.** My error, and an old one: it was written into Setup Guide 02, carried into Setup Guide 03, and quoted in three tracking documents as the command that would close T-202. It never would have. Verified against CLT `2.0.4:v202501021438`, the real options are:
+
+| Option | Lists |
+|---|---|
+| `-list` | Everything |
+| `-listAccessible` | What your licence entitles you to ⭐ |
+| `-listInstalled` / `-listInstalledRoots` | What you already have |
+| `-listQuery <query>` · `-listUpdates` | Search · updates |
+
+Also: `-installPackage` is for one package; `-installBaseline` is for a whole SDP.
+
+**3. The 47 GB `disk-qemu` was undocumented — D-008.** That's the VM's virtual disk, and 47 GB is its *apparent* size. It's very likely **sparse** — `ls -lh` shows what the guest thinks it has, `du -sh` shows what your disk actually lost. Worth knowing: copying a sparse file with a naive tool expands every hole into real zeros. If you ever move it, use `cp --sparse=always` or `rsync -S`.
+
+## 💡 What your listing revealed — this is the good part
+
+Your `ls -lh qemu/output/` is more interesting than a directory listing has any right to be:
+
+| File | Why it matters |
+|---|---|
+| `procnto-smp-instr.sym` | The kernel's name tells you the variant: **SMP** and **instrumented** — the build that supports kernel event tracing. That's what makes Chapter 26's System Analysis Toolkit work. You're not running a cut-down kernel. |
+| `output/build/` | ⭐ `ifs.build`, `system.build`, `disk.layout`, `startup.sh` — **the actual `mkifs` build files that produced this image**. Chapter 21's source material, already sitting on your disk. |
+| `option_files/` | `opt_valgrind`, `opt_secpol`, `opt_python`, `opt_graphics`… — the CTI feature switches. This is the "build your own image" machinery ADR-004 promised. |
+
+Take one look inside `build/` when you're there. It'll mean little now; in Chapter 21 you'll write one yourself, and knowing this image was made the same way is the point.
+
+**One more thing:** the QSTI package was **already installed** with SDP 8.0 — the archives were dated from your V3 run. The whole Software Center detour was unnecessary. §4.2 now says to check `~/qnx800/images/qemu` first.
+
+## 💬 About the `/btw` questions
+
+**There were no `/btw` lines in the file** — nothing was lost, but if you meant to include some, they didn't make it.
+
+I've made the convention real regardless. Put `/btw <question>` on its own line — in a message, or anywhere inside a `toAgent/` drop — and it becomes a permanent `D-NNN` entry, however small. That's now **ADR-025**, documented in both `Doubts.md` and `toAgent/README.md`.
+
+> **Why a marker at all?** Every question is logged anyway (ADR-014). The prefix removes ambiguity: it says *this is a question, and I want it in the record* — for the ones asked in passing, mid-task, that otherwise read as rhetorical asides. Those are exactly the ones that get lost.
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_03_QEMU_VM.md` | → **v1.1.** §§4–5 marked ✅ verified: real listings, the nested-directory tree, what each artefact is; §7 `cd`s correctly and carries the error + `--force` warning |
+| `docs/guides/Setup_02_QNX_Account_And_License.md` | → v2.1. `-listAvailablePackages` corrected |
+| `docs/meta/Doubts.md` | **+D-006, D-007, D-008** — full answers · **`/btw` convention documented** |
+| `docs/meta/Decisions.md` | **+ADR-025** |
+| `docs/meta/DecisionsLog.md` | Session 008: the nested-directory trap · the bogus option · the image contents · ADR-025 · open disk-budget revision |
+| `docs/internal/VerificationRuns.md` | V5.1–V5.2 ✅, V5.3 blocked→fixed, results logged |
+| `docs/meta/CourseState.md`, `CompactContext.md`, `ToDos.md` | Session 008; T-015 re-scoped to the retry; T-016, T-017 added |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 008 row; **H-10** — check CLT option names against `-help`, never assume |
+| `tools/qemu/qnx-vm.sh` | Default image path corrected to the nested `qemu/qemu` |
+| `toAgent/README.md` | Drop 3 indexed; `/btw` documented |
+
+---
+
+## 👉 Retry V5.3
+
+```bash
+host$ cd ~/qnx800/images/qemu/qemu
+host$ mkqnximage --run
+```
+
+Log in with `root` / `root`. **Paste the entire boot log** — it's the most valuable artefact in this block, and Chapters 09 and 21 dissect it line by line.
+
+Then keep going through V5.4 (`pidin`, `/proc/boot`), V5.5 (networking — the `virbr0` bridge is still my predicted trouble spot), V5.6 (**run `hello_qnx` on the target** 🎉) and V5.7.
+
+Two small extras while you're in there:
+
+```bash
+host$ du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu   # is it sparse?  (T-016)
+host$ df -h ~
+host$ cat ~/qnx800/images/qemu/README.md                  # 394 bytes  (T-017)
+```
+
+**Reaching that `#` prompt is milestone M2 — "It boots" 🎉.**
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.5 | 2026-08-26 | PROMPT#7 logged: V5.3 diagnosed and unblocked; `/btw` convention adopted. |
 | 2.4 | 2026-08-26 | PROMPT#6 logged: Setup Guide 03 published. |
 | 2.3 | 2026-08-26 | PROMPT#5 logged: blocks V2–V4 complete, all `[UNVERIFIED]` markers cleared. |
 | 2.2 | 2026-08-26 | PROMPT#4 logged: name spelling correction and Block V2 completion. |

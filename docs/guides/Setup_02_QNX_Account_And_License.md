@@ -1,7 +1,7 @@
 ---
 title: "Setup Guide 02 — QNX Account, Licence & SDP 8.0 Install"
 document_id: SETUP-02
-version: 2.0
+version: 2.1
 status: ✅ Published & verified — executed end to end
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -506,8 +506,14 @@ Then:
 
 ```bash
 host$ cd ~/qnx/qnxsoftwarecenter
-host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+host$ ./qnxsoftwarecenter_clt -listAccessible
 ```
+
+> ⚠️ **Verified correction (2026-08-26).** An earlier version of this guide used
+> `-listAvailablePackages`. **That option does not exist** — the tool answers
+> `Error: Unknown argument`. The real listing options are `-list`, `-listAccessible`,
+> `-listQuery <query>`, `-listInstalled`, `-listInstalledRoots` and `-listUpdates`.
+> `./qnxsoftwarecenter_clt -help` is authoritative. *(QNX Software Center CLT `2.0.4:v202501021438`.)*
 
 Then install (exact package ID comes from the listing above):
 
@@ -1020,6 +1026,7 @@ But you have **nowhere to run it**. That's next.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.1 | 2026-08-26 | **Correction:** §9.2 used `-listAvailablePackages`, which does not exist — replaced with `-listAccessible` and the real option list, verified against CLT `2.0.4:v202501021438`. |
 | 2.0 | 2026-08-26 | **Verified end to end.** All `[UNVERIFIED]` markers cleared. Real output throughout: `qcc -V` target list (GCC **12.2.0**, `x86_64` + `aarch64le`, C/`_gpp`/`_cxx`), `$QNX_HOST`/`$QNX_TARGET`, `file` output, and the `24 · 3 · 0` environment report. **Two corrections:** §11.2's sample program was missing `#include <unistd.h>` and emitted an implicit-declaration warning for `getpid()` — fixed, and turned into a lesson on POSIX vs. QNX-specific headers; §11.3 claimed `file` would print "QNX", which it never does — the real tell is the `ldqnx-64.so.2` interpreter. **New §12.1:** the install costs ~43 GB, not the 8–12 GB previously stated. |
 | 1.1 | 2026-08-26 | **Part A confirmed by a real run** — the account → request → accept → deploy flow works as documented; `[UNVERIFIED]` cleared from §§3–5 and now scoped to Part B only. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
 | 1.0 | 2026-08-25 | Created. Documents the request → accept → **deploy** licence flow (ADR-021) and the host/target split. Install steps marked `[UNVERIFIED]` pending first real run. |

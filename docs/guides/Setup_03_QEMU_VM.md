@@ -1,15 +1,15 @@
 ---
 title: "Setup Guide 03 — Your First QNX VM on QEMU"
 document_id: SETUP-03
-version: 1.0
-status: Published — steps marked [UNVERIFIED] pending first real run
+version: 1.1
+status: Published — §§4–5 ✅ verified; §§7–11 [UNVERIFIED] pending retry of block V5.3
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "45–75 minutes (plus a ~2–4 GB download)"
 prereqs: "Setup Guide 01 and Setup Guide 02, both complete"
 sdp_version: "QNX SDP 8.0"
-verified_on: "Not yet — written from QNX's official QSTI for QEMU documentation, verified 2026-08-26"
+verified_on: "§§4–5 executed on Ubuntu 26.04 / WSL2, 2026-08-26 — three corrections applied. §§7 onwards not yet reached."
 ---
 
 # 🖥️ Setup Guide 03 — Your First QNX VM on QEMU
@@ -26,10 +26,13 @@ verified_on: "Not yet — written from QNX's official QSTI for QEMU documentatio
 > them, paste the output back and each marker is replaced with the real result — or corrected, if
 > reality disagrees. *(ADR-024; verification block **V5** in the project's tracker.)*
 >
-> ⚠️ **Expect at least one thing here to be wrong.** Running Setup Guide 02 turned up three real
-> errors in a guide that looked perfectly reasonable on paper. This guide involves networking,
-> graphics and virtualization on a host newer than QNX documents — it is the most likely place in
-> the whole course to diverge.
+> ⚠️ **It was.** The prediction below held: the first real run of this guide turned up **three
+> errors in §§4–5**, all now fixed and marked ✅ verified. The most important is the nested `qemu/`
+> directory in §5 — miss it and §7 fails with a message that recommends a flag you must not use.
+> See [D-006](../meta/Doubts.md#d-006), [D-007](../meta/Doubts.md#d-007) and
+> [D-008](../meta/Doubts.md#d-008).
+>
+> §§7 onwards have still not been reached. Same warning applies with full force.
 
 ---
 
@@ -184,20 +187,36 @@ host$ ~/qnx/qnxsoftwarecenter/qnxsoftwarecenter &
 
 ```bash
 host$ cd ~/qnx/qnxsoftwarecenter
-host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+host$ ./qnxsoftwarecenter_clt -listAccessible
 ```
 
-Find the QEMU quick-start entry in the list, then install it:
+> ⚠️ **There is no `-listAvailablePackages` option.** Earlier drafts of this course used that name;
+> it does not exist and the tool answers `Error: Unknown argument`. The real listing options are:
+>
+> | Option | Lists |
+> |--------|-------|
+> | `-list` | Every package, accessible or not |
+> | `-listAccessible` | Packages your licence entitles you to |
+> | `-listQuery <query>` | Packages matching a query |
+> | `-listInstalled` | What is already installed |
+> | `-listInstalledRoots` | Installed top-level packages only |
+> | `-listUpdates` | Available updates |
+>
+> `./qnxsoftwarecenter_clt -help` prints the authoritative list. *(Verified 2026-08-26 against QNX
+> Software Center CLT `2.0.4:v202501021438`.)*
+
+Then install it — note **`-installPackage`** for a single package; `-installBaseline` is for a whole
+SDP baseline:
 
 ```bash
 host$ ./qnxsoftwarecenter_clt \
-      -installBaseline com.qnx.qnx800.quickstart.qemu \
+      -installPackage com.qnx.qnx800.quickstart.qemu \
       -destination ~/qnx800
 ```
 
-> 📋 **Please report the exact package name and version string** that `-listAvailablePackages`
-> shows. That is also the **SDP build number** every chapter's front matter needs (project item
-> T-202) — one command, two problems solved.
+> 💡 **You may already have it.** If you installed SDP 8.0 with its default package selection, the
+> QEMU quick-start image came along with it. Check `~/qnx800/images/qemu` before downloading
+> anything — that is exactly what happened on the verified run.
 
 ### 4.3 Verify the download arrived
 
@@ -205,12 +224,29 @@ host$ ./qnxsoftwarecenter_clt \
 host$ ls -lh ~/qnx800/images/qemu
 ```
 
-✅ **Expected:** one or more archives named like
-`qnx_sdp8.0_qemu_quickstart__xxxxxxxx_.tar.gz._xx`, plus a script called `unpack_qemu_image.sh`.
+✅ **Expected output** — real listing from a verified run:
 
-> 🐣 **Why is it split into `._00`, `._01`, … pieces?** Large files are chunked so that an
-> interrupted download does not cost you the whole transfer. The unpack script stitches them back
-> together. This is normal, not a sign something went wrong.
+```text
+total 1.9G
+-rw-r--r-- 1 user user   394 Aug 26 00:07 README.md
+-rw-r--r-- 1 user user 1000M Aug 26 00:08 qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.0
+-rw-r--r-- 1 user user  903M Aug 26 00:07 qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.1
+-rwxr-xr-x 1 user user   127 Aug 26 00:07 unpack_qemu_image.sh
+```
+
+> 🐣 **Why is it split into `.0` and `.1`?** Large files are chunked so that an interrupted download
+> does not cost you the whole transfer. `unpack_qemu_image.sh` — all 127 bytes of it — concatenates
+> the pieces and pipes them into `tar`. Read it; it is a two-line script and there is nothing magic
+> in it.
+>
+> 💡 **`20260606` is a date stamp: 6 June 2026.** That is the image build, and it is worth recording
+> in your notes — a future QNX image with a different stamp may behave differently.
+
+**Read the README while you are here:**
+
+```bash
+host$ cat ~/qnx800/images/qemu/README.md
+```
 
 ---
 
@@ -225,18 +261,75 @@ host$ chmod +x unpack_qemu_image.sh
 host$ ./unpack_qemu_image.sh
 ```
 
-✅ **Expected:** the archives are joined and extracted, producing an `output/` directory.
+✅ **Expected:** a long list of extracted paths scrolls past, all beginning `qemu/`.
+
+> ⚠️ **The script extracts into a `qemu/` SUBDIRECTORY, not into the current directory.** This is
+> the single most confusing thing in this guide, and it is what breaks the next step if you miss it.
+> After unpacking you have:
+>
+> ```text
+> ~/qnx800/images/qemu/          ← where you ran the script
+> ├── README.md
+> ├── unpack_qemu_image.sh
+> ├── qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.0
+> ├── qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.1
+> └── qemu/                      ← ✅ THE IMAGE DIRECTORY — everything below lives here
+>     ├── local/                 ← configuration: options, snippets, keys
+>     └── output/                ← the built image
+> ```
+>
+> So the path you want is **`~/qnx800/images/qemu/qemu`** — yes, `qemu` twice. Everything from §7
+> onwards runs from there.
 
 ```bash
-host$ ls -lh output/
+host$ ls -lh qemu/output/
 ```
 
-✅ **Expected** — two files matter:
+✅ **Expected output** — real listing from a verified run:
+
+```text
+total 47G
+drwxr-xr-x 2 user user 4.0K Jun  6 20:30 build
+-rw-r--r-- 1 user user  275 Jun  6 20:30 di.params
+-rw-r--r-- 1 user user  47G Jun  6 20:31 disk-qemu
+-rw-r--r-- 1 user user  171 Jun  6 20:31 disk-qemu.vmdk
+-rw-r--r-- 1 user user    0 Jun  6 20:30 diskimage.out
+-rw-r--r-- 1 user user  20M Jun  6 20:30 ifs.bin
+drwxr-xr-x 2 user user 4.0K Jun  6 20:29 inc
+drwxr-xr-x 2 user user 4.0K Jun  6 20:29 option_files
+-rw-r--r-- 1 user user 2.8K Jun  6 20:28 options
+-rwxr-xr-x 1 user user  12M Jun  6 20:30 procnto-smp-instr.sym
+```
+
+> ⚠️ **`disk-qemu` is 47 GB.** Check your free space before and after:
+>
+> ```bash
+> host$ df -h ~
+> ```
+>
+> It is a raw disk image and may be **sparse** — apparent size far larger than the blocks actually
+> used. `du -sh qemu/output/disk-qemu` tells you the truth. Either way, do not be alarmed by the
+> number, and do not copy this file around casually.
+
+✅ **The files that matter:**
 
 | File | What it is |
 |------|-----------|
-| `ifs.bin` | The **IFS — Image File System**. QNX's bootable image: the microkernel `procnto`, the startup code, drivers, and a small root filesystem, all in one file. QEMU loads this the way a PC loads a kernel. |
-| `disk-qemu.vmdk` | A virtual hard disk holding the larger filesystem — utilities, libraries, your home directory. |
+| `ifs.bin` | **20 MB.** The **IFS — Image File System**. QNX's bootable image: the microkernel `procnto`, the startup code, drivers, and a small root filesystem, all in one file. QEMU loads this the way a PC loads a kernel. |
+| `disk-qemu` / `disk-qemu.vmdk` | The virtual hard disk holding the larger filesystem. The `.vmdk` is a tiny 171-byte *descriptor* pointing at the 47 GB raw `disk-qemu`. |
+| `procnto-smp-instr.sym` | **12 MB of debug symbols for the kernel itself.** The name tells you which kernel this image runs: **SMP** (multi-core) and **instrumented** — the variant that supports kernel event tracing. That is what makes Chapter 26's System Analysis Toolkit work. |
+| `build/` | ⭐ The **`mkifs` build files** that produced this image: `ifs.build`, `system.build`, `disk.layout`, `startup.sh`. **This is Chapter 21's source material**, sitting on your disk right now. |
+| `option_files/`, `local/snippets/` | The feature switches that composed the image — `opt_valgrind`, `opt_secpol`, `opt_python`, `opt_graphics`, and dozens more. This is the CTI (Custom Target Image) machinery ADR-004 promises for Chapter 21. |
+
+> 💡 **Take one look inside `build/` now, even though it will mean little yet.**
+>
+> ```bash
+> host$ ls qemu/output/build/
+> ```
+>
+> Those files are the complete recipe for the system you are about to boot. In Chapter 21 you will
+> write one yourself. Knowing they exist — and that this image was built the same way yours will
+> be — is the point.
 
 > 💡 **`ifs.bin` is the single most important file in QNX.** Chapter 21 is devoted to building your
 > own with `mkifs`, and by then you will be able to say exactly what is inside this one. For now:
@@ -305,12 +398,40 @@ If that prints nothing:
 host$ source ~/qnx800/qnxsdp-env.sh
 ```
 
-Now boot:
+Now boot — **from the inner `qemu/` directory**:
 
 ```bash
-host$ cd ~/qnx800/images/qemu
+host$ cd ~/qnx800/images/qemu/qemu
+host$ ls
+```
+
+✅ You must see `local` and `output` here. If you do not, you are in the wrong directory — go back
+to §5.
+
+```bash
 host$ mkqnximage --run
 ```
+
+> ⚠️ **If you see this, you are one directory too high:**
+>
+> ```text
+> The current directory is neither that of an existing mkqnximage virtual image nor is it
+> an empty directory. This might be OK but as creating virtual images in random locations
+> is often not what is intended, you have to include the --force option to enable it.
+> ```
+>
+> 🚨 **Do NOT add `--force`, even though the message suggests it.** `mkqnximage` identifies an image
+> directory by the presence of `local/` and `output/`. From `~/qnx800/images/qemu` it sees neither —
+> only archives and a script — so it assumes you want to **create a brand-new image here**.
+> `--force` would grant that request: it would start building a fresh image in the wrong place,
+> ignoring the 47 GB one you just unpacked.
+>
+> **The fix is `cd qemu`, not `--force`.**
+>
+> 💡 **A general lesson worth carrying.** An error message tells you what the program *believes*,
+> and offers the escape hatch for the case where the program is wrong. Here the program is right
+> and you are in the wrong directory. Reach for the suggested flag only once you understand why the
+> tool objected.
 
 ✅ **Expected:** the terminal fills with boot messages, an SDL window may open, and after a few
 seconds you reach a login prompt.
@@ -437,7 +558,7 @@ qnx# ifconfig
 Or, from **another host terminal** (leave the VM running):
 
 ```bash
-host$ cd ~/qnx800/images/qemu
+host$ cd ~/qnx800/images/qemu/qemu
 host$ mkqnximage --getip
 ```
 
@@ -664,7 +785,7 @@ You may be in the graphical window rather than the terminal. Click on the **term
 from**, then try again. Or from a second terminal:
 
 ```bash
-host$ cd ~/qnx800/images/qemu
+host$ cd ~/qnx800/images/qemu/qemu
 host$ mkqnximage --stop
 ```
 
@@ -725,7 +846,7 @@ that runs them, and a network between them.
 | What | Value |
 |------|-------|
 | QSTI package | `com.qnx.qnx800.quickstart.qemu` |
-| Image location | `~/qnx800/images/qemu` |
+| Image location | `~/qnx800/images/qemu` (archives) → **`~/qnx800/images/qemu/qemu`** (the image itself) ⚠️ |
 | Unpack script | `./unpack_qemu_image.sh` |
 | Boot image | `output/ifs.bin` |
 | Virtual disk | `output/disk-qemu.vmdk` |
@@ -743,4 +864,5 @@ that runs them, and a network between them.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | **§§4–5 verified; three corrections.** (a) `unpack_qemu_image.sh` extracts into a nested **`qemu/`** subdirectory, so the image is at `~/qnx800/images/qemu/qemu` — §5 now shows the tree and §7 `cd`s into it, with the `mkqnximage` error quoted and an explicit warning **not** to use the `--force` it suggests (**D-006**). (b) `-listAvailablePackages` does not exist; replaced with `-listAccessible` and the real option table (**D-007**). (c) Real file listings added, including the 47 GB `disk-qemu` and what `procnto-smp-instr.sym`, `build/` and `option_files/` are for (**D-008**). Also: the QSTI package may already be installed with SDP — check before downloading. |
 | 1.0 | 2026-08-26 | Created from QNX's official *QSTI for QEMU* documentation (read 2026-08-26). Documents the QSTI → `unpack_qemu_image.sh` → `mkqnximage --run` flow, the underlying QEMU configuration, first-contact commands, SSH, the cross-compile-and-run payoff, and three predicted WSL2 failure modes. All steps `[UNVERIFIED]` pending block V5. |

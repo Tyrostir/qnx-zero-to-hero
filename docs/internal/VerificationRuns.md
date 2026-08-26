@@ -99,7 +99,7 @@ Worked / Failed. Notes: ...
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
-| **V5** — the QEMU VM | 👉 **Next.** Setup Guide 03 is written and waiting |
+| **V5** — the QEMU VM | 🔄 **In progress.** V5.1–V5.2 ✅ · V5.3 blocked on a directory bug, now fixed → **retry** |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -110,7 +110,7 @@ Neither gates anything; both improve the course.
 
 | # | What | Why it matters |
 |---|------|----------------|
-| **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
+| **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
 | **R2 / T-014** | Did QNX Software Center install via the **graphical** installer under WSLg, or did you need the **headless** route (`-- --unattended`)? Plus the licence approval latency and the portal's real accept/deploy button labels. | Setup Guide 02 §8 currently offers two routes as equals. It should state which one actually works and keep the other as a fallback. |
 
 ### 👉 Next verification block: **V5 — the QEMU VM**
@@ -306,7 +306,7 @@ Graphical, or:
 
 ```bash
 host$ cd ~/qnx/qnxsoftwarecenter
-host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+host$ ./qnxsoftwarecenter_clt -listInstalled
 ```
 
 📋 **Paste:** the full package list.
@@ -397,7 +397,7 @@ host$ ./tools/check-environment.sh
 
 ```bash
 host$ cd ~/qnx/qnxsoftwarecenter
-host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+host$ ./qnxsoftwarecenter_clt -listInstalled
 ```
 
 📋 **Paste:** the full package list.
@@ -517,9 +517,9 @@ or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
 | V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ✅ **24 pass · 3 warn · 0 fail** |
 | — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ✅ Setup 02 → v2.0 |
 | — | Write `Setup_03_QEMU_VM.md` + `tools/qemu/` | 🤖 | V4.4 | **T-112** | ✅ done 2026-08-26 |
-| **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 · **T-202** | ⬜ **next** |
-| V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ⬜ |
-| V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ⬜ |
+| **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
+| V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
+| V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | 🔄 **blocked → fix in D-006, retry** |
 | V5.4 | First contact (`pidin`, `/proc/boot`) | 👤 | V5.3 | Setup 03 §8 | ⬜ |
 | V5.5 | Networking + SSH ⚠️ | 👤 | V5.3 | Setup 03 §9 · §12.1 | ⬜ |
 | V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ⬜ |
@@ -560,6 +560,8 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V5.1 – V5.2** | ✅ **Passed, with 3 bugs found** | QSTI was **already installed** with SDP (archives `qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.{0,1}`, ~1.9 GB). Unpack produced `qemu/output/` with `ifs.bin` (20 MB), `disk-qemu` (47 GB apparent), `procnto-smp-instr.sym` (12 MB) and the **`mkifs` build files**. Bugs: **(a)** `unpack_qemu_image.sh` extracts into a nested `qemu/` — the guide assumed `output/` in place → **D-006**; **(b)** `-listAvailablePackages` does not exist → **D-007**; **(c)** the 47 GB disk is undocumented → **D-008**. |
+| 2026-08-26 | **V5.3** | ❌ **Blocked → fixed** | `mkqnximage --run` refused: *"neither an existing mkqnximage virtual image nor an empty directory"*. Cause: run from `~/qnx800/images/qemu` instead of `~/qnx800/images/qemu/qemu`. Fix documented (**D-006**); `--force` explicitly warned against. **Awaiting retry.** |
 | 2026-08-26 | **V3 + V4 (all)** | ✅ **Complete** | SDP 8.0 installed at `~/qnx800`; cross-compile proven; `24 passed · 3 warnings · 0 failed`. **T-011 and T-012 cleared; T-200 closed.** Setup Guide 02 → **v2.0**, all markers removed. **Risk R2 closed.** Two real bugs found in the guide — see below. **Still open:** T-202 (SDP build number) and the QSC install route. |
 | 2026-08-26 | **V2 (all)** | ✅ **Complete** | Licence requested, accepted and **deployed** (learner-attested). **T-003 and T-010 cleared. Risk R1 closed.** Setup Guide 02 §§3–5 markers cleared; Part B (§§7–11) still `[UNVERIFIED]`. Approval latency and portal button labels not captured — still wanted for Chapter 04, but non-blocking. |
 | 2026-08-25 | **V1 (all)** | ✅ **Passed** | `19 passed · 6 warnings · 0 failed`. **T-008** and **T-009** cleared. Setup Guide 01 → v2.0, `[UNVERIFIED]` removed, all expected-output blocks replaced with real output. **Risk R9 did not materialise** — every documented package installed under its documented name on Ubuntu 26.04. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |
@@ -614,6 +616,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | **V5.1–V5.2 passed; V5.3 blocked and fixed.** Three bugs found in Setup Guide 03 → D-006/D-007/D-008. Retry pending. |
 | 1.4 | 2026-08-26 | **Block V5 added** for Setup Guide 03 — 7 checkpoints ending at a booting QNX VM running the learner's own binary. V5.1 also closes T-202. |
 | 1.3 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** SDP toolchain table added; three guide bugs recorded; R2 closed; T-202 and the QSC install route flagged as the only open detail. |
 | 1.2 | 2026-08-26 | **Block V2 complete.** Licence deployed; Risk R1 closed; V3 unblocked and is now the next action. §3 rewritten as a status board. |
