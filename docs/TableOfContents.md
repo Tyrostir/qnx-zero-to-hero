@@ -172,7 +172,7 @@ documented**; you are not locked in.
 |---|-------|------------------|--------|
 | 01 | [Prerequisites & Host Preparation](guides/Setup_01_Prerequisites.md) | Ubuntu/WSL2 packages, QEMU, KVM enabled, disk space, Git | 📕 |
 | 02 | [QNX Account, Licence & SDP 8.0 Install](guides/Setup_02_QNX_Account_And_License.md) | myQNX account → request/accept/**deploy** licence → QNX Software Center → SDP 8.0 | 📕 |
-| 03 | [Building & Running the QNX VM on QEMU](guides/Setup_03_QEMU_VM.md) ⭐ | A booting QNX 8.0 x86_64 VM (QSTI) with networking and a shared folder | 📄 |
+| 03 | [Your First QNX VM on QEMU](guides/Setup_03_QEMU_VM.md) ⭐ | A booting QNX 8.0 x86_64 VM (QSTI), SSH access, and your own binary running on it | 📕 |
 | 04 | [IDE & Tooling](guides/Setup_04_IDE_And_Tooling.md) | VS Code + QNX Toolkit, Momentics IDE, `qconn`, remote gdb | 📄 |
 | 05 | [Troubleshooting Catalogue](guides/Setup_05_Troubleshooting.md) | Symptom → cause → fix, for every install/boot failure seen | 📄 |
 
@@ -261,5 +261,6 @@ documented**; you are not locked in.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Setup Guide 03 published. |
 | 1.1 | 2026-08-25 | Chapter 33 split into three documented capstone flavours (ADR-019). Setup Guides 01–02 published. |
 | 1.0 | 2026-08-25 | Initial TOC: 6 parts, 34 chapters, 5 setup guides, 2 hardware guides, 7 cheat sheets, 21 labs. |

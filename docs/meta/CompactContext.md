@@ -41,14 +41,14 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 | Phase | **1 — Environment setup** |
 | Plan | ✅ **Approved** 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **2 / 5** — **both ✅ verified**, zero `[UNVERIFIED]` markers |
+| Setup guides published | **3 / 5** — 01, 02 ✅ verified · **03 published**, pending block V5 |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ❌ |
-| Blocker | **None.** Chapter 00 off hold; Setup Guide 03 unblocked |
-| Next (me) | Learner's choice: **Chapter 00** (T-102) or **Setup Guide 03 — QEMU VM** (T-112) |
-| Next (learner) | Nothing blocking. When convenient: **T-202** SDP build number · **T-014** QSC install route |
+| Blocker | **None.** Setup Guide 03 awaits its first real run |
+| Next (me) | Clear Setup 03's markers from the V5 output, then **Chapter 00** |
+| Next (learner) | ⭐ **Run Setup Guide 03 → block V5** (boot the VM, run `hello_qnx`). V5.1 also closes T-202 |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -80,7 +80,12 @@ Check any time: ./tools/check-environment.sh   (last: 24 pass / 3 warn / 0 FAIL 
   (`~/qnx800`) → IDE.
 - ⚠️ Host support: x86-64 **Windows or Linux only**. **No macOS. No ARM hosts.**
 - **QSTI** = *Quick Start Target Image* — official **pre-built** images for **QEMU** and **RPi 4/5**.
-  **This is how we boot QNX (ADR-004).**
+  **This is how we boot QNX (ADR-004).** QSC package **`com.qnx.qnx800.quickstart.qemu`** →
+  `~/qnx800/images/qemu` → `./unpack_qemu_image.sh` → `output/{ifs.bin, disk-qemu.vmdk}`.
+- ⚠️ **QSTI and `mkqnximage` are not alternatives.** QSTI supplies the image; **`mkqnximage --run`**
+  launches it. Also `--stop`, `--getip`. Login **root/root**. Defaults: 8 CPUs, 4 GB (>16 GB may
+  misbehave), 1280×768. Network defaults to a **`virbr0` bridge** — needs libvirt, hence systemd,
+  which WSL2 does not enable by default. Display defaults to `sdl,gl=on`.
 - **CTI** = *Custom Target Image* — official **build-your-own** flow (RPi + QEMU). Used in Ch 21.
 - QSTI-for-QEMU is documented for **Ubuntu 22.04/24.04**; our host is **26.04**. Risk **R9** tested
   at Setup 01 and **did not materialise** — every documented package name still exists on 26.04.
@@ -172,9 +177,9 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ## OPEN ITEMS
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
-- **Learner's open actions:** none blocking. **T-202** SDP build number (needed for chapter front
-  matter) · **T-014** QSC install route / licence latency / portal labels.
-  ✅ Done: T-003, T-008, T-009, T-010, T-011, T-012, T-200 · **Blocks V1–V4 all complete.**
+- **Learner's open actions:** ⭐ **T-015 run Setup Guide 03 → report block V5** (7 checkpoints,
+  milestone M2) · **T-202** SDP build number *(V5.1 delivers it)* · T-014 QSC install route.
+  ✅ Done: T-003, T-008–T-012, T-200 · **Blocks V1–V4 complete.**
 - **Doubts logged:** 5 (D-001…D-005, all answered)
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
@@ -183,6 +188,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | Regenerated after Session 007: Setup Guide 03 published; QSTI/`mkqnximage` mechanics recorded; block V5 is the next action. |
 | 1.5 | 2026-08-26 | Regenerated after Session 006: SDP installed and toolchain verified; both setup guides done; R2 closed; nothing blocking. |
 | 1.4 | 2026-08-26 | Regenerated after Session 005: licence deployed, R1 closed, V3 is the next action, no external blockers remain. |
 | 1.3 | 2026-08-26 | Regenerated after Session 004: Block V1 verified, host now all-green, R9 and R3 closed, licence request is the sole blocker. |

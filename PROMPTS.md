@@ -58,6 +58,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#3](#prompt3) | 2026-08-26 | Claude (Opus 5) | Block V1 output delivered in `toAgent/1.BlockV1Output.md`; update the Git identity | ✅ Block V1 verified · Setup Guide 01 → v2.0 · repo path corrected · identity set |
 | [PROMPT#4](#prompt4) | 2026-08-26 | Claude (Opus 5) | Correct the name spelling; licence already deployed — mark V2.1–V2.3 complete | ✅ Block V2 complete · **Risk R1 closed** · Setup Guide 02 → v1.1 · V3 unblocked |
 | [PROMPT#5](#prompt5) | 2026-08-26 | Claude (Opus 5) | Commits pushed manually; blocks V2–V4 complete, output in `toAgent/2.BlockV2V3V4Output.md` | ✅ **All verification done** · Setup Guide 02 → v2.0 · 3 guide bugs fixed · R2 closed · Chapter 00 off hold |
+| [PROMPT#6](#prompt6) | 2026-08-26 | Claude (Opus 5) | "Go for B" — write Setup Guide 03, the QEMU VM | ✅ **Setup Guide 03 published** (729 lines) · `tools/qemu/qnx-vm.sh` · block V5 defined |
 
 ---
 
@@ -718,10 +719,127 @@ Say the word — or "A" if you'd rather have the map before the territory.
 
 ---
 
+## PROMPT#6
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 007 |
+| **Context** | Offered a choice between Chapter 00 and Setup Guide 03 at the end of [PROMPT#5](#prompt5). |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> Go for B now
+
+### Standing instructions
+
+*(None new — this selects option B, Setup Guide 03, from the two offered.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+**Setup Guide 03 is published** — 729 lines, written from QNX's official *QSTI for QEMU* documentation, which I read live rather than reconstructing from memory. It ends where it should: with the binary you built in Setup Guide 02 running on a QNX target.
+
+## 🔍 The finding that changed the guide
+
+**QSTI and `mkqnximage` are not alternatives.** ADR-004 reads as though QSTI replaced `mkqnximage`. It didn't:
+
+| | |
+|---|---|
+| **QSTI** | The **image** — a pre-built QNX system. QSC package `com.qnx.qnx800.quickstart.qemu` → `~/qnx800/images/qemu` → `./unpack_qemu_image.sh` → `output/ifs.bin` + `output/disk-qemu.vmdk` |
+| **`mkqnximage`** | The **launcher** — `--run`, `--stop`, `--getip`. It's how QNX's own QSTI guide starts the image. |
+
+ADR-004's strategy is unchanged — QSTI → CTI → raw `mkifs` still stands — but the mechanics differ from what was assumed. I logged this explicitly so no future author "corrects" the guide into avoiding `mkqnximage`.
+
+## 📕 What the guide covers
+
+**The path:** install the QSTI package → unpack → understand the launch command → boot → log in (`root`/`root`) → look around with `pidin` → get an IP and SSH in → **`scp` your binary across and run it** → shut down cleanly.
+
+Per course rule #4, §6 documents what `mkqnximage --run` actually starts, flag by flag:
+
+| Setting | Default |
+|---|---|
+| Kernel / disk | `ifs.bin` · `disk-qemu.vmdk` (IDE) |
+| CPUs / RAM | 8 · 4 GB — ⚠️ QNX warns **above 16 GB may misbehave** |
+| Network | `bridge,br=virbr0` |
+| Display | `sdl,gl=on`, default `1280 × 768 @ 60` |
+| Serial | `mon:stdio` — which is *why* `Ctrl+A` `X` quits |
+
+§8 turns the first five commands into teaching rather than typing. `pidin` gets a 🐧 In-Linux box explaining what it shows that `ps` cannot — each thread's blocking state (`REPLY`, `RECEIVE`, `SEND`), the column you'll live in from Chapter 13. And listing the processes *is* the microkernel argument: filesystem and network drivers appear there as ordinary user-space processes, not kernel code.
+
+§10 is the payoff, and I wrote it as a moment rather than a step:
+
+> You wrote C on Linux, compiled it into a binary your own machine physically cannot execute, moved it across a virtual network into a different operating system, and ran it there. That is the complete embedded development loop — **edit → cross-compile → deploy → run**.
+
+## ⚠️ Three WSL2 problems I've predicted, not observed
+
+§12 documents them honestly as predictions. The first is the one I'd bet on:
+
+**Networking — the `virbr0` bridge.** QSTI defaults to bridged networking via `virbr0`, which **libvirt** creates as a **systemd** service. WSL2 doesn't enable systemd by default, so the bridge may never exist and the VM may boot with no IP.
+
+Three fallbacks, in order: enable systemd via `/etc/wsl.conf`; start the network by hand (`sudo virsh net-start default`); or drop to QEMU user-mode NAT with port forwarding — which you've already seen working, since that's where `10.0.2.15` came from in Block V1. Note port **8000** in that fallback: that's `qconn`, the remote-debug agent you'll need in Chapter 08.
+
+The other two: `sdl,gl=on` under WSLg may fall back to software or fail (harmless — every lab is text), and hosts with **>32 GB RAM** hit a graphics failure needing `host-phys-bits-limit=39`. You have 23 GB, so that one shouldn't apply.
+
+## 🎁 One piece of good news
+
+QNX supports **Ubuntu 22.04/24.04** and tells those users to **build QEMU 10 from source**. You're on 26.04 with **QEMU 10.2.1 from `apt`** — you skip that entire ordeal. Risk R9, being ahead of the documented platform, working in your favour for once. §2.2 says so explicitly so you don't go hunting for a build step you don't need.
+
+## 🛠️ Also shipped: `tools/qemu/qnx-vm.sh`
+
+`run` · `stop` · `ip` · `ssh` · `status`. Deliberately thin — it does nothing `mkqnximage` can't. It exists to fail with a useful message instead of `command not found`, source the SDP environment if you forgot, and remember the image directory.
+
+**§7.2 tells you to use the real commands first.** A wrapper introduced before you understand what it wraps is exactly the black box this course promises not to create.
+
+---
+
+## 👉 Your next run: Block V5 — 7 checkpoints
+
+Everything in Setup Guide 03 is `[UNVERIFIED]`. Given that Setup Guide 02 yielded three real bugs, and this guide touches networking, graphics *and* nested virtualization on an undocumented host — **expect at least one thing here to be wrong.**
+
+| | | |
+|---|---|---|
+| **V5.1** | Install the QSTI package | Also gives us the **SDP build number** — closes T-202 |
+| **V5.2** | Unpack | Confirms the real archive and output names |
+| **V5.3** | **Boot** 🎉 | 📋 **Paste the entire boot log** — the single most valuable artefact in this block |
+| **V5.4** | `pidin`, `/proc/boot` | Becomes course material for Chapters 09 and 21 |
+| **V5.5** | Networking + SSH ⚠️ | **The predicted trouble spot.** Tell me which route worked |
+| **V5.6** | **Run `hello_qnx`** 🎉 | Proves the whole loop end to end |
+| **V5.7** | Graphics + shutdown | Did an SDL window open under WSLg? |
+
+**V5.3 is milestone M2 — "It boots" 🎉.**
+
+The full block with exact commands is in `docs/internal/VerificationRuns.md` §7a. Anything that errors, send it as-is — I'll diagnose it, fix the guide, and log a `D-NNN`.
+
+Once V5 lands, Setup Guide 03's markers clear and **Chapter 00 is next**.
+
+### Artefacts changed
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_03_QEMU_VM.md` | **Created** — 729 lines, 15 sections, v1.0 |
+| `tools/qemu/qnx-vm.sh` | **Created** — thin `mkqnximage` wrapper, syntax-checked and smoke-tested |
+| `docs/internal/VerificationRuns.md` | **Block V5 added** — 7 checkpoints; status board and §3 updated |
+| `docs/meta/DecisionsLog.md` | Session 007: QSTI/`mkqnximage` distinction · QSTI's QEMU defaults · the 26.04 advantage · predicted bridge failure · the wrapper convention |
+| `docs/meta/CourseState.md` | Session 007 log; 3/5 guides published; next action → V5 |
+| `docs/meta/CompactContext.md` | QSTI mechanics recorded for future sessions |
+| `docs/meta/ToDos.md` | T-112 closed; T-015 (run V5) and T-147 (clear its markers) added |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 007 row; **H-9** added (the `virbr0` prediction) |
+| `docs/reference/ReferenceLinks.md` | QSTI links re-verified 2026-08-26 with findings |
+| `docs/TableOfContents.md` | Setup Guide 03 → 📕 Published |
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.4 | 2026-08-26 | PROMPT#6 logged: Setup Guide 03 published. |
 | 2.3 | 2026-08-26 | PROMPT#5 logged: blocks V2–V4 complete, all `[UNVERIFIED]` markers cleared. |
 | 2.2 | 2026-08-26 | PROMPT#4 logged: name spelling correction and Block V2 completion. |
 | 2.1 | 2026-08-26 | PROMPT#3 logged: Block V1 verification results and the Git identity change. |

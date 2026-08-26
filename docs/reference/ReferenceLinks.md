@@ -202,6 +202,7 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Date | Action | Result |
 |------|--------|--------|
+| 2026-08-26 | Third pass — the four **QSTI for QEMU** pages re-read in full for Setup Guide 03 | ✅ All four live and unchanged in structure. Confirmed: package `com.qnx.qnx800.quickstart.qemu`; `unpack_qemu_image.sh`; launch via **`mkqnximage --run`** (not a raw `qemu-system-x86_64` line); credentials `root`/`root`; defaults 8 CPUs / 4 GB / 1280×768; network `bridge,br=virbr0`; display `sdl,gl=on`. Ubuntu **22.04/24.04** only, with QEMU 10 built from source — unnecessary on 26.04. |
 | 2026-08-25 | Second pass — QNX Everywhere doc set read directly | ✅ Added 15 links. **Discovered QSTI (pre-built images for QEMU + Raspberry Pi) and CTI (custom images)** — these did not exist in older QNX material and changed ADR-004. Also found the **QNX Porting Guide** and **DDK Developer's Guide**, and a *different* Discord invite (`nF3UE97RND`) cited in the official docs vs. the marketing footer (`Jj4EkkrFTT`). Both live. |
 | 2026-08-25 | Initial verification of all links in this document | ✅ All reachable. **Notable:** `blackberry.qnx.com/*` now 301-redirects to `qnx.software`. All QNX links recorded in their post-migration form. |
 
@@ -220,5 +221,6 @@ update_trigger: "Every time a chapter cites a new external source"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | QSTI-for-QEMU links re-verified for Setup Guide 03; findings recorded in the verification table. |
 | 1.1 | 2026-08-25 | +15 links from the QNX Everywhere doc set: QSTI (QEMU + Raspberry Pi), CTI, Porting Guide, DDK Guide, Hardware Interfacing, `getqnx`, QSC User's Guide, Release Notes, System Architecture, Migration Guide, GitLab ports, r/qnx, SO tag. Discord invite corrected. |
 | 1.0 | 2026-08-25 | Created. 45 links across 10 categories, all verified 2026-08-25. |

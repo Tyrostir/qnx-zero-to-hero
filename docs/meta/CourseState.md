@@ -27,12 +27,12 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Current phase** | **Phase 1 — Environment setup** *(host + toolchain done; VM remaining)* |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **2 / 5** — **both ✅ verified end to end**, zero `[UNVERIFIED]` markers |
+| **Setup guides published** | **3 / 5** — 01 and 02 ✅ verified · **03 published**, `[UNVERIFIED]` pending block V5 |
 | **Labs completed** | **0 / 21** |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ❌ Not yet |
-| **Blocked on** | **Nothing.** Chapter 00 is off hold; Setup Guide 03 is unblocked. |
+| **Blocked on** | **Nothing.** Setup Guide 03 awaits its first real run (block V5). |
 | **Last session** | 2026-08-26 (Session 004) |
 
 ### Progress bar
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | Nothing is blocking. Two small reports when convenient: **T-202** the SDP build number (`qnxsoftwarecenter_clt -listAvailablePackages`), and **T-014** whether QNX Software Center installed graphically or headlessly. |
-| 🤖 **Me — next turn** | Your call: **Chapter 00** (T-102, off hold) or **Setup Guide 03 — the QEMU VM** (T-112, now unblocked and the shortest path to a `qnx#` prompt). |
+| 👤 **You — do next** | ⭐ **Run [Setup Guide 03](../guides/Setup_03_QEMU_VM.md)** — boot the QNX VM and run `hello_qnx` on it. Report block **V5** (7 checkpoints). Reaching a `#` prompt is milestone **M2**. V5.1 also delivers the SDP build number (T-202). |
+| 🤖 **Me — next turn** | Clear Setup Guide 03's markers from your V5 output — the boot log becomes documented expected output. Then **Chapter 00**. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -183,7 +183,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |-------|-----------|-------|
 | Setup 01 — Prerequisites | 📕 **Published ✅ verified** | v2.0 — executed end to end on the host. All expected output is real. Risk R9 did not materialise. |
 | Setup 02 — Account, Licence, SDP | 📕 **Published ✅ verified** | v2.0 — executed end to end. Three real bugs found and fixed. Disk cost corrected to ~43 GB. |
-| Setup 03 — QEMU VM ⭐ | 📄 **Unblocked** | Will follow QNX's official **QSTI for QEMU** guide (ADR-004). A real SDP now exists to test against. |
+| Setup 03 — QEMU VM ⭐ | 📕 **Published** | v1.0 — QSTI → `unpack_qemu_image.sh` → `mkqnximage --run`. Steps `[UNVERIFIED]` pending block V5. Ships `tools/qemu/qnx-vm.sh`. |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
 | Hardware 01 — Public Boards | 📄 | |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 007 — 2026-08-26
+
+| | |
+|---|---|
+| **Goal** | Write Setup Guide 03 — the QEMU VM — so the learner can reach a `#` prompt. |
+| **Done** | • Read QNX's official **QSTI for QEMU** documentation directly (about, getting started, additional specs, troubleshooting)<br>• **Key finding:** QSTI and `mkqnximage` are not alternatives — QSTI supplies the image, `mkqnximage --run` launches it. ADR-004's two-stage plan is unaffected, but the mechanics differ from what was assumed<br>• Published **Setup Guide 03** (729 lines): QSTI install → `unpack_qemu_image.sh` → `mkqnximage --run` → login → `pidin` → SSH → **run the Setup Guide 02 binary on the target** → clean shutdown<br>• Documented the underlying QEMU configuration flag by flag, per course rule #4<br>• Predicted and documented **three WSL2 failure modes**: the `virbr0` bridge needing systemd/libvirt, `sdl,gl=on` under WSLg, and the >32 GB RAM graphics issue<br>• Wrote `tools/qemu/qnx-vm.sh` — a thin, commented wrapper (run/stop/ip/ssh/status) that degrades gracefully<br>• Added verification block **V5** (7 checkpoints); V5.1 also closes T-202<br>• Noted that Ubuntu 26.04's QEMU 10.2.1 skips the build-from-source step QNX prescribes for 22.04/24.04 — Risk R9 working in our favour |
+| **Learner decisions** | Setup Guide 03 before Chapter 00 |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | Clear Setup Guide 03's markers from the V5 output, then **Chapter 00** |
 
 ### Session 006 — 2026-08-26
 
@@ -299,6 +310,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | Session 007: Setup Guide 03 published; block V5 defined; next action is booting the VM. |
 | 1.5 | 2026-08-26 | Session 006: blocks V3/V4 verified, SDP installed, Setup Guide 02 → v2.0, all markers cleared, Chapter 00 off hold. |
 | 1.4 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, Risk R1 closed, V3 is the next action. |
 | 1.3 | 2026-08-26 | Session 004: Block V1 verified. Environment snapshot now all-green. Setup Guide 01 marked verified. Repo path corrected. |

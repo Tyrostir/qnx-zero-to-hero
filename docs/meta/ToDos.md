@@ -28,6 +28,7 @@ update_trigger: "Continuously"
 
 
 
+| T-015 | 🔴 | **Run [Setup Guide 03](../guides/Setup_03_QEMU_VM.md)** and report block **V5** — boot the VM, SSH in, run `hello_qnx` | ⬜ | — | ⭐ Milestone **M2**. 7 checkpoints in [`VerificationRuns.md`](../internal/VerificationRuns.md) §7a. |
 | T-202 | 🟠 | **Report the exact SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
 | T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
 
@@ -48,7 +49,7 @@ update_trigger: "Continuously"
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | Done — Setup Guides 01 and 02 both verified. **The gate on Chapter 00 is lifted.** |
 | T-102 | 🔴 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | ✅ **Off hold** — onboarding and verification are both complete. Awaiting the learner's go-ahead. |
 | T-103 | 🟠 | Write `Chapter01_WhatIsARealTimeSystem.md` | ⬜ | Hard/soft real-time, determinism, latency, jitter, WCET |
-| T-112 | 🔴 | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/` scripts | ⬜ | ⭐ Critical. **Unblocked** — a real SDP now exists to test against. |
+| T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
 | T-105 | ✅ | Commit and push the scaffolding | ✅ | Done, Session 001 |
 
@@ -58,7 +59,7 @@ update_trigger: "Continuously"
 |----|-----|------|--------|-------|
 | T-110 | 🟠 | `Chapter02_WhatIsQNX.md` | ⬜ | History 1980→2026, microkernel bet, product family |
 | T-111 | 🟠 | `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | Automotive, medical, rail, nuclear, robotics; vs Linux/FreeRTOS/VxWorks |
-| T-112 | 🟠 | `Setup_03_QEMU_VM.md` + `tools/qemu/` scripts | ⬜ | ⭐ The critical enabling document |
+| T-147 | 🔴 | Clear Setup Guide 03's `[UNVERIFIED]` markers from the learner's V5 output | ⏸️ | Blocked on T-015. The boot log becomes documented expected output. |
 | T-113 | 🟡 | `Setup_04_IDE_And_Tooling.md` | ⬜ | VS Code QNX Toolkit, Momentics, qconn, remote gdb |
 | T-114 | 🟡 | `Setup_05_Troubleshooting.md` | ⬜ | Starts small, grows with every failure we hit |
 | T-115 | 🟡 | Chapters 04–08 | ⬜ | |
@@ -153,6 +154,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | **Setup Guide 03 published.** T-112 closed. New learner item T-015 (run block V5) and author item T-147 (clear its markers). |
 | 1.5 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** T-011, T-012, T-141, T-144, T-200 closed. T-202 promoted to a learner item (SDP build number still unreported). T-112 (Setup Guide 03) unblocked and 🔴. **T-102 Chapter 00 off hold.** |
 | 1.4 | 2026-08-26 | **Block V2 complete.** T-003, T-010 and T-146 closed; Risk R1 closed. T-011 promoted to 🔴 and unblocked. T-014 added (optional licence-flow detail for Chapter 04). |
 | 1.3 | 2026-08-26 | **Block V1 verified.** T-008 and T-009 closed; T-145 added and closed (Setup Guide 01 → v2.0). T-013 re-scoped to every session. T-144 added for Setup Guide 02. |

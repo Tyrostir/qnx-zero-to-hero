@@ -1,8 +1,8 @@
 ---
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
-version: 1.3
-status: ✅ Blocks V1–V4 all complete. Setup Guides 01 and 02 verified.
+version: 1.4
+status: Active — V1–V4 ✅ complete; **V5 (QEMU VM) pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -99,6 +99,7 @@ Worked / Failed. Notes: ...
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
+| **V5** — the QEMU VM | 👉 **Next.** Setup Guide 03 is written and waiting |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -112,10 +113,10 @@ Neither gates anything; both improve the course.
 | **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listAvailablePackages` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
 | **R2 / T-014** | Did QNX Software Center install via the **graphical** installer under WSLg, or did you need the **headless** route (`-- --unattended`)? Plus the licence approval latency and the portal's real accept/deploy button labels. | Setup Guide 02 §8 currently offers two routes as equals. It should state which one actually works and keep the other as a fallback. |
 
-### Next verification block
+### 👉 Next verification block: **V5 — the QEMU VM**
 
-**Setup Guide 03 — the QEMU VM.** Not yet written (T-112); it was blocked on having a real SDP to
-test against, and now is not. That block ends at a `qnx#` prompt.
+[Setup Guide 03](../guides/Setup_03_QEMU_VM.md) is now written. Block **V5** below verifies it, and
+ends at a `qnx#` prompt with your own binary running on it.
 
 ---
 
@@ -382,6 +383,115 @@ host$ ./tools/check-environment.sh
 
 ---
 
+## 7a. Block V5 — The QEMU VM (Setup Guide 03)
+
+> 🎯 **Goal:** a booting QNX system, reachable over SSH, running the binary you cross-compiled.
+> ⏱️ 45–75 minutes plus a ~2–4 GB download.
+> 📖 Follow [Setup Guide 03](../guides/Setup_03_QEMU_VM.md).
+>
+> ⚠️ **This is the block most likely to find bugs.** It involves networking, graphics and nested
+> virtualization on a host newer than QNX documents. Setup Guide 02 yielded three real errors; expect
+> at least one here.
+
+### V5.1 — Install the QEMU quick-start package
+
+```bash
+host$ cd ~/qnx/qnxsoftwarecenter
+host$ ./qnxsoftwarecenter_clt -listAvailablePackages
+```
+
+📋 **Paste:** the full package list.
+🎯 **Double duty:** it names the quick-start package *and* gives the **exact SDP build number**
+(**T-202**), which every chapter's front matter must record. This is the one command that closes both.
+
+### V5.2 — Unpack the image
+
+```bash
+host$ cd ~/qnx800/images/qemu
+host$ ls -lh
+host$ ./unpack_qemu_image.sh
+host$ ls -lh output/
+```
+
+📋 **Paste:** both listings — the real archive names, and what `output/` contains.
+🎯 **Why:** Setup Guide 03 §5 currently *predicts* `ifs.bin` and `disk-qemu.vmdk`.
+
+### V5.3 — Boot 🎉
+
+```bash
+host$ cd ~/qnx800/images/qemu
+host$ mkqnximage --run
+```
+
+📋 **Paste: the entire boot log**, from the first line to the login prompt.
+🎯 **The most valuable single artefact in this block.** It names every driver that starts, the memory
+layout, and the exact QNX build. Chapters 09 and 21 dissect it line by line, and it becomes the
+documented expected output for every future reader.
+
+Log in as `root` / `root`.
+
+📋 **Confirm:** did you reach a `#` prompt? That is milestone **M2 — "It boots"**.
+
+### V5.4 — First contact
+
+```bash
+qnx# uname -a
+qnx# pidin
+qnx# pidin info
+qnx# ls /
+qnx# ls /proc/boot
+```
+
+📋 **Paste:** all five.
+🎯 **Why:** `pidin` output is course material — it shows drivers running as ordinary user-space
+processes, which is the microkernel argument made concrete (Chapter 09). `/proc/boot` is the contents
+of `ifs.bin` seen as a filesystem (Chapter 21).
+
+### V5.5 — Networking ⚠️ *the predicted trouble spot*
+
+```bash
+qnx# ifconfig
+```
+
+and from a second host terminal:
+
+```bash
+host$ cd ~/qnx800/images/qemu
+host$ mkqnximage --getip
+host$ ssh root@<ip>
+```
+
+📋 **Report:** whether the VM got an IP, and **which networking route worked** — the default
+`virbr0` bridge, systemd/libvirt enabled in WSL2, `virsh net-start default`, or a fallback to QEMU
+user-mode NAT with port forwarding.
+🎯 **Why this matters most:** WSL2 does not enable systemd by default, so libvirt's `virbr0` bridge
+may never exist. Whichever route works becomes the documented one and the others become §13.
+See [Setup Guide 03 §12.1](../guides/Setup_03_QEMU_VM.md#121-networking-the-virbr0-bridge).
+
+### V5.6 — Run your binary 🎉
+
+```bash
+host$ scp /tmp/hello_qnx root@<ip>:/tmp/
+qnx# cd /tmp && chmod +x hello_qnx && ./hello_qnx
+```
+
+📋 **Paste:** the output, including the PID.
+🎯 **What this proves:** the complete embedded loop — edit, cross-compile, deploy, run — works end to
+end. With this confirmed, every lab in the course is executable.
+
+### V5.7 — Graphics and shutdown
+
+📋 **Report:** did an SDL/graphical window open under WSLg, did it fall back to software rendering,
+or did it fail? *(Not important for the course — every lab is text — but it should be documented.)*
+
+```bash
+host$ mkqnximage --stop
+```
+
+or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -406,10 +516,18 @@ host$ ./tools/check-environment.sh
 | V4.3 | Prove it will not run on Linux | 👤 | V4.2 | Setup 02 §11.4 | ✅ failed exactly as predicted |
 | V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ✅ **24 pass · 3 warn · 0 fail** |
 | — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ✅ Setup 02 → v2.0 |
-| — | Write `Setup_03_QEMU_VM.md` | 🤖 | V4.4 | **T-112** | ⬜ **unblocked** |
+| — | Write `Setup_03_QEMU_VM.md` + `tools/qemu/` | 🤖 | V4.4 | **T-112** | ✅ done 2026-08-26 |
+| **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 · **T-202** | ⬜ **next** |
+| V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ⬜ |
+| V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ⬜ |
+| V5.4 | First contact (`pidin`, `/proc/boot`) | 👤 | V5.3 | Setup 03 §8 | ⬜ |
+| V5.5 | Networking + SSH ⚠️ | 👤 | V5.3 | Setup 03 §9 · §12.1 | ⬜ |
+| V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ⬜ |
+| V5.7 | Graphics + clean shutdown | 👤 | V5.3 | Setup 03 §11 · §12.2 | ⬜ |
+| — | Clear Setup Guide 03's markers | 🤖 | V5.7 | — | ⏸️ |
 
-> ✅ **All blocks complete.** Host prepared, licence deployed, SDP installed, cross-compile proven.
-> Setup Guides 01 and 02 are verified. The next verification block belongs to Setup Guide 03.
+> ✅ **V1–V4 complete.** Host prepared, licence deployed, SDP installed, cross-compile proven.
+> 👉 **V5 is next** — boot the VM and run your binary on it.
 
 ---
 
@@ -496,6 +614,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | **Block V5 added** for Setup Guide 03 — 7 checkpoints ending at a booting QNX VM running the learner's own binary. V5.1 also closes T-202. |
 | 1.3 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** SDP toolchain table added; three guide bugs recorded; R2 closed; T-202 and the QSC install route flagged as the only open detail. |
 | 1.2 | 2026-08-26 | **Block V2 complete.** Licence deployed; Risk R1 closed; V3 unblocked and is now the next action. §3 rewritten as a status board. |
 | 1.1 | 2026-08-26 | **Block V1 verified.** All six V1 checkpoints ✅; T-008 and T-009 cleared; real host versions recorded; V1.5's documented output replaced with the real SeaBIOS/iPXE result. |

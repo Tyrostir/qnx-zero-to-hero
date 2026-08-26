@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.3
+version: 1.4
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -171,11 +171,11 @@ filesystem costume.
 | Phase | **1 — Environment setup** |
 | Plan | ✅ Approved 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **2 / 5** — **both ✅ verified end to end**, zero `[UNVERIFIED]` markers |
+| Setup guides published | **3 / 5** — 01, 02 ✅ verified · **03 published**, `[UNVERIFIED]` pending block V5 |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
 | QNX SDP | ✅ **8.0 installed** at `~/qnx800` · cross-compiler **GCC 12.2.0** · cross-compile proven |
-| QNX VM booting | ❌ Not yet — Setup Guide 03 is unwritten (T-112, unblocked) |
+| QNX VM booting | ❌ Not yet — Setup Guide 03 is written; the learner runs block V5 next |
 | VM booting | ❌ Not yet |
 | Doubts logged | 5 (D-001…D-005, all answered) |
 | ADRs | 24 (ADR-001…ADR-024) |
@@ -256,7 +256,12 @@ Much of what is online about QNX is stale. These were checked against live QNX s
   **SDP 8.0** (`~/qnx800`) → IDE.
 - ⚠️ Host support: **x86-64 Windows or Linux only. No macOS. No ARM hosts.**
 - **QSTI** = *Quick Start Target Image* — official **pre-built** images for **QEMU** and RPi 4/5.
-  This is how the course boots QNX (ADR-004).
+  This is how the course boots QNX (ADR-004). QSC package **`com.qnx.qnx800.quickstart.qemu`** →
+  `~/qnx800/images/qemu` → `./unpack_qemu_image.sh` → `output/{ifs.bin, disk-qemu.vmdk}`.
+- ⚠️ **QSTI and `mkqnximage` are NOT alternatives** — a natural misreading of ADR-004. QSTI is the
+  *image*; **`mkqnximage --run`** is the *launcher* (also `--stop`, `--getip`). Login **root/root**.
+  Defaults 8 CPUs / 4 GB (>16 GB may misbehave) / 1280×768; network `bridge,br=virbr0`; display
+  `sdl,gl=on`; serial on `mon:stdio` (hence `Ctrl+A` `X`).
 - **CTI** = *Custom Target Image* — official build-your-own flow. Used in Ch 21.
 - QSTI-for-QEMU is documented for **Ubuntu 22.04 / 24.04**; the execution box runs **26.04** → risk **R9**.
 - Non-commercial **allows**: learning, academia, hobby/maker, **writing training material or books
@@ -313,6 +318,7 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **007** | 2026-08-26 | Claude (Opus 5) | **Setup Guide 03 published** (729 lines) from QNX's official QSTI-for-QEMU docs, read live. Key finding: **QSTI and `mkqnximage` are not alternatives** — QSTI is the image, `mkqnximage --run` is the launcher. Documented the underlying QEMU flags, first-contact commands, SSH, and running the Setup Guide 02 binary on the target. Predicted three WSL2 failure modes (chiefly the `virbr0` bridge → H-9). Wrote `tools/qemu/qnx-vm.sh`. Added verification block **V5** (7 checkpoints); V5.1 also closes T-202. |
 | **006** | 2026-08-26 | Claude (Opus 5) | **Blocks V3 + V4 complete — all verification done.** QNX SDP 8.0 installed at `~/qnx800`; cross-compile proven (`ldqnx-64.so.2` interpreter; Linux refuses to run the binary); `24 passed · 3 warnings · 0 failed`. Setup Guide 02 → **v2.0**, all markers cleared. **Three real bugs found by running the guide**: missing `#include <unistd.h>`, a false claim that `file` prints "QNX", and a disk estimate ~4× low (~43 GB actual). `PLAN.md` disk budget corrected to ~50 GB. **Risk R2 closed.** T-202 (SDP build number) still open. Learner pushed to GitHub manually. |
 | **005** | 2026-08-26 | Claude (Opus 5) | **Block V2 complete.** Learner confirmed the QNX Everywhere licence is requested, accepted and **deployed**. T-003 and T-010 cleared; **Risk R1 closed** — no external blocker remains anywhere in the project. Setup Guide 02 → v1.1, `[UNVERIFIED]` cleared from §§3–5 and scoped to Part B. Block V3 (QSC + SDP install) promoted to the next action. Git author name spelling corrected. |
 | **004** | 2026-08-26 | Claude (Opus 5) | **Block V1 verified.** Learner ran Setup Guide 01 on the host and reported output: `19 passed · 6 warnings · 0 failed` (was 13/9/3). T-008 and T-009 cleared; Risk R9 closed (no package-name drift on 26.04); Risk R3 closed. Setup Guide 01 → **v2.0**, all `[UNVERIFIED]` removed and every expected-output block replaced with real observed output. Repo path corrected to `~/exercises/qnx-zero-to-hero`. Git identity updated. |
@@ -335,6 +341,7 @@ that is precisely why the onboarding documents exist.
 | ~~H-3~~ | Setup Guides 01 and 02 are both verified end to end. Three real bugs were found in Setup Guide 02 by running it. | ✅ Closed 2026-08-26 |
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
+| **H-9** | **Setup Guide 03's default networking may not work on WSL2.** It uses `bridge,br=virbr0`, which libvirt creates as a systemd service — and WSL2 does not enable systemd by default. Documented in §12.1 with three fallbacks, but **unverified**. If the learner reports no IP, this is the first place to look. | ⚠️ Predicted |
 | **H-8** | **T-202 — the SDP build number was never captured.** `PLAN.md` §5 requires every chapter's front matter to record the SDP build it was written against (Risk R5). No chapter can state it today. Ask the learner for `qnxsoftwarecenter_clt -listAvailablePackages` before writing chapters that depend on it. | ⬜ Open |
 | **H-6** | Risk **R10** — authoring all three paths in full costs ~20–30 % more effort per chapter. | ✅ Accepted deliberately |
 | **H-7** | `CompactContext.md` (Tier 2) must never gain Tier 3 detail, even though it is the "re-prime a session" document. **This file is the Tier 3 equivalent.** | ⚠️ Ongoing discipline |
@@ -345,6 +352,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | Session 007: Setup Guide 03 published; QSTI/`mkqnximage` distinction recorded; H-9 added. |
 | 1.3 | 2026-08-26 | Session 006: SDP verified, both setup guides done, H-3 closed, H-8 added (SDP build number), Chapter 00 off hold. |
 | 1.2 | 2026-08-26 | Session 005: licence deployed, Block V2 complete, R1 closed, hazards H-3/H-5 updated, Git identity spelling fixed. |
 | 1.1 | 2026-08-26 | Session 004: Block V1 verified; host state, hazards H-3/H-4/H-5 and the session table updated. |

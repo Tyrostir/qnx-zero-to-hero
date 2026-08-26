@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.5
+version: 1.6
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -711,10 +711,94 @@ onward as `Karthikeyan Kasivishwanathan`. **History is now published and must no
 
 ---
 
+## 2026-08-26 — Session 007 (Setup Guide 03 published)
+
+### 🔍 VERIFIED — QSTI and `mkqnximage` are not alternatives
+
+QNX's official *QSTI for QEMU* documentation was read directly (about, getting started, additional
+specifications, troubleshooting — all four pages, 2026-08-26).
+
+**The finding.** ADR-004 records the VM strategy as "QSTI → CTI → raw `mkifs`", with `mkqnximage`
+demoted to "still taught, but as an alternative, not the primary route". That reads as though QSTI
+*replaced* `mkqnximage`. It does not:
+
+| | |
+|---|---|
+| **QSTI** | The **image** — a pre-built QNX system, installed as QSC package `com.qnx.qnx800.quickstart.qemu`, unpacked by `unpack_qemu_image.sh` into `output/ifs.bin` and `output/disk-qemu.vmdk`. |
+| **`mkqnximage`** | The **launcher** — `--run`, `--stop`, `--getip`. It is how QNX's own QSTI guide starts the image. |
+
+**ADR-004 is not changed** — the QSTI → CTI → `mkifs` progression stands, and the reasoning behind it
+is untouched. Only the *mechanics* differ from what was assumed. Recorded here so no future author
+tries to "correct" Setup Guide 03 into avoiding `mkqnximage`.
+
+---
+
+### 🔍 VERIFIED — QSTI's default QEMU configuration
+
+Documented flag by flag in Setup Guide 03 §6, per course rule #4 (nothing is a black box).
+
+| Setting | Default |
+|---------|---------|
+| Kernel / disk | `output/ifs.bin` · `output/disk-qemu.vmdk` (IDE) |
+| CPUs / RAM | `-smp 8` · `-m 4G` — ⚠️ QNX warns **above 16 GB may misbehave** |
+| Network | `bridge,br=virbr0`, MAC `52:54:00:91:01:ea` |
+| Display | `sdl,gl=on`, `vga none`; default mode `1280 x 768 @ 60` |
+| Serial | `mon:stdio` — hence `Ctrl+A` then `X` to quit |
+| Credentials | `root` / `root` |
+
+Also recorded: on hosts with **more than 32 GB RAM**, QNX's *Screen* graphics subsystem can fail to
+start, fixed with `host-phys-bits-limit=39` (Intel) or `40` (AMD). The host has 23 GB, so it should
+not apply — documented anyway, because it is an obscure failure with a non-obvious fix.
+
+---
+
+### 🔍 VERIFIED — Ubuntu 26.04 skips QNX's build-QEMU-from-source step
+
+QNX's guide supports **Ubuntu 22.04 / 24.04** and instructs those users to build **QEMU 10 from
+source**, because their distributions ship older versions. Ubuntu 26.04 ships **QEMU 10.2.1** in
+`apt`, already verified installed in block V1.
+
+**Risk R9 — being ahead of the documented platform — works in our favour here.** Setup Guide 03 §2.2
+says so explicitly, so the reader does not go looking for a build step they do not need.
+
+---
+
+### ❓ OPEN — Predicted: bridged networking may fail on WSL2 (hazard H-9)
+
+QSTI defaults to `bridge,br=virbr0`. That bridge is created by **libvirt**, which runs as a
+**systemd** service — and **WSL2 does not enable systemd by default**. The VM may therefore boot with
+no network.
+
+Setup Guide 03 §12.1 documents three fallbacks in order of preference: enable systemd via
+`/etc/wsl.conf`, start the libvirt default network by hand (`virsh net-start default`), or fall back
+to QEMU user-mode NAT with port forwarding (`hostfwd=tcp::2222-:22`, plus **8000** for `qconn` in
+Chapter 08).
+
+**This is a prediction, not an observation.** Whichever route works becomes the documented one and
+the others move to the troubleshooting section. Verified by block **V5.5**.
+
+---
+
+### 🆕 DECIDED — `tools/qemu/qnx-vm.sh` is a convenience, never the taught path
+
+A small wrapper ships with the repository: `run`, `stop`, `ip`, `ssh`, `status`.
+
+**Why it is deliberately thin.** It does nothing `mkqnximage` cannot. It exists to fail with a useful
+message instead of `command not found`, to source the SDP environment if the user forgot, and to
+remember the image directory.
+
+**Why the guide tells the reader to use the real commands first.** Course rule #4. A convenience
+wrapper introduced before the underlying command is understood is exactly the black box this course
+promises not to create. Setup Guide 03 §7.2 states this explicitly and invites the reader to read the
+script, which is short and commented.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | Session 007 appended: QSTI/`mkqnximage` distinction, QSTI's default QEMU configuration, Ubuntu 26.04 advantage, predicted WSL2 bridge failure (H-9), and the `qnx-vm.sh` convention. |
 | 1.5 | 2026-08-26 | Session 006 appended: SDP verified, 3 guide bugs recorded, R2 closed, T-202 opened, history published. |
 | 1.4 | 2026-08-26 | Session 005 appended: licence flow verified, Risk R1 closed, Git identity spelling revised. |
 | 1.3 | 2026-08-26 | Session 004 appended: 4 verifications (Setup Guide 01 executed, R9 closed, R3/KVM closed, repo path corrected) and 1 decision (Git identity). |
