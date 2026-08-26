@@ -10,6 +10,13 @@ created: 2026-08-25
 
 The course itself. Chapters are published in order and appear here as they are written.
 
+## Published
+
+| # | Chapter | Paths | Time |
+|---|---------|-------|------|
+| 00 | [How To Use This Course](Chapter00_HowToUseThisCourse.md) | 🐣🚶🏃 | 25 m |
+
+
 > 📑 Full chapter list with status, path tags and time estimates:
 > **[../TableOfContents.md](../TableOfContents.md)**
 > 📍 Current progress: **[../meta/CourseState.md](../meta/CourseState.md)**

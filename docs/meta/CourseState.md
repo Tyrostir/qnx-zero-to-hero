@@ -24,9 +24,9 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Repository** | https://github.com/Tyrostir/qnx-zero-to-hero |
 | **Learner** | Tyrostir — starting-level embedded engineer (C/C++ solid, Python strong) |
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
-| **Current phase** | ✅ **Phase 1 complete** → moving to **Phase 2: writing chapters** |
+| **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **0 / 34** |
+| **Chapters published** | **1 / 34** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs completed** | **0 / 21** |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -38,7 +38,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 ### Progress bar
 
 ```text
-Part 0  Orientation        [                    ]   0 %   (0/4 chapters)
+Part 0  Orientation        [█████               ]  25 %   (1/4 chapters)
 Part 1  Environment        [                    ]   0 %   (0/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
@@ -46,7 +46,7 @@ Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [                    ]   0 %   (0/34)
+OVERALL                    [                    ]   3 %   (1/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | Nothing blocking. Optional: `cat ~/qnx800/images/qemu/README.md` (T-017). Otherwise, **read Chapter 00** when it lands. |
-| 🤖 **Me — next turn** | ⭐ **Chapter 00 — How To Use This Course** (T-102). Nothing gates it. |
+| 👤 **You — do next** | 📕 **Read [Chapter 00](../chapters/Chapter00_HowToUseThisCourse.md)** (~25 min) and do its three labs. Confirm the path you are taking, and tell me anything in it that reads wrong. |
+| 🤖 **Me — next turn** | **Chapter 01 — What Is a Real-Time System?** (T-103). Hard vs. soft real-time, determinism, latency, jitter, WCET. No software needed. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -111,7 +111,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
-| 00 | How To Use This Course | 📄 | — | |
+| 00 | How To Use This Course | 📕 | — | v1.0. Sets the template for all 34 chapters. |
 | 01 | What Is a Real-Time System? | 📄 | — | |
 | 02 | What Is QNX? | 📄 | — | |
 | 03 | Why & Where QNX Is Used | 📄 | — | |
@@ -197,7 +197,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | Milestone | Definition | Status | Date reached |
 |-----------|-----------|--------|--------------|
 | **M0** Plan approved | `PLAN.md` status = Approved | ⬜ In progress | — |
-| **M1** "I get it" | Ch 00–03 read | ⬜ | — |
+| **M1** "I get it" | Ch 00–03 read | 🔄 In progress — Ch 00 published | — |
 | **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | ✅ 🎉 **COMPLETE** | 2026-08-26 |
 | **M3** "I speak QNX" | Ch 09–15 + labs done | ⬜ | — |
 | **M4** "I can extend the OS" | Resource manager written and working | ⬜ | — |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 011 — 2026-08-26 📕 **First chapter published**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 00 and establish the template every later chapter follows. |
+| **Done** | 📕 **Chapter 00 — How To Use This Course** published (897 lines), the first of 34<br>• Follows `PLAN.md` §5 exactly: promise → 🏃 Fast-Track Summary → objectives → prerequisites → mental model → problem → concept → mechanism → notation → worked example → labs → mastery check → recap → cheat sheet<br>• **Three labs, all runnable on the now-verified VM:** ⭐ Lab 00.1 (prove the environment, meet `uname`/`pidin`/`pidin info`/`ls /proc/boot`), Lab 00.2 (working habits: two terminals, SSH keys, `CourseState.md`), and a **💥 Break It** that runs `mkqnximage` from the wrong directory to teach reading an error rather than reaching for `--force`<br>• 🐣 **Path A activity** reads a live `pidin` listing — no coding, no compiler<br>• Every expected output is real, from the verified target<br>• §4 is a **notation reference** — the chapter's "API" is the course's own conventions<br>• §5 walks through a sample chapter section and explains *why* each element is there<br>• Glossary +10 terms; sections L and U added and kept alphabetical<br>• Style audit clean: one H1, no heading skips, no GitHub-only syntax, 2 Mermaid diagrams each with a text description |
+| **Learner decisions** | "Go ahead and write Chapter 00" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 01 — What Is a Real-Time System?** |
 
 ### Session 010 — 2026-08-26 ✅ **Phase 1 complete**
 
@@ -343,6 +354,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | Session 011: **Chapter 00 published** — 1/34. Phase 2 begins. |
 | 1.9 | 2026-08-26 | Session 010: **Phase 1 complete.** Block V5 done, Setup Guide 03 → v2.0, D-009 corrected, doubts to D-013. Next: Chapter 00. |
 | 1.8 | 2026-08-26 | Session 009: **M2 reached — the VM boots.** Setup Guide 03 §§4–9 verified; D-009/D-010; H-9 closed. |
 | 1.7 | 2026-08-26 | Session 008: V5.3 diagnosed and fixed; three bugs corrected; D-006/007/008 logged; ADR-025. |

@@ -1,10 +1,10 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.0
+version: 1.1
 status: Active (living document)
 created: 2026-08-25
-last_updated: 2026-08-25
+last_updated: 2026-08-26
 update_trigger: "Every time a chapter introduces a new term"
 ---
 
@@ -38,6 +38,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Core lab (⭐)** | One of the six labs every coding path must complete: L06 (boot), L08 (deploy/debug loop), L13 (message passing), L17 (resource manager), L21 (custom IFS), L25 (diagnose a hung system). | 00 |
+| **Critical path** | The six chapters that carry the course: 05 → 06 → 08 → 13 → 17 → 21. If you only ever do six chapters, do those. | 00 |
 | **Channel** | A server-side endpoint that receives messages. Created with `ChannelCreate()`. Clients create a **connection** to it. | 13 🌱 |
 | **Connection** | A client-side handle to a server's **channel**, created by `ConnectAttach()` or, indirectly, by `open()`. It *is* a file descriptor — this is why `open()` and message passing are the same thing in QNX. | 13 🌱 |
 | **Cross-compilation** | Building on one machine/architecture (your x86_64 Linux host) for another (the QNX target). The normal mode of QNX development. | 08 🌱 |
@@ -46,6 +48,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Doubt (`D-NNN`)** | A permanent, numbered record of a question and its full answer, in [`Doubts.md`](../meta/Doubts.md). Prefix an aside with `/btw` to guarantee one is created. | 00 |
 | **`devb-*`** | Naming convention for QNX **block** device drivers (e.g. `devb-ahci` for SATA). | 20 🌱 |
 | **`devc-*`** | Naming convention for QNX **character** device drivers (e.g. `devc-ser8250` for a serial port). | 20 🌱 |
 | **`devctl()`** | QNX's device-control call — the POSIX-flavoured replacement for `ioctl()`. Sends a typed command plus data to a resource manager. | 18 🌱 |
@@ -90,10 +93,17 @@ update_trigger: "Every time a chapter introduces a new term"
 |------|-----------|-----|
 | **Jitter** | Variation in the timing of a repeated event. Low average latency with high jitter is often worse for control systems than higher but stable latency. | 01 🌱 |
 
+## L
+
+| Term | Definition | Ch. |
+|------|-----------|-----|
+| **Learning path** | One of three routes through the same chapters: 🐣 **A** (understand, no coding), 🚶 **B** (full course with all labs), 🏃 **C** (QNX deltas only, ~1 week). Markers inside each chapter, not separate documents. | 00 |
+
 ## M
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`mkqnximage`** | The SDP tool that builds, launches (`--run`), stops (`--stop`) and queries (`--getip`) a QNX virtual machine. It identifies an image directory by the presence of `local/` and `output/`. Not the same thing as **QSTI**, which is the image it launches. | 00 |
 | **Message passing** | QNX's fundamental IPC: a *synchronous* `MsgSend()` → `MsgReceive()` → `MsgReply()` exchange between processes. Everything in QNX — files, devices, drivers — is built on it. | 13 🌱 |
 | **Microkernel** | An OS design where the kernel provides only scheduling, IPC, interrupt dispatch, timers and basic memory management. Drivers, filesystems and network stacks run as ordinary user-space processes. | 09 🌱 |
 | **`mkifs`** | The tool that turns a **build file** into a bootable **IFS** image. | 21 🌱 |
@@ -118,6 +128,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`pidin`** | *Process information* — QNX's `ps`, and the single most-used diagnostic command in this course. Lists **threads**, with each one's priority, scheduling policy and **blocking state**. `ps` has no equivalent for that last column. | 00 |
+| **Process ID (QNX)** | A 32-bit identifier that is neither small nor sequential — expect values like `14032920`. A QNX PID names an **addressable message-passing endpoint**, so IDs are spread across a large space to make a stale reference fail rather than reach a recycled process. | 00 |
 | **Pathname space** | QNX's unified namespace mapping paths to the processes that serve them. When you `open("/dev/ser1")`, the process manager tells you which server owns that path; you then message that server directly. | 16 🌱 |
 | **`pidin`** | *Process Information* — the most important QNX diagnostic command. Shows processes, threads, priorities, blocking states, memory, and what each thread is waiting on. | 07 🌱 |
 | **POSIX** | The IEEE standard for Unix-like OS interfaces. QNX is POSIX-compliant, which is why your C/C++ knowledge transfers. | 02 🌱 |
@@ -131,6 +143,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`qnxuser`** | The unprivileged account (UID 1000) on the QSTI QEMU image, password `qnxuser`, holding full `sudo`. **The account you must use for SSH** — the image ships `PermitRootLogin no`, so `root` is refused by password *and* key. | 00 |
+| **QSTI** | *Quick Start Target Image* — QNX's official **pre-built** system image for QEMU and Raspberry Pi. Installed as a QNX Software Center package and launched with `mkqnximage --run`. The course's day-one target. | 00 |
 | **`qcc` / `q++`** | The QNX C and C++ compiler drivers — wrappers around GCC that select the right target, headers and libraries. | 08 🌱 |
 | **`qconn`** | A daemon on the QNX target that lets host tools (IDE, `gdb`, System Analysis Toolkit) inspect, launch and debug processes remotely. Listens on TCP port 8000 by default. | 08 🌱 |
 | **QDL** | *QNX Development Licence* — the licence terms governing your use of QNX software. | 04 🌱 |
@@ -166,6 +180,12 @@ update_trigger: "Every time a chapter introduces a new term"
 | **`tracelogger`** | The tool that captures kernel event traces for later analysis in the System Analysis Toolkit. | 26 🌱 |
 | **Typed memory** | QNX's mechanism for allocating from specific, named physical memory regions (e.g. DMA-capable or device-specific memory). | 15 🌱 |
 
+## U
+
+| Term | Definition | Ch. |
+|------|-----------|-----|
+| **`[UNVERIFIED]`** | A marker on a step that was written from documentation but **has not been executed on a real machine**. Removed only when someone runs it and pastes back the real output. There are currently none in this course. | 00 |
+
 ## W
 
 | Term | Definition | Ch. |
@@ -174,8 +194,10 @@ update_trigger: "Every time a chapter introduces a new term"
 
 ---
 
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Chapter 00: +10 terms (learning path, core lab, critical path, doubt, `[UNVERIFIED]`, `pidin`, QNX process ID, QSTI, `mkqnximage`, `qnxuser`). Sections L and U added and the index kept alphabetical. |
 | 1.0 | 2026-08-25 | Seeded with 55 terms during planning. All marked 🌱 pending their chapter. |

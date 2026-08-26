@@ -38,17 +38,17 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 | | |
 |---|---|
-| Phase | ✅ **1 complete** → **2: writing chapters** |
+| Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **0 / 34** |
+| Chapters published | **1 / 34** — Ch 00 📕 |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | ⭐ **Chapter 00 — How To Use This Course** (T-102) |
-| Next (learner) | Nothing blocking. Read Chapter 00 when it lands. |
+| Next (me) | **Chapter 01 — What Is a Real-Time System?** (T-103) |
+| Next (learner) | 📕 **Read Chapter 00** + its 3 labs; confirm your path (T-019) |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -199,6 +199,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | Regenerated after Session 011: Chapter 00 published; Phase 2 begins. |
 | 1.9 | 2026-08-26 | Regenerated after Session 010: **Phase 1 complete**; loop closed; SSH facts corrected; next action is Chapter 00. |
 | 1.8 | 2026-08-26 | Regenerated after Session 009: **M2 reached**; verified target facts recorded; SSH-as-root trap noted. |
 | 1.7 | 2026-08-26 | Regenerated after Session 008: the nested `qemu/qemu` trap recorded; ADR-025; 8 doubts. |

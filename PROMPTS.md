@@ -62,6 +62,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#7](#prompt7) | 2026-08-26 | Claude (Opus 5) | Stuck at V5.3; log in `toAgent/3.BlockV5.1V5.3-StuckAtV5.3.md`; document the `/btw` questions | ✅ Diagnosed: nested `qemu/` directory · 3 bugs fixed · **D-006/007/008** · **ADR-025** (`/btw`) |
 | [PROMPT#8](#prompt8) | 2026-08-26 | Claude (Opus 5) | V5.3–V5.5 done, stuck at V5.5 (SSH) | 🎉 **M2 — the VM boots** · SSH fix: use `qnxuser` (**D-009**) · boot warnings benign (**D-010**) · **H-9 closed** · Setup 03 → v1.2 |
 | [PROMPT#9](#prompt9) | 2026-08-26 | Claude (Opus 5) | V5.6–V5.7 done; V5 complete; three observations to explain | ✅ **Phase 1 complete** · `Hello from QNX!` ran on target · Setup 03 → v2.0 · **D-009 corrected** · +D-011/012/013 |
+| [PROMPT#10](#prompt10) | 2026-08-26 | Claude (Opus 5) | "Go ahead and write Chapter 00" | 📕 **Chapter 00 published** (1/34) — the template's reference implementation · 3 labs · Glossary +10 |
 
 ---
 
@@ -1286,10 +1287,89 @@ Say the word and I'll write it.
 
 ---
 
+## PROMPT#10
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 011 |
+| **Context** | Phase 1 complete; the environment is verified and nothing blocks the course content. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> Go ahead and write Chapter 00
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 00 published — 1 / 34
+
+**[docs/chapters/Chapter00_HowToUseThisCourse.md](docs/chapters/Chapter00_HowToUseThisCourse.md)** — 897 lines, ~25 minutes to read, ~25 minutes of labs.
+
+It follows `PLAN.md` §5 exactly, so it doubles as **the reference implementation of the template** all 34 chapters use. Future chapters get written by matching it rather than re-reading the spec.
+
+## What's in it
+
+**§§1–3 — the reading manual.** Why the three paths exist, how to pick one by *time available* rather than ego, the chapter skeleton, every callout box, and the prompt convention (`host$` / `qnx#` / `qnx$`) with a blunt warning that running the right command on the wrong machine is the top way to waste an hour here.
+
+**§4 — the Notation Reference.** Chapter 00 teaches no QNX API, so its "API" section is the course's own notation: symbols, identifier forms (`D-NNN`, `ADR-NNN`, `T-NNN`), the lab directory layout, and a **target quick reference** with your verified credentials in it. That's the section you'll come back to.
+
+**§5 — Worked Example.** A sample section written as a future Chapter 11 would be, then a table explaining *why each element is there*. Teaching you to read the course, using the course.
+
+## The three labs — all on your verified VM
+
+| | |
+|---|---|
+| ⭐ **Lab 00.1** | Prove the environment and meet the four commands you'll use in nearly every later lab: `uname -a`, `pidin`, `pidin info`, `ls /proc/boot`. Real expected output from *your* target. |
+| **Lab 00.2** | Three habits: one terminal per machine, **SSH keys instead of passwords** (you'll `scp` hundreds of times), and reading `CourseState.md` after a break. |
+| 💥 **Break It** | Run `mkqnximage` from one directory too high — deliberately reproducing D-006. |
+| 🐣 **Path A** | Read a live `pidin` listing. No coding, no compiler. |
+
+**The break-it exercise is the one I'd point at.** The course's first deliberate failure shouldn't teach an API — it should teach the *diagnostic habit*. This one costs nothing, has a real error message, and carries a genuine trap: the message recommends `--force`, and `--force` would quietly build a new image and ignore the 47 GB one you unpacked. The reader is asked to work that out before the answer is revealed.
+
+> An error message tells you what the program *believes*, and offers an escape hatch for the case where the program is wrong. Ask which it is **before** reaching for the flag.
+
+It also turns a bug this course actually hit into teaching material — which is the whole point of having logged it.
+
+## The verification work paying off
+
+Chapter 00 could have been pure prose. It isn't, because your five verification blocks mean **every expected output in it is real**. Lab 00.1's answers teach the microkernel argument straight from your own `pidin` listing — `io-sock` is the entire TCP/IP stack sitting there as an ordinary process — and the `ldqnx-64.so.2` question closes the loop Setup Guide 02 opened.
+
+**Also done:** Glossary +10 terms (with new L and U sections, kept alphabetical), TOC and chapters index updated, README now shows 1/34 and points new readers at Chapter 00 first.
+
+**Style audit passed mechanically:** one H1, no heading-level skips, no GitHub-only syntax, no raw HTML beyond `<details>`, two Mermaid diagrams each with a text description, relative links only.
+
+---
+
+## 👉 Two things
+
+**1. Read it** (T-019) and do the three labs — about 50 minutes total. Then tell me:
+
+- **which path you're taking** (I've assumed 🚶 B, but Chapter 00 argues for choosing by time available, so it's worth re-deciding now that you've seen the shape of the thing)
+- **anything that reads wrong** — too slow, too fast, a section that doesn't earn its place
+
+That feedback matters more now than it will later. Chapter 00 defines the template; a structural problem caught here costs one rewrite, and caught at Chapter 20 costs twenty.
+
+**2. Say the word for Chapter 01 — What Is a Real-Time System?** Hard vs. soft real-time, determinism, latency, jitter, WCET, and why "fast" and "real-time" are different properties — one of which QNX deliberately trades away for the other. No software needed.
+
+I can write Chapter 01 while you're reading Chapter 00, if you'd rather not serialise.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.8 | 2026-08-26 | PROMPT#10 logged: Chapter 00 published. |
 | 2.7 | 2026-08-26 | PROMPT#9 logged: block V5 complete, Phase 1 complete. |
 | 2.6 | 2026-08-26 | PROMPT#8 logged: milestone M2 reached; SSH-as-root diagnosed. |
 | 2.5 | 2026-08-26 | PROMPT#7 logged: V5.3 diagnosed and unblocked; `/btw` convention adopted. |

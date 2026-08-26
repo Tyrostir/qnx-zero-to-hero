@@ -5,7 +5,7 @@
 **A complete, hands-on, beginner-friendly course on the QNX Real-Time Operating System**
 *for embedded engineers with a C/C++ and Python background.*
 
-[![Course Status](https://img.shields.io/badge/status-in%20progress-yellow)](docs/meta/CourseState.md)
+[![Course Status](https://img.shields.io/badge/chapters-1%2F34-yellow)](docs/meta/CourseState.md)
 [![QNX SDP](https://img.shields.io/badge/QNX%20SDP-8.0-blue)](https://qnx.software/)
 [![Lab Platform](https://img.shields.io/badge/labs-QEMU%2FKVM-green)](docs/guides/Setup_03_QEMU_VM.md)
 [![License](https://img.shields.io/badge/course%20content-CC%20BY--SA%204.0-lightgrey)](LICENSE)
@@ -181,12 +181,12 @@ part of the course material. Chapters cross-reference doubts where relevant.
 
 | | |
 |---|---|
-| **Phase** | 1 — Environment setup |
+| **Phase** | 2 — Writing chapters |
 | **Plan** | ✅ Approved (2026-08-25) |
-| **Chapters published** | 0 / 34 |
-| **Setup guides published** | 2 / 5 — [01 Prerequisites](docs/guides/Setup_01_Prerequisites.md), [02 Licence & SDP](docs/guides/Setup_02_QNX_Account_And_License.md) |
-| **Your next action** | Do Setup Guide 01, then **request your free QNX licence today** (approval takes time) |
-| **My next action** | Write Chapter 00 |
+| **Chapters published** | **1 / 34** — [Chapter 00 — How To Use This Course](docs/chapters/Chapter00_HowToUseThisCourse.md) |
+| **Setup guides published** | **3 / 5, all ✅ verified end to end** — [01 Prerequisites](docs/guides/Setup_01_Prerequisites.md) · [02 Licence & SDP](docs/guides/Setup_02_QNX_Account_And_License.md) · [03 QEMU VM](docs/guides/Setup_03_QEMU_VM.md) |
+| **Verified against** | QNX 8.0.0 (kernel build `2026/02/27`) on QEMU/KVM, Ubuntu 26.04 / WSL2 |
+| **Start here** | [Chapter 00](docs/chapters/Chapter00_HowToUseThisCourse.md), then [Setup Guide 01](docs/guides/Setup_01_Prerequisites.md) |
 
 ---
 

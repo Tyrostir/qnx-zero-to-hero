@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.9
+version: 1.10
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1096,10 +1096,62 @@ relaxed at the finish line.
 
 ---
 
+## 2026-08-26 — Session 011 (Chapter 00 published)
+
+### DECIDED — Chapter 00 is the reference implementation of the chapter template
+
+`PLAN.md` section 5 defines the mandatory chapter skeleton in the abstract. Chapter 00 is now the
+concrete example, and future chapters should be written by matching it rather than by re-reading the
+specification.
+
+**Two adaptations the template needed for a meta-chapter**, recorded so they are not mistaken for
+drift:
+
+| Template section | Chapter 00's version |
+|------------------|----------------------|
+| **4. The API** | **The Notation Reference.** Chapter 00 teaches no QNX API; its "API" is the course's own notation - symbols, prompts, identifiers, lab layout, target quick reference. |
+| **5. Worked Example** | A *sample chapter section* in the house style, followed by a line-by-line reading of why each element is there. Teaching the reader to read, rather than to code. |
+
+Everything else is unchanged: promise, Fast-Track Summary, objectives, prerequisites, mental model,
+problem/concept/mechanism, labs with a break-it and a Path A activity, mastery check with collapsed
+answers, recap, cheat sheet, further reading, what's next, changelog.
+
+---
+
+### DECIDED — Chapter 00's labs use the verified VM rather than being theoretical
+
+Chapter 00 could have been pure prose. It is not, because the environment was verified first:
+
+- **Lab 00.1 (core)** runs `check-environment.sh`, boots the VM, and introduces `uname -a`, `pidin`,
+  `pidin info` and `ls /proc/boot` - the four commands used in almost every later lab. Every expected
+  output is real, from the target verified in block V5.
+- **Lab 00.2** establishes three habits: two terminals (host and target), SSH keys instead of
+  passwords, and reading `CourseState.md` after a break.
+- **The break-it exercise** deliberately runs `mkqnximage` from one directory too high, reproducing
+  **D-006**, and asks the reader to work out what `--force` would actually do before reading the
+  answer.
+
+**Why the break-it exercise is that one.** The course's first deliberate failure should teach the
+*diagnostic habit*, not a QNX API - and this failure costs nothing, has a real error message, and
+carries a genuine trap: the message recommends a flag that would make things worse. It also converts
+a bug the course hit for real into teaching material.
+
+---
+
+### VERIFIED — Chapter 00 passes the style rules mechanically
+
+Audited: exactly one H1, no heading-level skips, no GitHub-only alert syntax, no raw HTML beyond
+`<details>`, two Mermaid diagrams each followed by a one-line text description, all links relative,
+a cheat sheet, and a changelog. Glossary gained 10 terms and two new letter sections, kept
+alphabetical.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | Session 011 appended: Chapter 00 as the template's reference implementation; its two meta-chapter adaptations; labs grounded in the verified VM. |
 | 1.9 | 2026-08-26 | Session 010 appended: Phase 1 complete; D-009 corrected (`PermitRootLogin no`); target accounts and the default-credential observation; QNX PID semantics; an evidence note. |
 | 1.8 | 2026-08-26 | Session 009 appended: M2 reached; H-9 closed as a failed prediction; the SSH-root refusal; benign boot warnings; pidin as course material. |
 | 1.7 | 2026-08-26 | Session 008 appended: the nested `qemu/` trap, the non-existent CLT option, the QSTI image contents, ADR-025, and an open disk-budget revision. |
