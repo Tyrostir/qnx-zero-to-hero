@@ -38,17 +38,17 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 
 | | |
 |---|---|
-| Phase | **1 — Environment setup** |
+| Phase | ✅ **1 complete** → **2: writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **3 / 5** — 01, 02 ✅ · 03 §§4–9 ✅, §§10–11 pending |
+| Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | Clear Setup 03 §§10–11 from the V5.6–V5.7 output, then **Chapter 00** |
-| Next (learner) | **V5.6:** `ssh qnxuser@192.168.122.46` (NOT root), `scp` + run `hello_qnx` |
+| Next (me) | ⭐ **Chapter 00 — How To Use This Course** (T-102) |
+| Next (learner) | Nothing blocking. Read Chapter 00 when it lands. |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -86,8 +86,12 @@ Check any time: ./tools/check-environment.sh   (last: 24 pass / 3 warn / 0 FAIL 
   in the CWD; run it one level up and it offers to build a NEW image — **never pass `--force`**.
 - ✅ **VERIFIED TARGET:** `QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64` · 31 procs /
   207 threads / 8 CPUs / 4 GB · net `vtnet0` `192.168.122.46` (virbr0 bridge **works** on WSL2) ·
-  console `root`/`root` · **SSH must use `qnxuser`** — `sshd` refuses root password auth (D-009) ·
-  VNC default password `qnxuser` · `apk` package manager on target · `slm` = QNX's `systemd`.
+  console `root`/`root` · **SSH `qnxuser`/`qnxuser`** (sudo password the same) — `sshd` ships
+  **`PermitRootLogin no`**, so root is refused by password *and* key (D-009) · accounts: root, sshd
+  (privilege-separated), qnxuser UID 1000 w/ full sudo, user1–user6; homes on the writable `/data`
+  partition · VNC password `qnxuser` · `apk` on target · `slm` = QNX's `systemd` ·
+  **QNX PIDs are large and non-sequential** — they are IPC endpoints (D-013).
+- ✅ **Loop closed 2026-08-26:** `hello_qnx` cross-compiled on Linux ran on the target (PID 14032920).
 - ⚠️ **QSTI and `mkqnximage` are not alternatives.** QSTI supplies the image; **`mkqnximage --run`**
   launches it. Also `--stop`, `--getip`. Login **root/root**. Defaults: 8 CPUs, 4 GB (>16 GB may
   misbehave), 1280×768. Network defaults to a **`virbr0` bridge** — needs libvirt, hence systemd,
@@ -184,10 +188,10 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 ## OPEN ITEMS
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
-- **Learner's open actions:** ⭐ **T-015 run Setup Guide 03 → report block V5** (7 checkpoints,
-  milestone M2) · **T-202** SDP build number *(V5.1 delivers it)* · T-014 QSC install route.
-  ✅ Done: T-003, T-008–T-012, T-200 · **Blocks V1–V4 complete.**
-- **Doubts logged:** 10 (D-001…D-010, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
+- **Learner's open actions:** none blocking. Optional: T-017 image README · T-014 QSC install route ·
+  T-016 sparse-file measurement · T-202 exact SDP package version.
+  ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
+- **Doubts logged:** 13 (D-001…D-013, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
@@ -195,6 +199,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-08-26 | Regenerated after Session 010: **Phase 1 complete**; loop closed; SSH facts corrected; next action is Chapter 00. |
 | 1.8 | 2026-08-26 | Regenerated after Session 009: **M2 reached**; verified target facts recorded; SSH-as-root trap noted. |
 | 1.7 | 2026-08-26 | Regenerated after Session 008: the nested `qemu/qemu` trap recorded; ADR-025; 8 doubts. |
 | 1.6 | 2026-08-26 | Regenerated after Session 007: Setup Guide 03 published; QSTI/`mkqnximage` mechanics recorded; block V5 is the next action. |

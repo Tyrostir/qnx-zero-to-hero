@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.8
+version: 1.9
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -986,10 +986,121 @@ The captured listing is now the backbone of Setup Guide 03 section 8 and feeds C
 
 ---
 
+## 2026-08-26 — Session 010 (Phase 1 complete: the loop closes)
+
+### VERIFIED — A binary cross-compiled on Linux runs on QNX
+
+```text
+[root@qnxqemu /tmp]# ./hello_qnx
+Hello from QNX!
+My process ID is 14032920
+```
+
+**Block V5 complete. Milestone M2 complete. Phase 1 complete.** The full
+**edit -> cross-compile -> deploy -> run** loop that Setup Guide 02 deliberately left open is closed.
+Setup Guide 03 is promoted to **v2.0**, and **no `[UNVERIFIED]` marker remains anywhere in the
+course**.
+
+Setup Guides 01, 02 and 03 have now all been executed end to end on the real host. Between them they
+cost **eight documented bugs** and **two wrong predictions** to get right - every one of which read
+as perfectly reasonable when written from official documentation.
+
+---
+
+### CORRECTED — D-009: the image ships `PermitRootLogin no`, not `prohibit-password`
+
+Session 009 attributed the SSH refusal to OpenSSH's shipped default,
+`PermitRootLogin prohibit-password`. Reading the target's actual configuration showed:
+
+```text
+PermitRootLogin no
+PasswordAuthentication yes
+```
+
+**Why the difference matters, and why this is a real correction rather than a detail.** Under
+`prohibit-password`, root may still log in **with a key**. Under `no`, root is refused by *every*
+method. Setup Guide 03 section 9.5 had told the reader that a key would let root in - actionable
+advice that would simply not have worked. Corrected in the guide and in D-009.
+
+> The lesson repeats the one from D-007: a plausible, well-known default is not the same as the
+> value in the file in front of you. `grep` the file.
+
+A related trap, now documented in D-011: the learner's `grep` also matched three **comment** lines,
+one of which mentions `prohibit-password`. Reading a commented-out value as the live setting would
+have produced exactly the wrong conclusion.
+
+---
+
+### VERIFIED — Target accounts, and a security observation worth recording
+
+```text
+root:x:0:0:root:/data/home/root:/bin/bash
+sshd:x:15:15:sshd:/data/var/chroot/sshd:/bin/false
+qnxuser:x:1000:1000:qnxuser:/data/home/qnxuser:/bin/bash
+user1..user6
+```
+
+| Detail | Significance |
+|--------|--------------|
+| Homes under `/data/home/` | `/data` is the **writable partition**; the rest of the system comes from the read-only boot image. This is why edits to `/etc` may not survive a reboot, and it is the shape of most embedded systems. |
+| `sshd` with `/bin/false` and a chroot home | **Privilege separation** - untrusted network data is parsed by an unprivileged, chrooted child before anyone authenticates. |
+| `qnxuser` holds full `sudo`, password `qnxuser` | |
+
+**The security observation.** Every credential on this image is a published default -
+`root`/`root`, `qnxuser`/`qnxuser`, VNC `qnxuser` - and `qnxuser` has full `sudo`. So
+`PermitRootLogin no` buys much less than it appears to: anyone who can reach port 22 with the default
+password has root anyway. Entirely fine for a disposable VM on a private virtual network, and
+unacceptable anywhere else. Stated plainly in Setup Guide 03 section 9.3.1, and it becomes a worked
+example in Chapter 28.
+
+---
+
+### VERIFIED — QNX process IDs are large and non-sequential (D-013)
+
+`hello_qnx` ran as PID **14032920**; the boot listing showed 16386, 32773, 1458208, 13520913. Not a
+counter.
+
+**Why this earns a doubt entry rather than a footnote.** It is the first genuinely QNX-specific thing
+a learner meets after `Hello from QNX!`, and the explanation is load-bearing for the rest of the
+course: a QNX PID is an **addressable endpoint for message passing** (`ConnectAttach`), not merely a
+label for `kill`. Small, promptly-recycled IDs would let a stale connection reach a different,
+newly-created process - unacceptable where messages carry control commands in a real-time system.
+
+This is the same instinct that will reappear with connection IDs, channel IDs and server identifiers
+in Chapters 13 and 16: identifiers that name an IPC endpoint are treated as capabilities, not
+indices, and QNX would rather an operation fail loudly than succeed against the wrong target.
+
+---
+
+### ANSWERED — "SSH as root seemed to accept the qnxuser password" (D-012)
+
+The learner reported this as a surprise. **The transcript contradicts it**: `ssh root@` failed three
+times, `ssh qnxuser@` succeeded. With `PermitRootLogin no` the username is rejected before any
+password is examined, so no password can work.
+
+Logged rather than waved away. "It worked and I don't know why" is the worst state to leave a
+security control in, and the most likely explanations - shell history recalling the `qnxuser@` line,
+or the `[root@qnxqemu ~]#` prompt after `sudo -i` - are recorded so the observation is closed rather
+than lingering. If a successful `ssh root@` can ever be reproduced, that would be a genuine finding:
+it would mean `sshd_config` is not the file in effect.
+
+---
+
+### Evidence note (ADR-024)
+
+V5.6's `scp` transfer and V5.7's shutdown command were not themselves captured in the drop - the
+binary was already on the target, and the session ended with `exit`. The **outcomes** are confirmed
+(the program ran; the learner attested the block complete), and the transfer path is the same SSH
+channel proven in V5.5. Recorded so the standard of evidence stays visible rather than quietly
+relaxed at the finish line.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-08-26 | Session 010 appended: Phase 1 complete; D-009 corrected (`PermitRootLogin no`); target accounts and the default-credential observation; QNX PID semantics; an evidence note. |
 | 1.8 | 2026-08-26 | Session 009 appended: M2 reached; H-9 closed as a failed prediction; the SSH-root refusal; benign boot warnings; pidin as course material. |
 | 1.7 | 2026-08-26 | Session 008 appended: the nested `qemu/` trap, the non-existent CLT option, the QSTI image contents, ADR-025, and an open disk-budget revision. |
 | 1.6 | 2026-08-26 | Session 007 appended: QSTI/`mkqnximage` distinction, QSTI's default QEMU configuration, Ubuntu 26.04 advantage, predicted WSL2 bridge failure (H-9), and the `qnx-vm.sh` convention. |

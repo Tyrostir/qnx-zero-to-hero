@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V4 ✅ complete; **V5 (QEMU VM) pending**
+status: ✅ Blocks V1–V5 all complete. Setup Guides 01, 02 and 03 verified end to end.
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -99,7 +99,7 @@ Worked / Failed. Notes: ...
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
-| **V5** — the QEMU VM | 🔄 **V5.1–V5.5 ✅ — the VM boots (M2 🎉).** V5.6–V5.7 remain; SSH needs `qnxuser` (D-009) |
+| **V5** — the QEMU VM | ✅ 🎉 **Complete 2026-08-26.** Boots, networked, and runs a cross-compiled binary |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -113,10 +113,16 @@ Neither gates anything; both improve the course.
 | **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
 | **R2 / T-014** | Did QNX Software Center install via the **graphical** installer under WSLg, or did you need the **headless** route (`-- --unattended`)? Plus the licence approval latency and the portal's real accept/deploy button labels. | Setup Guide 02 §8 currently offers two routes as equals. It should state which one actually works and keep the other as a fallback. |
 
-### 👉 Next verification block: **V5 — the QEMU VM**
+### 👉 Next verification block
 
-[Setup Guide 03](../guides/Setup_03_QEMU_VM.md) is now written. Block **V5** below verifies it, and
-ends at a `qnx#` prompt with your own binary running on it.
+**None outstanding.** All three published setup guides are verified. The next block will be defined
+when Setup Guide 04 (IDE & tooling) or the first chapter lab needs one.
+
+> 📌 **Evidence note, for the record (ADR-024).** V5.6's `scp` transfer and V5.7's shutdown command
+> were not themselves captured in the drop — the binary was already on the target and the session
+> ended with `exit`. The *outcomes* are confirmed (the program ran; the learner attested the block
+> complete), and the transfer path is the same SSH channel proven in V5.5. Recorded so the standard
+> of evidence stays visible rather than quietly relaxed.
 
 ---
 
@@ -522,9 +528,9 @@ or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
 | V5.4 | First contact (`pidin`, `/proc/boot`) | 👤 | V5.3 | Setup 03 §8 | ✅ — excellent course material |
 | V5.5 | Networking + SSH ⚠️ | 👤 | V5.3 | Setup 03 §9 | ✅ IP `192.168.122.46` · **SSH root refused → D-009** |
-| V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ⬜ **next — use `qnxuser@`** |
-| V5.7 | Graphics + clean shutdown | 👤 | V5.3 | Setup 03 §11 · §12.2 | ⬜ |
-| — | Clear Setup Guide 03's markers | 🤖 | V5.7 | — | ⏸️ |
+| V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ✅ 🎉 `Hello from QNX!` PID 14032920 |
+| V5.7 | Graphics + clean shutdown | 👤 | V5.3 | Setup 03 §11 | ✅ *(learner-attested)* |
+| — | Clear Setup Guide 03's markers | 🤖 | V5.7 | — | ✅ Setup 03 → **v2.0** |
 
 > ✅ **V1–V4 complete.** Host prepared, licence deployed, SDP installed, cross-compile proven.
 > 👉 **V5 is next** — boot the VM and run your binary on it.
@@ -560,6 +566,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V5.6 – V5.7** | ✅ 🎉 **BLOCK V5 COMPLETE** | `./hello_qnx` on the target printed `Hello from QNX!` / `My process ID is 14032920` — **the full edit → cross-compile → deploy → run loop is closed.** SSH confirmed as `qnxuser`/`qnxuser`, `sudo` password the same. **Correction to D-009:** the image ships **`PermitRootLogin no`**, not `prohibit-password` — keys do not help root either; Setup Guide 03 §9.5 had said they would. `/etc/passwd` captured (9 accounts, homes on the writable `/data` partition, `sshd` privilege-separated). Setup Guide 03 → **v2.0**. +D-011, D-012, D-013. |
 | 2026-08-26 | **V5.3 – V5.5** | ✅ 🎉 **M2 REACHED** | **QNX 8.0.0 boots** (kernel build `2026/02/27-11:02:56EST`, host `qnxqemu`). 31 processes, 207 threads, 8 CPUs, 3659/4095 MB free. **Bridged networking worked on WSL2** — `192.168.122.46` on `vtnet0` — so hazard **H-9** did not materialise. **One real failure:** `sshd` refuses password auth for root (`PermitRootLogin prohibit-password`) → **D-009**, use `qnxuser`. Four benign boot warnings explained → **D-010**. `pidin`, `pidin info`, `ls /proc/boot` captured as course material. Setup Guide 03 → **v1.2**, §§4–9 verified. |
 | 2026-08-26 | **V5.1 – V5.2** | ✅ **Passed, with 3 bugs found** | QSTI was **already installed** with SDP (archives `qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.{0,1}`, ~1.9 GB). Unpack produced `qemu/output/` with `ifs.bin` (20 MB), `disk-qemu` (47 GB apparent), `procnto-smp-instr.sym` (12 MB) and the **`mkifs` build files**. Bugs: **(a)** `unpack_qemu_image.sh` extracts into a nested `qemu/` — the guide assumed `output/` in place → **D-006**; **(b)** `-listAvailablePackages` does not exist → **D-007**; **(c)** the 47 GB disk is undocumented → **D-008**. |
 | 2026-08-26 | **V5.3** | ❌ **Blocked → fixed** | `mkqnximage --run` refused: *"neither an existing mkqnximage virtual image nor an empty directory"*. Cause: run from `~/qnx800/images/qemu` instead of `~/qnx800/images/qemu/qemu`. Fix documented (**D-006**); `--force` explicitly warned against. **Awaiting retry.** |
@@ -613,7 +620,7 @@ future readers than a step that silently worked.
 | At idle | **31 processes, 207 threads** |
 | Network | `vtnet0` (virtio) · `192.168.122.46/24` via libvirt's `virbr0` |
 | Console login | `root` / `root` |
-| **SSH login** | **`qnxuser`** — root refused by `sshd` (D-009) |
+| **SSH login** | **`qnxuser`** / `qnxuser` — `sudo` password the same. Root refused: **`PermitRootLogin no`** (D-009) |
 | VNC | runs by default, password `qnxuser` |
 | `slm` components | 22, from `slog2` through `apk_start` |
 | Package manager | `apk` (Alpine's), on the target |
@@ -635,6 +642,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | **Block V5 complete — all verification done.** Setup Guide 03 → v2.0; D-009 corrected (`PermitRootLogin no`); target account facts recorded. |
 | 1.6 | 2026-08-26 | **V5.3–V5.5 passed — M2 reached.** QNX target facts recorded. H-9 (the `virbr0` prediction) did not materialise. New blocker D-009: SSH refuses root. |
 | 1.5 | 2026-08-26 | **V5.1–V5.2 passed; V5.3 blocked and fixed.** Three bugs found in Setup Guide 03 → D-006/D-007/D-008. Retry pending. |
 | 1.4 | 2026-08-26 | **Block V5 added** for Setup Guide 03 — 7 checkpoints ending at a booting QNX VM running the learner's own binary. V5.1 also closes T-202. |

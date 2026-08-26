@@ -61,6 +61,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#6](#prompt6) | 2026-08-26 | Claude (Opus 5) | "Go for B" — write Setup Guide 03, the QEMU VM | ✅ **Setup Guide 03 published** (729 lines) · `tools/qemu/qnx-vm.sh` · block V5 defined |
 | [PROMPT#7](#prompt7) | 2026-08-26 | Claude (Opus 5) | Stuck at V5.3; log in `toAgent/3.BlockV5.1V5.3-StuckAtV5.3.md`; document the `/btw` questions | ✅ Diagnosed: nested `qemu/` directory · 3 bugs fixed · **D-006/007/008** · **ADR-025** (`/btw`) |
 | [PROMPT#8](#prompt8) | 2026-08-26 | Claude (Opus 5) | V5.3–V5.5 done, stuck at V5.5 (SSH) | 🎉 **M2 — the VM boots** · SSH fix: use `qnxuser` (**D-009**) · boot warnings benign (**D-010**) · **H-9 closed** · Setup 03 → v1.2 |
+| [PROMPT#9](#prompt9) | 2026-08-26 | Claude (Opus 5) | V5.6–V5.7 done; V5 complete; three observations to explain | ✅ **Phase 1 complete** · `Hello from QNX!` ran on target · Setup 03 → v2.0 · **D-009 corrected** · +D-011/012/013 |
 
 ---
 
@@ -1137,10 +1138,159 @@ qnx# cat /etc/passwd
 
 ---
 
+## PROMPT#9
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 010 |
+| **Context** | The learner completed the final two checkpoints of block V5, closing the environment phase. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I executed V5.6 and V5.7, output in toAgent/5.BlockV5.5V5.7-NoteOnPasswordAtV5.5.md - please read once. So with this, V5 is completed.
+
+Accompanying observations, in the drop file:
+
+> 1. During ssh "qnxuser" was working fine but the password was "qnxuser".
+> 2. Same way, even for the ssh as "root", surprisingly using "qnxuser" as password was working. I don't know why.
+> 3. I hope the output of below commands make some sense to you. You may can explain what is there and not there.
+> 	"cat /etc/passwd" and "grep -iE 'PermitRootLogin|PasswordAuthentication' /etc/ssh/sshd_config"
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# ✅ Phase 1 complete — the loop is closed
+
+```text
+[root@qnxqemu /tmp]# ./hello_qnx
+Hello from QNX!
+My process ID is 14032920
+```
+
+You wrote C on Linux, compiled it with a cross-compiler into a binary your own machine physically refuses to run, moved it into a different operating system, and executed it there. **Block V5 complete. Milestone M2 complete. Phase 1 complete.**
+
+**Setup Guide 03 → v2.0.** All three published setup guides are now verified end to end, and **the course carries zero `[UNVERIFIED]` markers.**
+
+## ✏️ A correction — my D-009 explanation was wrong
+
+I told you `sshd` was using `PermitRootLogin prohibit-password`. Your grep shows otherwise:
+
+```text
+PermitRootLogin no
+PasswordAuthentication yes
+```
+
+**The difference is actionable, not cosmetic.** Under `prohibit-password`, root can still log in *with a key* — and §9.5 told you exactly that. Under **`no`**, root is refused by **every** method, keys included. That advice would simply not have worked. Fixed in the guide and in D-009.
+
+Same lesson as D-007: a plausible, well-known default is not the value in the file in front of you.
+
+## 🔍 Your question 3 — reading those two files
+
+Logged in full as **D-011**. The short version:
+
+**`/etc/passwd` — what's there:**
+
+| Detail | What it tells you |
+|---|---|
+| Homes under **`/data/home/`** | ⭐ `/data` is the **writable partition**. Everything else comes from the read-only boot image. That's why edits to `/etc` may not survive a reboot — and it's the shape of nearly every embedded system: immutable image + small writable area. |
+| `sshd` with shell `/bin/false`, home `/data/var/chroot/sshd` | **Privilege separation.** Before anyone authenticates, `sshd` forks a child that drops to this unprivileged account and `chroot`s in, so untrusted network data is parsed with almost no authority. `/bin/false` means it's a service identity, not a login. |
+| `qnxuser` at UID 1000 | The conventional first human user, same as Linux. |
+
+**What's *absent* is equally informative:** none of the dozens of service accounts a Linux distribution carries (`daemon`, `bin`, `mail`, `www-data`…). This is an embedded image — only accounts that are actually used exist.
+
+> 🐧 And note that `/etc/passwd` is *the same file* as on Linux — seven POSIX fields, `x` meaning "hash is in `/etc/shadow`". QNX being POSIX-compliant isn't a slogan.
+
+**`sshd_config` — one trap worth flagging.** Your grep matched three lines that are **comments**:
+
+```text
+# the setting of "PermitRootLogin prohibit-password".
+```
+
+That mentions `prohibit-password` — a *different* value from the one in force. Reading it as the setting gives exactly the wrong answer. When a directive matters, check for the leading `#`.
+
+**What's absent there is good news:** no `AllowUsers` (no hidden account allowlist), no `PubkeyAuthentication` line (so it defaults to `yes` — key auth works for non-root, which is what §9.5 recommends).
+
+## 🤔 Your question 2 — root SSH with the `qnxuser` password
+
+**It can't have worked, and your own transcript agrees.** In the log you sent:
+
+```text
+$ ssh root@192.168.122.46
+Permission denied, please try again.     ← ×3
+root@192.168.122.46: Permission denied (publickey,password).
+
+$ ssh qnxuser@192.168.122.46
+[qnxuser@qnxqemu ~]$                      ← succeeded
+```
+
+With `PermitRootLogin no`, `sshd` rejects the *username* before any password is compared, so the outcome doesn't depend on what you type.
+
+Three easy ways the impression arises, none of them a mistake worth worrying about: shell history recalling the `qnxuser@` line after the root attempt failed; the prompt becoming `[root@qnxqemu ~]#` after `sudo -i` (a root shell, reached via `qnxuser`); or conflating the serial console, where `root`/`root` genuinely works.
+
+Ten-second check next time: `whoami` right after connecting.
+
+I logged this as **D-012** rather than waving it away — *"it worked and I don't know why"* is the worst state to leave a security control in. And if you ever **can** reproduce a successful `ssh root@`, that's a genuine finding: it would mean `sshd_config` isn't the file in effect.
+
+## 🔢 That process ID — 14032920
+
+Not a typo, and worth understanding. Look at your own `pidin`: `16386`, `32773`, `1458208`, `13520913`. Not a counter.
+
+> 🐧 On Linux, PIDs are small integers that wrap at 32768 and get **recycled aggressively**.
+
+**Why QNX can't afford that.** Here a PID is an **addressable endpoint for message passing** — `ConnectAttach(0, pid, chid, ...)` names the server your client talks to. If PIDs were small and promptly recycled, a server could die, an unrelated process could inherit its number, and a client holding a stale connection would send its next request **to the wrong process**. In a real-time system where those messages carry control commands, that isn't an inconvenience.
+
+Spreading IDs across a 32-bit space means a stale reference fails cleanly instead of silently reaching a stranger. You'll meet the same instinct again with connection IDs, channel IDs and server identifiers in Chapters 13 and 16: **identifiers that name an IPC endpoint are capabilities, not indices.** Logged as **D-013**.
+
+## ⚠️ One thing worth saying plainly
+
+Every credential on this image is a published default — `root`/`root`, `qnxuser`/`qnxuser`, VNC `qnxuser` — and **`qnxuser` holds full `sudo`**. So `PermitRootLogin no` buys much less than it looks: anyone who reaches port 22 with the default password has root anyway.
+
+Fine for a disposable VM on a private virtual network. **Unacceptable on anything else.** It's now stated in §9.3.1, and it becomes a worked example in Chapter 28.
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_03_QEMU_VM.md` | → **v2.0 verified.** All markers cleared; §9.3 corrected to `PermitRootLogin no`; §9.3.1 added (reading `/etc/passwd`); §9.4 fixed to *change* the line not append; §9.5's wrong key claim removed; §10 shows the real PID with its explanation; note on the benign OpenSSH post-quantum warning |
+| `docs/meta/Doubts.md` | **D-009 corrected** · **+D-011, D-012, D-013** |
+| `docs/meta/DecisionsLog.md` | Session 010: Phase 1 complete · the correction · target accounts + the default-credential observation · QNX PID semantics · an evidence note |
+| `docs/internal/VerificationRuns.md` | **Block V5 ✅ complete**; verified target facts extended |
+| `docs/meta/CourseState.md` | **Phase 1 complete**, M2 ✅ dated, Session 010 |
+| `docs/meta/CompactContext.md`, `ToDos.md`, `CLAUDE-MEMORY.md` | Regenerated; T-015/T-018/T-147 closed; H-11 resolved |
+
+**An honesty note I put in the record rather than glossing over:** V5.6's `scp` and V5.7's shutdown command aren't in the transcript — the binary was already on the target and the session ended with `exit`. The *outcomes* are confirmed and you attested the block complete, so V5 is closed; but under ADR-024 the standard of evidence should stay visible rather than quietly relax at the finish line.
+
+---
+
+## 👉 Next: Chapter 00
+
+Nothing blocks it. Environment done, toolchain proven, VM booting, loop closed.
+
+**Chapter 00 — How To Use This Course** sets the template every one of the 34 chapters follows: conventions, the three path markers, how labs are structured, how the `💥 Break it` exercises work, and how to choose your path. It needs no software, and it's the last piece of scaffolding before Chapter 01 starts teaching real-time systems.
+
+Say the word and I'll write it.
+
+**Optional, whenever:** `cat ~/qnx800/images/qemu/README.md` (394 bytes — T-017), and `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` to settle whether that 47 GB image is sparse (T-016).
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.7 | 2026-08-26 | PROMPT#9 logged: block V5 complete, Phase 1 complete. |
 | 2.6 | 2026-08-26 | PROMPT#8 logged: milestone M2 reached; SSH-as-root diagnosed. |
 | 2.5 | 2026-08-26 | PROMPT#7 logged: V5.3 diagnosed and unblocked; `/btw` convention adopted. |
 | 2.4 | 2026-08-26 | PROMPT#6 logged: Setup Guide 03 published. |

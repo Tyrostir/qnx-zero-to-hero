@@ -28,10 +28,10 @@ update_trigger: "Continuously"
 
 
 
-| T-015 | 🔴 | **Finish V5.6–V5.7** — `scp` and run `hello_qnx` on the target, then shut down | ⬜ | — | Use **`ssh qnxuser@<ip>`**, not root ([D-009](Doubts.md#d-009)). V5.1–V5.5 ✅ · **M2 reached** 🎉 |
-| T-018 | 🟠 | Confirm the SSH account name — `cat /etc/passwd` and `grep -i permitrootlogin /etc/ssh/sshd_config` on the target | ⬜ | — | Settles [D-009](Doubts.md#d-009). `qnxuser` is inferred from the banner, not yet proven. |
+
+
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
-| T-017 | 🔵 | Paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | Two lines; may contain QNX's own notes on the image. |
+| T-017 | 🔵 | *When convenient:* paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | 394 bytes; may contain QNX's own notes on the image. |
 | T-202 | 🟡 | **Report the exact SDP build number** — try `-listInstalledRoots` *(partially answered: the kernel reports build `2026/02/27-11:02:56EST`)* — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
 | T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
 
@@ -49,8 +49,8 @@ update_trigger: "Continuously"
 |----|-----|------|--------|-------|
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
-| T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | Done — Setup Guides 01 and 02 both verified. **The gate on Chapter 00 is lifted.** |
-| T-102 | 🔴 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | ✅ **Off hold** — onboarding and verification are both complete. Awaiting the learner's go-ahead. |
+| T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
+| T-102 | 🔴 | Write `Chapter00_HowToUseThisCourse.md` | ⬜ | ⭐ **Next.** All setup guides verified; nothing blocks it. |
 | T-103 | 🟠 | Write `Chapter01_WhatIsARealTimeSystem.md` | ⬜ | Hard/soft real-time, determinism, latency, jitter, WCET |
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -62,7 +62,7 @@ update_trigger: "Continuously"
 |----|-----|------|--------|-------|
 | T-110 | 🟠 | `Chapter02_WhatIsQNX.md` | ⬜ | History 1980→2026, microkernel bet, product family |
 | T-111 | 🟠 | `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | Automotive, medical, rail, nuclear, robotics; vs Linux/FreeRTOS/VxWorks |
-| T-147 | 🔴 | Clear Setup Guide 03's `[UNVERIFIED]` markers from the learner's V5 output | ⏸️ | Blocked on T-015. The boot log becomes documented expected output. |
+
 | T-113 | 🟡 | `Setup_04_IDE_And_Tooling.md` | ⬜ | VS Code QNX Toolkit, Momentics, qconn, remote gdb |
 | T-114 | 🟡 | `Setup_05_Troubleshooting.md` | ⬜ | Starts small, grows with every failure we hit |
 | T-115 | 🟡 | Chapters 04–08 | ⬜ | |
@@ -130,6 +130,9 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-015 | Run Setup Guide 03 end to end (block V5) — **milestone M2** | 2026-08-26 | 010 |
+| T-018 | Confirm the SSH account name and `sshd_config` | 2026-08-26 | 010 |
+| T-147 | Clear Setup Guide 03's `[UNVERIFIED]` markers → v2.0 | 2026-08-26 | 010 |
 | T-008 | Add the user to the `kvm` group | 2026-08-25 | 003 |
 | T-009 | Complete Setup Guide 01 on the host | 2026-08-25 | 003 |
 | T-145 | Clear the Setup Guide 01 `[UNVERIFIED]` markers with real output → v2.0 | 2026-08-26 | 003 |
@@ -157,6 +160,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-08-26 | **Block V5 complete.** T-015, T-018, T-147 closed. All three setup guides verified; zero `[UNVERIFIED]` markers remain. **T-102 (Chapter 00) is the next action.** |
 | 1.8 | 2026-08-26 | **M2 reached.** T-015 re-scoped to V5.6–V5.7; T-018 added (confirm the SSH account); T-202 downgraded — the kernel build date is now known. |
 | 1.7 | 2026-08-26 | **V5.1–V5.2 passed, V5.3 blocked and fixed.** T-015 re-scoped to the retry; T-016 (sparse-file measurement) and T-017 (image README) added. |
 | 1.6 | 2026-08-26 | **Setup Guide 03 published.** T-112 closed. New learner item T-015 (run block V5) and author item T-147 (clear its markers). |

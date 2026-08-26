@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.2
+version: 1.3
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -70,8 +70,11 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-008](#d-008) | Setup/Install | Why is `disk-qemu` 47 GB, and do I really need that much disk? | ✅ |
 | [D-009](#d-009) | Setup/Install | Why does SSH refuse `root`/`root` when the console accepts it? | ✅ |
 | [D-010](#d-010) | Debug | The boot log has errors in it — `ACPI table not found`, `Unable to start "uname"`, `slogger2` not connecting. Is my system broken? | ✅ |
+| [D-011](#d-011) | Setup/Install | Explain the target's `/etc/passwd` and `sshd_config` — what is there, and what is *not*? | ✅ |
+| [D-012](#d-012) | Setup/Install | SSH as `root` seemed to accept the `qnxuser` password. Why? | ✅ |
+| [D-013](#d-013) | Concept | Why is my process ID `14032920` instead of a small number? | ✅ |
 
-**Open questions: 0** · **Needs verification: 1** *(D-009's `qnxuser` account name)* · **Answered: 10**
+**Open questions: 0** · **Needs verification: 0** · **Answered: 13**
 
 ---
 
@@ -608,7 +611,7 @@ asks for `df -h` before and after. `PLAN.md`'s disk budget flagged for another r
 | **Date** | 2026-08-26 |
 | **Context** | Setup Guide 03, verification block V5.5 |
 | **Category** | Setup/Install |
-| **Status** | ✅ Answered *(the `qnxuser` account name still to be confirmed on the target)* |
+| **Status** | ✅ Answered · **corrected 2026-08-26** after reading the target's real `sshd_config` |
 
 **Question (verbatim).** *"I used root as username and root as password. I am able to login to qnx.
 … I tried root as username and root as password. Still I am not able to ssh to qnx."*
@@ -620,9 +623,14 @@ root@192.168.122.46: Permission denied (publickey,password).
 ```
 
 **Short answer.**
-Your password is correct. **`sshd` refuses password authentication for `root` by design** —
-`PermitRootLogin prohibit-password`, the OpenSSH default since version 7.0. Root may use a key, never
-a password. Use **`ssh qnxuser@<ip>`** and then `sudo -i`.
+Your password is correct. **`sshd` is configured with `PermitRootLogin no`** — root cannot log in
+over SSH at all, by password *or* by key. Use **`ssh qnxuser@<ip>`** (password `qnxuser`) and then
+`sudo -i`.
+
+> ✏️ **Corrected 2026-08-26.** This entry originally attributed the refusal to
+> `PermitRootLogin prohibit-password`, OpenSSH's shipped default. Reading the target's actual
+> `sshd_config` showed the stricter **`PermitRootLogin no`**. The practical difference matters: under
+> `prohibit-password` a *key* would have let root in; under `no`, nothing does.
 
 **Full answer.**
 
@@ -634,16 +642,29 @@ it look like a password problem. It is not. Two different things authenticate yo
 | Serial console | `login` → PAM → the shadow file | ✅ `root`/`root` accepted |
 | SSH | **`sshd`'s own policy**, *before* the password is even considered | ❌ refused for root |
 
-**Read the error precisely.** `Permission denied (publickey,password)` lists the methods the
-**server** was willing to offer. Password is on that list — just not for `root`. Since OpenSSH 7.0
-the shipped default has been:
+**What the target actually says.** Verified on the image:
 
 ```text
-PermitRootLogin prohibit-password
+PermitRootLogin no
+PasswordAuthentication yes
 ```
 
-Root may authenticate with a **key**; a password attempt is rejected however correct it is. This is
-sensible hardening: remote root password login is the most brute-forced door on the internet.
+| Directive | Effect |
+|-----------|--------|
+| `PermitRootLogin no` | **Root is refused by every method** — password, public key, everything. |
+| `PasswordAuthentication yes` | Password login is enabled for **all other accounts** — which is why `qnxuser` works. |
+
+**Read the error precisely.** `Permission denied (publickey,password)` lists the methods the
+**server** was willing to offer. Both were on offer — just not for `root`. Remote root login is the
+single most brute-forced door on the internet, so shipping it off is sensible hardening.
+
+> 💡 **Three settings worth being able to tell apart**, because they are constantly confused:
+>
+> | Value | Root may log in… |
+> |-------|------------------|
+> | `yes` | with a password or a key |
+> | `prohibit-password` *(OpenSSH's own default since 7.0)* | with a key only |
+> | **`no`** *(what this image ships)* | **never** |
 
 **Three ways forward, best first.**
 
@@ -654,23 +675,17 @@ host$ ssh qnxuser@192.168.122.46
 qnx$  sudo -i
 ```
 
-The QSTI image is built around a `qnxuser` account. The evidence is all in the login banner: the VNC
-server's default password is `qnxuser`, the image ships a `sudoers` configuration, and the banner
-tells you to run `sudo apk update` — advice that only makes sense for a non-root user. The unpacked
-image also contains `system_files.custom.sudoers` and `data_files.custom.var_users` snippets.
-
-If the name turns out to be different, the target will tell you:
-
-```bash
-qnx# cat /etc/passwd
-qnx# grep -iE 'PermitRootLogin|PasswordAuthentication|AllowUsers' /etc/ssh/sshd_config
-```
+✅ **Password: `qnxuser`.** Confirmed 2026-08-26, along with `sudo`'s password (also `qnxuser`).
+`/etc/passwd` shows `qnxuser:x:1000:1000:qnxuser:/data/home/qnxuser:/bin/bash`, plus spare accounts
+`user1`…`user6`. A full reading of that file is in [D-011](#d-011).
 
 **2. Allow root over SSH.** Fine on a disposable VM on a private virtual network; never on anything
 reachable from outside.
 
+The image ships `PermitRootLogin no`, so change that line rather than appending a duplicate:
+
 ```bash
-qnx# echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+qnx# sed -i 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
 qnx# slay -f sshd && sshd
 ```
 
@@ -684,8 +699,14 @@ host$ ssh-keygen -t ed25519 -C qnx-lab
 host$ ssh-copy-id qnxuser@192.168.122.46
 ```
 
-Note that a key also satisfies `prohibit-password` — so `ssh-copy-id root@...` would work too, once
-you have a way to place the key.
+⚠️ **For `qnxuser` only.** `PermitRootLogin no` blocks root by every method, so a key will not get
+`root@` in either — you would need remedy 2 first.
+
+> ⚠️ **A security note this image deserves.** Every credential here is a published default —
+> `root`/`root`, `qnxuser`/`qnxuser`, VNC `qnxuser` — and `qnxuser` holds full `sudo`. So
+> `PermitRootLogin no` buys less than it appears to: anyone who can reach port 22 with the default
+> password has root anyway. Perfectly fine for a disposable VM on a private virtual network;
+> unacceptable on anything reachable from elsewhere. Chapter 28 treats this properly.
 
 > 💡 **Do this before Chapter 08.** That chapter has you running `gdb` across this link and
 > redeploying binaries constantly. A password prompt in that loop gets old within minutes.
@@ -693,9 +714,10 @@ you have a way to place the key.
 **Related.** [Setup Guide 03 §9.3](../guides/Setup_03_QEMU_VM.md#93--ssh-as-root-will-be-refused--use-qnxuser) ·
 [§13.4a](../guides/Setup_03_QEMU_VM.md) · Chapter 08 · Chapter 28 (security)
 
-**Action taken.** Setup Guide 03 → v1.2: §9.3 rewritten around the real failure with all three
-remedies, §9.5 added for key-based auth, §10.2's `scp` changed to `qnxuser@`, and a troubleshooting
-entry added.
+**Action taken.** Setup Guide 03 → v1.2 then **v2.0**: §9.3 rewritten around the real failure with
+all three remedies and the actual `sshd_config`; §9.3.1 added to read `/etc/passwd`; §9.4 corrected to
+*change* the `no` line rather than append a duplicate; §9.5's incorrect "a key works for root" claim
+removed; §10.2's `scp` changed to `qnxuser@`; troubleshooting entry added.
 
 ---
 
@@ -759,10 +781,261 @@ table, so the next reader does not stop to debug them.
 
 ---
 
+## D-011
+
+### Explain the target's `/etc/passwd` and `sshd_config` — what is there, and what is *not*?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, block V5.5 — investigating the SSH refusal |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *"I hope the output of below commands make some sense to you. You may can
+explain what is there and not there. `cat /etc/passwd` and
+`grep -iE 'PermitRootLogin|PasswordAuthentication' /etc/ssh/sshd_config`"*
+
+**Short answer.**
+`/etc/passwd` shows nine accounts, homes on the **writable `/data` partition**, and a privilege-
+separated `sshd` service account. `sshd_config` shows `PermitRootLogin no` and
+`PasswordAuthentication yes` — which together explain exactly why `qnxuser` works and `root` does not.
+What is *absent* is as informative as what is present.
+
+**Full answer.**
+
+### `/etc/passwd`
+
+```text
+root:x:0:0:root:/data/home/root:/bin/bash
+sshd:x:15:15:sshd:/data/var/chroot/sshd:/bin/false
+qnxuser:x:1000:1000:qnxuser:/data/home/qnxuser:/bin/bash
+user1:x:1001:1001:user1:/data/home/user1:/bin/bash
+...through user6
+```
+
+**The seven colon-separated fields** are POSIX and identical to Linux:
+`name : password : UID : GID : comment : home : shell`.
+
+| What is there | Why it matters |
+|---------------|----------------|
+| **`x` in every password field** | The real hashes are in `/etc/shadow`, readable only by root. Standard practice — `/etc/passwd` itself is world-readable, which is why you could read it. |
+| **Homes under `/data/home/`** | ⭐ The most informative detail. `/data` is the **writable partition** on `disk-qemu`. Everything else comes from the read-only boot image. That is why edits to `/etc` may not survive a reboot, and it is the shape of nearly every embedded system: an immutable system image plus a small writable area. |
+| **`sshd` with shell `/bin/false` and home `/data/var/chroot/sshd`** | **Privilege separation.** Before anyone authenticates, `sshd` forks a child that drops to this unprivileged account and `chroot`s into that directory, so untrusted network data is parsed with almost no authority. `/bin/false` means the account cannot be logged into — it is a *service* identity, not a user. |
+| **`qnxuser` at UID 1000** | The conventional first human user, same as Linux. This is your SSH account. |
+| **`user1`…`user6`** | Spare accounts for multi-user experiments. Nothing in this course uses them. |
+
+**What is *not* there, and what that tells you:**
+
+| Absent | Meaning |
+|--------|---------|
+| The dozens of service accounts a Linux distribution carries (`daemon`, `bin`, `sys`, `mail`, `www-data`…) | This is an **embedded** system image, not a general-purpose distribution. Only accounts that are actually used exist. |
+| Any account with `/sbin/nologin` | QNX uses `/bin/false` for the same purpose. |
+| A `wheel` or `sudo` group *(that lives in `/etc/group`)* | `/etc/passwd` shows primary GIDs only. `qnxuser`'s `sudo` rights come from `/etc/sudoers`, which the image ships as `system_files.custom.sudoers`. |
+
+### `sshd_config`
+
+```text
+PermitRootLogin no
+PasswordAuthentication yes
+```
+
+| Directive | Effect |
+|-----------|--------|
+| `PermitRootLogin no` | Root is refused over SSH by **every** method — password *and* public key. |
+| `PasswordAuthentication yes` | Password login is enabled for **every other** account. Hence `qnxuser` works. |
+
+The remaining grep hits were **comments**, not settings — note the leading `#`:
+
+```text
+# PasswordAuthentication.  Depending on your PAM configuration,
+# the setting of "PermitRootLogin prohibit-password".
+# PAM authentication, then enable this but set PasswordAuthentication
+```
+
+> ⚠️ **A `grep` of a config file shows you comments too.** That third line mentions
+> `prohibit-password` — a *different* value from the one actually in force. Reading it as the setting
+> would give exactly the wrong answer. When a directive matters, check for a leading `#`.
+
+**What is *not* in `sshd_config`, and why that is good news:**
+
+| Absent | Meaning |
+|--------|---------|
+| `AllowUsers` / `AllowGroups` | No account allowlist. Any account with a password can log in — no hidden extra restriction to discover. |
+| `PubkeyAuthentication` | Not disabled, so it defaults to `yes`. **Key-based login works** for non-root accounts — which is what [Setup Guide 03 §9.5](../guides/Setup_03_QEMU_VM.md#95-better--use-a-key-and-stop-typing-passwords) recommends. |
+| `Port` | Defaults to **22**. |
+
+**Related.** [D-009](#d-009) · [D-012](#d-012) ·
+[Setup Guide 03 §9.3.1](../guides/Setup_03_QEMU_VM.md) · Chapter 28 (security)
+
+**Action taken.** Setup Guide 03 → v2.0: new §9.3.1 reads `/etc/passwd` in the guide itself, with the
+`/data` partition and privilege separation explained, plus a warning about default credentials.
+
+---
+
+## D-012
+
+### SSH as `root` seemed to accept the `qnxuser` password. Why?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, block V5.5 |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *"Same way, even for the ssh as 'root', surprisingly using 'qnxuser' as
+password was working. I don't know why."*
+
+**Short answer.**
+It cannot have. With **`PermitRootLogin no`**, `sshd` rejects `root` before any password is checked —
+no password can work, correct or otherwise. Your own transcript agrees: `ssh root@192.168.122.46`
+failed three times in a row. The overwhelmingly likely explanation is that the successful session was
+`qnxuser@`, recalled from shell history.
+
+**Full answer.**
+
+**The evidence in your log.**
+
+```text
+$ ssh root@192.168.122.46
+root@192.168.122.46's password:
+Permission denied, please try again.
+root@192.168.122.46's password:
+Permission denied, please try again.
+root@192.168.122.46's password:
+root@192.168.122.46: Permission denied (publickey,password).
+
+$ ssh qnxuser@192.168.122.46
+qnxuser@192.168.122.46's password:
+[qnxuser@qnxqemu ~]$          ← succeeded
+```
+
+Root failed, `qnxuser` succeeded. That is exactly what `PermitRootLogin no` produces.
+
+**Why root cannot succeed, mechanically.** `sshd` evaluates `PermitRootLogin` as an *authorization*
+decision, before and independently of *authentication*. With `no`, the username `root` is rejected
+outright — the password is never compared against anything. This is why the outcome does not depend
+on which password you type.
+
+**How the confusion most likely arose** — all three are easy to do and none is a mistake worth
+worrying about:
+
+1. **Shell history.** `ssh root@…` fails, you press ↑ a couple of times, and the line that actually
+   ran was the `qnxuser@` one. The prompt that appears — `[qnxuser@qnxqemu ~]$` — is the giveaway.
+2. **A prompt that looks like root's.** After `sudo -i` the prompt becomes `[root@qnxqemu ~]#`. It is
+   a root shell, but you arrived via `qnxuser`, not via `ssh root@`.
+3. **The serial console.** `root`/`root` genuinely works there. Console and SSH are authenticated by
+   different components (§D-009), and it is easy to conflate the two windows.
+
+**How to settle it in ten seconds.** After connecting:
+
+```bash
+qnx$ whoami
+qnx$ echo $SSH_CONNECTION
+```
+
+`whoami` names the account you actually authenticated as. And on the target, the definitive record:
+
+```bash
+qnx# grep sshd /var/log/messages 2>/dev/null || slog2info | grep -i sshd
+```
+
+> 💡 **Why this is worth logging rather than waving away.** "It worked and I don't know why" is the
+> most dangerous state to leave a system in — a security control you believe is off when it is on,
+> or on when it is off, leads to bad decisions later. Here the configuration is unambiguous and the
+> transcript agrees with it. If you *can* reproduce a successful `ssh root@`, that would be a genuine
+> finding and worth reporting: it would mean `sshd_config` is not the file in effect.
+
+**Related.** [D-009](#d-009) · [D-011](#d-011) · Chapter 28
+
+**Action taken.** None to the guides — the documented behaviour already matches reality. Recorded so
+the observation is not left unexplained.
+
+---
+
+## D-013
+
+### Why is my process ID `14032920` instead of a small number?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, block V5.6 — the first program run on the target |
+| **Category** | Concept |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *(Implicit, from the reported output.)*
+
+```text
+Hello from QNX!
+My process ID is 14032920
+```
+
+**Short answer.**
+QNX process IDs are **32-bit values that are neither small nor sequential**. On QNX a PID is not just
+a label for `kill` — it is an **addressable endpoint for message passing**, so IDs are spread across
+a large space to make accidental reuse vanishingly unlikely.
+
+**Full answer.**
+
+**Look back at your own `pidin` output** — the pattern is unmistakable:
+
+```text
+       1  procnto-smp-instr
+   16386  slm
+   20483  slogger2
+   32773  devb-eide
+   81926  random
+  135186  dhcpcd
+ 1458208  mdnsd
+13520913  demolauncher
+14032920  hello_qnx        ← yours
+```
+
+Not a counter. Roughly increasing, with large and irregular jumps.
+
+> 🐧 **In Linux this would be…** a small integer from a counter that wraps at
+> `/proc/sys/kernel/pid_max` (32768 by default) and **reuses** freed numbers aggressively. Fresh
+> Linux systems hand out PIDs in the hundreds.
+
+**Why QNX cannot afford that.** In QNX, IPC is addressed by process:
+
+```c
+coid = ConnectAttach(0, pid, chid, _NTO_SIDE_CHANNEL, 0);
+```
+
+That `pid` is how your client names the server it is talking to. Now imagine PIDs were small and
+recycled promptly: a server dies, a completely unrelated process starts and inherits the same number,
+and a client still holding a stale connection sends its next request **to the wrong process**. On a
+system where message passing is the primary means of communication — and where those messages carry
+control commands in a real-time system — that is not an inconvenience.
+
+Spreading IDs over a 32-bit space means a freed slot does not immediately hand back the same PID, so
+a stale reference fails cleanly instead of silently reaching a stranger.
+
+> 💡 **The general principle, which recurs throughout QNX.** Identifiers that name an IPC endpoint
+> are treated as *capabilities*, not as indices. You will meet the same thinking with connection IDs
+> (`coid`), channel IDs (`chid`) and server identifiers in Chapters 13 and 16. QNX would rather an
+> operation fail loudly than succeed against the wrong target — the same instinct that makes it a
+> real-time OS.
+
+**What this means in practice:** never hard-code a PID, never assume PIDs are small enough to index
+an array, and expect large numbers in `pidin`, `slay` and `gdb`. Chapter 10 covers the process model
+in full.
+
+**Related.** [Setup Guide 03 §10](../guides/Setup_03_QEMU_VM.md) · Chapters 10, 13, 16
+
+**Action taken.** Setup Guide 03 §10 now shows the real output with this explanation attached, so the
+first surprising number a reader meets is explained where they meet it.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-08-26 | **D-009 corrected** — the image ships `PermitRootLogin no`, not `prohibit-password`; keys do not help root. +D-011 (reading `/etc/passwd` and `sshd_config`), D-012 (the apparent root SSH success), D-013 (why QNX PIDs are large). |
 | 1.2 | 2026-08-26 | +D-009 (SSH refuses root by design), D-010 (benign boot-log warnings). |
 | 1.1 | 2026-08-26 | +D-006 (the `mkqnximage` nested-directory trap), D-007 (`-listAvailablePackages` does not exist), D-008 (the 47 GB sparse disk image). `/btw` convention documented. |
 | 1.0 | 2026-08-25 | Created. Seeded with D-001…D-005 from the learner's opening request. |

@@ -1,15 +1,15 @@
 ---
 title: "Setup Guide 03 — Your First QNX VM on QEMU"
 document_id: SETUP-03
-version: 1.2
-status: Published — §§4–9 ✅ verified; §§10–11 pending block V5.6
+version: 2.0
+status: ✅ Published & verified — executed end to end
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "45–75 minutes (plus a ~2–4 GB download)"
 prereqs: "Setup Guide 01 and Setup Guide 02, both complete"
 sdp_version: "QNX SDP 8.0"
-verified_on: "§§4–9 executed on Ubuntu 26.04 / WSL2 against QNX 8.0.0 (kernel build 2026/02/27), 2026-08-26. §§10–11 not yet reached."
+verified_on: "✅ Fully executed on Ubuntu 26.04 / WSL2 against QNX 8.0.0 (kernel build 2026/02/27-11:02:56EST), 2026-08-26."
 ---
 
 # 🖥️ Setup Guide 03 — Your First QNX VM on QEMU
@@ -26,13 +26,17 @@ verified_on: "§§4–9 executed on Ubuntu 26.04 / WSL2 against QNX 8.0.0 (kerne
 > them, paste the output back and each marker is replaced with the real result — or corrected, if
 > reality disagrees. *(ADR-024; verification block **V5** in the project's tracker.)*
 >
-> ⚠️ **It was.** The prediction below held: the first real run of this guide turned up **three
-> errors in §§4–5**, all now fixed and marked ✅ verified. The most important is the nested `qemu/`
-> directory in §5 — miss it and §7 fails with a message that recommends a flag you must not use.
-> See [D-006](../meta/Doubts.md#d-006), [D-007](../meta/Doubts.md#d-007) and
-> [D-008](../meta/Doubts.md#d-008).
+> ✅ **Verified end to end.** Every step in this guide has been executed on **Ubuntu 26.04 LTS under
+> WSL2** against **QNX 8.0.0** (kernel build `2026/02/27-11:02:56EST`), ending with a
+> cross-compiled binary running on the target. All output shown is real.
 >
-> §§7 onwards have still not been reached. Same warning applies with full force.
+> ⚠️ **It cost five bugs to get here**, every one of which looked perfectly reasonable on paper:
+> the nested `qemu/` directory ([D-006](../meta/Doubts.md#d-006)), a QNX Software Center option that
+> does not exist ([D-007](../meta/Doubts.md#d-007)), an undocumented 47 GB disk image
+> ([D-008](../meta/Doubts.md#d-008)), `sshd` refusing root ([D-009](../meta/Doubts.md#d-009)), and
+> four boot warnings that look like failures and are not
+> ([D-010](../meta/Doubts.md#d-010)). Two predictions in §12 turned out to be **wrong in your
+> favour** — the `virbr0` bridge worked, and Ubuntu 26.04 needed no QEMU build from source.
 
 ---
 
@@ -828,6 +832,17 @@ host$ ping -c3 192.168.122.46
 host$ ssh root@192.168.122.46
 ```
 
+> 🐣 **A warning you will see on every SSH connection, and can ignore:**
+>
+> ```text
+> ** WARNING: connection is not using a post-quantum key exchange algorithm.
+> ** This session may be vulnerable to "store now, decrypt later" attacks.
+> ```
+>
+> That is your **host's** OpenSSH 10.2 noting that the target's older `sshd` does not offer
+> post-quantum key exchange. It is a real concern for long-lived secrets crossing the public
+> internet; it is meaningless for a VM on a virtual network on your own machine.
+
 ❌ **What actually happens:**
 
 ```text
@@ -839,11 +854,20 @@ root@192.168.122.46: Permission denied (publickey,password).
 **The password is not wrong.** `root`/`root` logs in perfectly on the serial console. What is
 refusing you is **`sshd`**, not the password database.
 
-> 💡 **Why.** Since OpenSSH 7.0 the default has been `PermitRootLogin prohibit-password`: root may
-> authenticate with a **key**, never with a password, no matter how correct the password is. It is a
-> sensible hardening default — remote root password login is the single most brute-forced door on
-> the internet — and QSTI ships with it. The clue is in the error: `(publickey,password)` lists the
-> methods the *server* offered, and password was not on offer **for root**.
+> 💡 **Why.** The image's `/etc/ssh/sshd_config` contains:
+>
+> ```text
+> PermitRootLogin no
+> PasswordAuthentication yes
+> ```
+>
+> **Root cannot log in over SSH at all** — not with a password, and not with a key either.
+> `PasswordAuthentication yes` applies to *every other* account, which is why `qnxuser` works.
+> Remote root login is the single most brute-forced door on the internet, so shipping it off is a
+> sensible default.
+>
+> The clue is in the error: `(publickey,password)` lists the methods the *server* offered. Both were
+> on offer — just not **for root**.
 
 **✅ Use the unprivileged account instead:**
 
@@ -851,37 +875,60 @@ refusing you is **`sshd`**, not the password database.
 host$ ssh qnxuser@192.168.122.46
 ```
 
-The image is built around a `qnxuser` account — the login banner names `qnxuser` as the VNC password,
-the image includes a `sudoers` configuration, and the banner tells you to run `sudo apk update`. That
-`sudo` only makes sense for a non-root user.
+✅ **Password: `qnxuser`.** Verified 2026-08-26.
 
-Once in, become root normally:
+Then become root — the `sudo` password is `qnxuser` too:
 
-```bash
-qnx$ sudo -i
+```text
+[qnxuser@qnxqemu ~]$ sudo -i
+[sudo] password for qnxuser:
+[root@qnxqemu ~]#
 ```
 
-<details>
-<summary>If <code>qnxuser</code> is not the account name, find out from the console</summary>
-
-At the serial console, as root:
+### 9.3.1 Who else lives on this image?
 
 ```bash
 qnx# cat /etc/passwd
-qnx# grep -iE 'PermitRootLogin|PasswordAuthentication|AllowUsers' /etc/ssh/sshd_config
 ```
 
-`/etc/passwd` lists every account with a real shell. `sshd_config` tells you exactly what the server
-will accept.
-</details>
+✅ **Real output:**
+
+```text
+root:x:0:0:root:/data/home/root:/bin/bash
+sshd:x:15:15:sshd:/data/var/chroot/sshd:/bin/false
+qnxuser:x:1000:1000:qnxuser:/data/home/qnxuser:/bin/bash
+user1:x:1001:1001:user1:/data/home/user1:/bin/bash
+...through user6
+```
+
+Three things worth reading out of that:
+
+| Observation | What it tells you |
+|-------------|-------------------|
+| Home directories are under **`/data/home/`** | `/data` is the **writable partition** on `disk-qemu`. The rest of the system comes from the read-only boot image. This is why edits to `/etc` may not survive a reboot (§9.4) — and it is the shape of most embedded systems. |
+| `sshd` has shell `/bin/false`, home `/data/var/chroot/sshd` | **Privilege separation.** `sshd` drops into an unprivileged, chrooted account to handle untrusted network data before anyone authenticates. It is a service account, not a login. |
+| `user1`…`user6` exist | Spare accounts for multi-user experiments. Nothing in this course needs them. |
+
+> 🐧 **In Linux this would be…** identical. `/etc/passwd` is POSIX: the `x` means the real hash lives
+> in `/etc/shadow`, and the seven fields are the same seven. QNX being POSIX-compliant is not a
+> slogan — this is the same file.
+
+> ⚠️ **Every password on this image is a published default.** `root`/`root`, `qnxuser`/`qnxuser`,
+> VNC `qnxuser`. And `qnxuser` has full `sudo`, so `PermitRootLogin no` buys less than it looks:
+> anyone who reaches port 22 with the default password has root anyway. Fine for a disposable lab VM
+> on a private virtual network; **completely unacceptable** anywhere else. Chapter 28 covers QNX
+> security properly.
 
 ### 9.4 Alternative — allow root over SSH
 
 Reasonable on a disposable VM on a private virtual network; **never** on anything reachable from
 outside. At the serial console:
 
+The image ships `PermitRootLogin no`, so change that line rather than appending a duplicate:
+
 ```bash
-qnx# echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+qnx# sed -i 's/^PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+qnx# grep -i permitrootlogin /etc/ssh/sshd_config
 qnx# slay -f sshd && sshd
 ```
 
@@ -899,12 +946,16 @@ host$ ssh-copy-id qnxuser@192.168.122.46
 host$ ssh qnxuser@192.168.122.46                # no password
 ```
 
+> ⚠️ **A key does not get *root* in.** `PermitRootLogin no` blocks root by **every** method, keys
+> included. This works for `qnxuser`. (If you have met `PermitRootLogin prohibit-password` elsewhere,
+> that setting *does* let root in with a key — this image uses the stricter `no`.)
+
 > 💡 **Worth doing now rather than later.** Chapter 08 has you running `gdb` across this link and
 > redeploying binaries constantly. A password prompt in that loop gets old within minutes.
 
-## 10. Step 7 — Run your binary 🎉 ⚠️
+## 10. Step 7 — Run your binary 🎉 ✅
 
-`[UNVERIFIED]` — *the last unverified step in this guide.*
+> ✅ **Verified 2026-08-26.** This is where the course's first complete loop closes.
 
 This is the payoff. Rebuild the program from Setup Guide 02 and run it **on QNX**.
 
@@ -936,12 +987,23 @@ qnx# chmod +x hello_qnx
 qnx# ./hello_qnx
 ```
 
-✅ **Expected output:**
+✅ **Real output:**
 
 ```text
 Hello from QNX!
-My process ID is 12345
+My process ID is 14032920
 ```
+
+> 💡 **That process ID is not a typo.** On Linux you would expect a small number that counts up from
+> 1. QNX process IDs are **32-bit values that are neither small nor sequential** — look back at your
+> `pidin` output and you will see `16386`, `32773`, `81926`, `1458208`, `13520913`.
+>
+> **Why it works that way.** In QNX a process ID is not just a label for `kill` — it is an
+> **addressable endpoint for message passing**. When your client calls `MsgSend`, the identity on the
+> other end has to be unambiguous. If PIDs were small and recycled quickly, a message aimed at a
+> dead process could reach a *different, newly created* one occupying the same number. Spreading IDs
+> across a large space makes that vanishingly unlikely. Chapter 10 covers the process model, and
+> Chapter 13 shows why the guarantee matters.
 
 > 🎉 **Stop and appreciate this.** You wrote C on Linux, compiled it with a cross-compiler into a
 > binary your own machine physically cannot execute, moved it across a virtual network into a
@@ -956,9 +1018,9 @@ My process ID is 12345
 
 ---
 
-## 11. Step 8 — Shut down cleanly ⚠️
+## 11. Step 8 — Shut down cleanly ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26.**
 
 Two ways:
 
@@ -1166,7 +1228,7 @@ The official QNX troubleshooting page is
 - [ ] `pidin` lists processes, including `procnto` and user-space drivers
 - [ ] `ls /proc/boot` shows `ldqnx-64.so.2` — the linker Linux could not find
 - [ ] The VM has an IP address
-- [ ] `ssh qnxuser@<ip>` works *(root over SSH is refused by default — §9.3)*
+- [ ] `ssh qnxuser@<ip>` works with password `qnxuser` *(root is refused — `PermitRootLogin no`, §9.3)*
 - [ ] **`hello_qnx` copied across and printed `Hello from QNX!`** 🎉
 - [ ] `Ctrl+A X` (or `mkqnximage --stop`) shuts it down cleanly
 
@@ -1199,7 +1261,7 @@ that runs them, and a network between them.
 | Find the IP | `mkqnximage --getip` |
 | Stop | `mkqnximage --stop`, or `Ctrl+A` then `X` |
 | Console credentials | `root` / `root` |
-| **SSH** | **`qnxuser`** — root is refused over SSH by default ([§9.3](#93--ssh-as-root-will-be-refused--use-qnxuser)) |
+| **SSH** | **`qnxuser`** / `qnxuser` — root refused (`PermitRootLogin no`), keys included ([§9.3](#93--ssh-as-root-will-be-refused--use-qnxuser)) |
 | VNC password | `qnxuser` |
 | Defaults | 8 CPUs · 4 GB RAM · 1280×768 @ 60 |
 | RAM ceiling | ⚠️ above **16 GB** may misbehave |
@@ -1211,6 +1273,7 @@ that runs them, and a network between them.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.0 | 2026-08-26 | **✅ Verified end to end.** All `[UNVERIFIED]` markers cleared. §10 shows the real `Hello from QNX!` with an explanation of why QNX process IDs are large and non-sequential (they are message-passing endpoints — D-011). **Correction:** §9.3 attributed the SSH refusal to `PermitRootLogin prohibit-password`; the image actually ships **`PermitRootLogin no`**, which blocks root by *every* method including keys — §9.5's claim that a key would let root in was wrong and is fixed. New §9.3.1 reads the real `/etc/passwd`: `/data/home` as the writable partition, `sshd`'s privilege separation, and a warning that every password on the image is a published default while `qnxuser` holds full `sudo`. Added a note on the benign OpenSSH post-quantum warning. |
 | 1.2 | 2026-08-26 | **§§7–9 verified — the VM boots.** Real boot log added with the four benign startup warnings explained and `slm`'s 22 components listed. §7.1 shows the real login banner (`apk`, the VNC server, and the `sudo` hint). §8 rewritten around real `uname`/`pidin`/`pidin info`/`ls /proc/boot` output — including live message passing visible in the `REPLY` column, and `ldqnx-64.so.2` sitting in `/proc/boot`. §9 rewritten: real `ifconfig`, and **the one real failure — `sshd` refuses password login for root** (`PermitRootLogin prohibit-password`); use `qnxuser`, or enable root login, or use a key (**D-009**). §12.1 downgraded: the `virbr0` bridge **worked** on WSL2. |
 | 1.1 | 2026-08-26 | **§§4–5 verified; three corrections.** (a) `unpack_qemu_image.sh` extracts into a nested **`qemu/`** subdirectory, so the image is at `~/qnx800/images/qemu/qemu` — §5 now shows the tree and §7 `cd`s into it, with the `mkqnximage` error quoted and an explicit warning **not** to use the `--force` it suggests (**D-006**). (b) `-listAvailablePackages` does not exist; replaced with `-listAccessible` and the real option table (**D-007**). (c) Real file listings added, including the 47 GB `disk-qemu` and what `procnto-smp-instr.sym`, `build/` and `option_files/` are for (**D-008**). Also: the QSTI package may already be installed with SDP — check before downloading. |
 | 1.0 | 2026-08-26 | Created from QNX's official *QSTI for QEMU* documentation (read 2026-08-26). Documents the QSTI → `unpack_qemu_image.sh` → `mkqnximage --run` flow, the underlying QEMU configuration, first-contact commands, SSH, the cross-compile-and-run payoff, and three predicted WSL2 failure modes. All steps `[UNVERIFIED]` pending block V5. |
