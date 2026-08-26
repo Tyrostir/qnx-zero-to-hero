@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.1
+version: 1.2
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -48,6 +48,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Deadline** | The latest acceptable completion time for a response, measured from its release. Often equal to the period for a periodic task. Missing one is a *failure* (hard), makes the result *worthless* (firm), or *degrades quality* (soft). | 01 |
+| **Determinism** | The property that timing is **bounded and the bound is knowable** — *not* that it is small. A slower system with a tight bound is more deterministic than a faster one with a long tail. | 01 |
 | **Doubt (`D-NNN`)** | A permanent, numbered record of a question and its full answer, in [`Doubts.md`](../meta/Doubts.md). Prefix an aside with `/btw` to guarantee one is created. | 00 |
 | **`devb-*`** | Naming convention for QNX **block** device drivers (e.g. `devb-ahci` for SATA). | 20 🌱 |
 | **`devc-*`** | Naming convention for QNX **character** device drivers (e.g. `devc-ser8250` for a serial port). | 20 🌱 |
@@ -72,6 +74,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Hard real-time** | A system in which missing a deadline is a failure, possibly causing harm. The value of a late result is *negative*. Contrast **firm** (value zero) and **soft** (value diminishing). Hardness is about **consequences**, not tightness. | 01 |
 | **HAM** | *High Availability Manager* — a QNX process that monitors other processes and automatically restarts them (or runs recovery actions) on failure. | 27 🌱 |
 | **Hard real-time** | A deadline miss is a *system failure*. Airbag deployment, flight control. Contrast **soft real-time**. | 01 🌱 |
 | **Hypervisor (type-1)** | Software that runs directly on hardware and hosts multiple guest OSes. QNX Hypervisor lets a safety-critical QNX guest and a feature-rich Linux guest share one SoC. | 30 🌱 |
@@ -91,12 +94,14 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Jitter** | The *variation* in latency, usually reported as `max − min` or as a percentile spread (p99.9 − p50). Matters most for periodic tasks, where a wandering interval makes every derivative term in a controller wrong. | 01 |
 | **Jitter** | Variation in the timing of a repeated event. Low average latency with high jitter is often worse for control systems than higher but stable latency. | 01 🌱 |
 
 ## L
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Latency** | Elapsed time from stimulus to response. Decomposes into interrupt latency, ISR duration, scheduling latency and execution time — **three of the four belong to the OS**. | 01 |
 | **Learning path** | One of three routes through the same chapters: 🐣 **A** (understand, no coding), 🚶 **B** (full course with all labs), 🏃 **C** (QNX deltas only, ~1 week). Markers inside each chapter, not separate documents. | 00 |
 
 ## M
@@ -128,6 +133,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Priority inversion** | A high-priority thread blocked on a lock held by a low-priority thread that is itself preempted by a medium-priority thread — so the highest-priority thread waits on the lowest, for unbounded time. Caused the Mars Pathfinder resets in 1997. Fixed by **priority inheritance**. | 01, 12 |
+| **Period (`T`)** | The interval between successive releases of a periodic task. | 01 |
 | **`pidin`** | *Process information* — QNX's `ps`, and the single most-used diagnostic command in this course. Lists **threads**, with each one's priority, scheduling policy and **blocking state**. `ps` has no equivalent for that last column. | 00 |
 | **Process ID (QNX)** | A 32-bit identifier that is neither small nor sequential — expect values like `14032920`. A QNX PID names an **addressable message-passing endpoint**, so IDs are spread across a large space to make a stale reference fail rather than reach a recycled process. | 00 |
 | **Pathname space** | QNX's unified namespace mapping paths to the processes that serve them. When you `open("/dev/ser1")`, the process manager tells you which server owns that path; you then message that server directly. | 16 🌱 |
@@ -155,6 +162,9 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Rate-monotonic** | Fixed-priority scheduling in which a shorter period earns a higher priority. Guarantees schedulability only up to `U ≤ n(2^(1/n) − 1)`, which approaches **≈ 69 %** for large task sets — so deadlines can be missed with a third of the CPU idle. | 01, 11 |
+| **Real-time system** | A system whose **correctness depends on when a result is produced as well as what it is**. A late answer is a wrong answer. Says nothing about speed. | 01 |
+| **Response time (`R`)** | Release → completion, **including any time spent preempted or blocked**. Deadlines apply to `R`, not to execution time `C`. Confusing the two is the most common beginner error in timing analysis. | 01 |
 | **Resource manager** | A user-space QNX process that registers a path (e.g. `/dev/mydev`) and responds to POSIX messages (`open`, `read`, `write`, `devctl`). QNX's equivalent of a device driver — but with no kernel privileges. | 17 🌱 |
 | **Round-robin (`SCHED_RR`)** | Like FIFO, but threads of *equal* priority share the CPU in timeslices. | 11 🌱 |
 | **RTOS** | *Real-Time Operating System* — an OS whose design goal is bounded, predictable timing rather than maximum average throughput. | 01 🌱 |
@@ -184,12 +194,14 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Utilisation (`U`)** | The fraction of CPU a task set demands: `Σ(Cᵢ/Tᵢ)`. `U > 1.0` is infeasible on one core; `U ≤ 1.0` is necessary but not sufficient — see **rate-monotonic**. | 01, 11 |
 | **`[UNVERIFIED]`** | A marker on a step that was written from documentation but **has not been executed on a real machine**. Removed only when someone runs it and pastes back the real output. There are currently none in this course. | 00 |
 
 ## W
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **WCET** | *Worst-Case Execution Time* — the upper bound on one computation across all inputs and machine states, excluding preemption. Measurement gives a *lower* bound; static analysis gives an upper bound that is often uselessly loose. Caches and multi-core make both harder. | 01, 26 |
 | **WCET** | *Worst-Case Execution Time* — the provable upper bound on how long a piece of code can take. The unit of currency in real-time analysis. | 01 🌱 |
 
 ---
@@ -199,5 +211,6 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | Chapter 01: +13 terms (real-time system, determinism, deadline, hard real-time, latency, jitter, period, response time, WCET, utilisation, rate-monotonic, priority inversion). |
 | 1.1 | 2026-08-26 | Chapter 00: +10 terms (learning path, core lab, critical path, doubt, `[UNVERIFIED]`, `pidin`, QNX process ID, QSTI, `mkqnximage`, `qnxuser`). Sections L and U added and the index kept alphabetical. |
 | 1.0 | 2026-08-25 | Seeded with 55 terms during planning. All marked 🌱 pending their chapter. |

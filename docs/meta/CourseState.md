@@ -26,9 +26,9 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **1 / 34** |
+| **Chapters published** | **2 / 34** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
-| **Labs completed** | **0 / 21** |
+| **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
@@ -38,7 +38,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 ### Progress bar
 
 ```text
-Part 0  Orientation        [█████               ]  25 %   (1/4 chapters)
+Part 0  Orientation        [██████████          ]  50 %   (2/4 chapters)
 Part 1  Environment        [                    ]   0 %   (0/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
@@ -46,7 +46,7 @@ Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [                    ]   3 %   (1/34)
+OVERALL                    [█                   ]   6 %   (2/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   3 %   (1/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 00](../chapters/Chapter00_HowToUseThisCourse.md)** (~25 min) and do its three labs. Confirm the path you are taking, and tell me anything in it that reads wrong. |
-| 🤖 **Me — next turn** | **Chapter 01 — What Is a Real-Time System?** (T-103). Hard vs. soft real-time, determinism, latency, jitter, WCET. No software needed. |
+| 👤 **You — do next** | 📕 **Read [Chapter 01](../chapters/Chapter01_WhatIsARealTimeSystem.md)** (~60 min), then run **block V6** — build and run `labs/lab01_timing/`. V6.3 tests the chapter's central claim directly; if it does not reproduce, the chapter is wrong. |
+| 🤖 **Me — next turn** | **Chapter 02 — What Is QNX?** (T-110). History 1980→2026, the microkernel bet, the product family, and how 8.0 relates to the 6.x material that dominates search results. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -112,7 +112,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
 | 00 | How To Use This Course | 📕 | — | v1.0. Sets the template for all 34 chapters. |
-| 01 | What Is a Real-Time System? | 📄 | — | |
+| 01 | What Is a Real-Time System? | 📕 | — | v1.0. Ships `labs/lab01_timing/`. |
 | 02 | What Is QNX? | 📄 | — | |
 | 03 | Why & Where QNX Is Used | 📄 | — | |
 
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 012 — 2026-08-26 📕 **Chapter 01 + the first lab**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 01 and establish the lab mechanism. |
+| **Done** | 📕 **Chapter 01 — What Is a Real-Time System?** published (1024 lines)<br>• Defines real-time without the word "fast"; hard/firm/soft by **consequence, not tightness**; determinism as *bounded and knowable*, illustrated with an ASCII latency histogram<br>• The **four latency components** — three of which belong to the OS — and the **five classic unbounds**, each with its QNX answer and forward chapter reference<br>• **Mars Pathfinder** as the worked illustration of priority inversion<br>• §4 adapts "The API" into **The Vocabulary**: eight quantities with units, the `R` vs `C` trap, utilisation and the **≈69 % rate-monotonic bound**, and the five things a testable timing requirement must name<br>• §5 budgets a 1 kHz control loop to 205 µs/32 % margin, then derives a priority-inversion failure from three individually correct components and fixes it with one `pthread_mutexattr_setprotocol` line<br>• 🔬 Deep dive on why WCET is genuinely hard (measurement gives a *lower* bound)<br>• **First compiled lab:** `labs/lab01_timing/` — Makefile calling `qcc` directly (ADR-007), skeleton with 4 TODOs, annotated solution, `expected_output.txt`. Source is clean under `gcc -Wall -Wextra`<br>• 💥 Break It measures the tail growing under load, then recovers it with `on -p 63`<br>• 🐣 Path A activity is paper-only — five systems to classify, one budget to compute — because no verified binary exists to ship<br>• Glossary +13 terms; **verification block V6** added |
+| **Learner decisions** | "Proceed to write Chapter 01" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 02 — What Is QNX?** |
 
 ### Session 011 — 2026-08-26 📕 **First chapter published**
 
@@ -354,6 +365,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | Session 012: **Chapter 01 published** — 2/34 — plus the course's first compiled lab and block V6. |
 | 1.10 | 2026-08-26 | Session 011: **Chapter 00 published** — 1/34. Phase 2 begins. |
 | 1.9 | 2026-08-26 | Session 010: **Phase 1 complete.** Block V5 done, Setup Guide 03 → v2.0, D-009 corrected, doubts to D-013. Next: Chapter 00. |
 | 1.8 | 2026-08-26 | Session 009: **M2 reached — the VM boots.** Setup Guide 03 §§4–9 verified; D-009/D-010; H-9 closed. |

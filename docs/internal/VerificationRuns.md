@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: ✅ Blocks V1–V5 all complete. Setup Guides 01, 02 and 03 verified end to end.
+status: Active — V1–V5 ✅ complete; **V6 (first lab build) pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -100,6 +100,7 @@ Worked / Failed. Notes: ...
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
 | **V5** — the QEMU VM | ✅ 🎉 **Complete 2026-08-26.** Boots, networked, and runs a cross-compiled binary |
+| **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all 33 remaining chapters use |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -113,10 +114,12 @@ Neither gates anything; both improve the course.
 | **T-202** | The exact **SDP build number** — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). Right now no chapter can state it. |
 | **R2 / T-014** | Did QNX Software Center install via the **graphical** installer under WSLg, or did you need the **headless** route (`-- --unattended`)? Plus the licence approval latency and the portal's real accept/deploy button labels. | Setup Guide 02 §8 currently offers two routes as equals. It should state which one actually works and keep the other as a fallback. |
 
-### 👉 Next verification block
+### 👉 Next verification block: **V6 — the first chapter lab**
 
-**None outstanding.** All three published setup guides are verified. The next block will be defined
-when Setup Guide 04 (IDE & tooling) or the first chapter lab needs one.
+Chapter 01 ships `labs/lab01_timing/`, the course's **first compiled lab**. Its source is
+syntax-clean under `gcc -Wall -Wextra`, but it has never been built with `qcc` or run on the target.
+Block **V6** below verifies it — and with it, the whole lab mechanism that the remaining 33 chapters
+depend on.
 
 > 📌 **Evidence note, for the record (ADR-024).** V5.6's `scp` transfer and V5.7's shutdown command
 > were not themselves captured in the drop — the binary was already on the target and the session
@@ -498,6 +501,75 @@ or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
 
 ---
 
+## 7b. Block V6 — The first chapter lab (Chapter 01)
+
+> 🎯 **Goal:** prove the lab mechanism end to end — build with `qcc`, deploy, run, get numbers.
+> ⏱️ 20 minutes.
+> 📖 [`labs/lab01_timing/README.md`](../../labs/lab01_timing/README.md) ·
+> [Chapter 01 Lab 01.2](../chapters/Chapter01_WhatIsARealTimeSystem.md)
+>
+> ⚠️ **This verifies more than one lab.** It is the first time a `Makefile`, a skeleton/solution
+> pair and a deploy-and-run cycle have been exercised. Whatever breaks here breaks in every later
+> chapter, so it is worth doing carefully.
+
+### V6.1 — Build
+
+```bash
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab01_timing
+host$ make
+host$ file solution/jitter
+```
+
+📋 **Paste:** the full `make` output — **including any warnings** — and the `file` line.
+🎯 **Why:** `qcc` is GCC **12.2.0** and may warn where the host's GCC 15 did not. Warnings on the
+course's first lab need fixing, not tolerating.
+
+### V6.2 — Deploy and run
+
+```bash
+host$ scp solution/jitter qnxuser@<ip>:/tmp/
+host$ ssh qnxuser@<ip>
+qnx$ /tmp/jitter
+```
+
+📋 **Paste:** the complete statistics block.
+🎯 **Why:** it becomes the real `expected_output.txt`, replacing the illustrative numbers — and it is
+the first real timing data in the course.
+
+⚠️ **Sanity check before anything else:** is `min` **≥ 1000 µs**? If it is lower, the measurement is
+wrong rather than the sleep being short, and `elapsed_us()` needs looking at.
+
+### V6.3 — 💥 Break It: loaded, then prioritised
+
+```bash
+qnx$ /tmp/jitter                  # idle baseline
+qnx$ while true; do :; done &     # x3
+qnx$ /tmp/jitter                  # loaded
+qnx$ on -p 63 /tmp/jitter         # loaded, but at priority 63
+```
+
+*(Clean up with `slay sh`, or reboot the VM.)*
+
+📋 **Paste all three runs.**
+🎯 **The claim being tested:** load moves `max` far more than `mean`, and running at priority 63
+pushes `max` back down **even though the machine is still fully loaded**. That is the chapter's whole
+argument, and if it does not reproduce, **the chapter is wrong and must be corrected.**
+
+⚠️ **`on -p 63` is unverified.** If the syntax is wrong, `on --help` on the target will give the real
+one — please paste that too.
+
+### V6.4 — Optional: does jitter scale with the interval?
+
+Change `INTERVAL_US` to `10000` in `solution/jitter.c`, rebuild, rerun.
+
+📋 **Report:** does jitter grow tenfold, or stay roughly constant?
+🎯 **Why it is interesting:** roughly constant jitter points at a fixed cost — the 1 ms clock tick and
+scheduling overhead — rather than anything proportional to the sleep. That distinction is the start
+of Chapter 14.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -523,6 +595,11 @@ or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
 | V4.4 | Final check | 👤 | V4.3 | **T-012**, **T-200** | ✅ **24 pass · 3 warn · 0 fail** |
 | — | Remove Part B markers, paste real output | 🤖 | V4.4 | **T-200** | ✅ Setup 02 → v2.0 |
 | — | Write `Setup_03_QEMU_VM.md` + `tools/qemu/` | 🤖 | V4.4 | **T-112** | ✅ done 2026-08-26 |
+| **V6.1** | Build `lab01_timing` with `qcc` | 👤 | — | Lab 01.2 · the lab mechanism | ⬜ **next** |
+| V6.2 | Deploy and run it | 👤 | V6.1 | `expected_output.txt` | ⬜ |
+| V6.3 | 💥 Loaded, then at priority 63 | 👤 | V6.2 | **Ch 01 §2.3's central claim** | ⬜ |
+| V6.4 | Optional: interval scaling | 👤 | V6.2 | Ch 14 preview | ⬜ |
+| — | Clear Lab 01.2's markers | 🤖 | V6.3 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -642,6 +719,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | **Block V6 added** for Chapter 01's `lab01_timing` — 4 checkpoints. V6.3 tests the chapter's central claim directly. |
 | 1.7 | 2026-08-26 | **Block V5 complete — all verification done.** Setup Guide 03 → v2.0; D-009 corrected (`PermitRootLogin no`); target account facts recorded. |
 | 1.6 | 2026-08-26 | **V5.3–V5.5 passed — M2 reached.** QNX target facts recorded. H-9 (the `virbr0` prediction) did not materialise. New blocker D-009: SSH refuses root. |
 | 1.5 | 2026-08-26 | **V5.1–V5.2 passed; V5.3 blocked and fixed.** Three bugs found in Setup Guide 03 → D-006/D-007/D-008. Retry pending. |

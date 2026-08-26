@@ -31,7 +31,7 @@ update_trigger: "Continuously"
 
 
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
-| T-019 | 🟡 | **Read Chapter 00** and do its three labs; confirm your path and report anything that reads wrong | ⬜ | — | ~25 min + 25 min of labs. Your feedback shapes the template all 34 chapters use. |
+| T-020 | 🔴 | **Run block V6** — build `labs/lab01_timing/` with `qcc`, deploy, run, and do the loaded/priority comparison | ⬜ | — | Verifies the **lab mechanism** all 33 remaining chapters depend on. V6.3 tests Chapter 01's central claim; if it does not reproduce, the chapter is wrong. |
 | T-017 | 🔵 | *When convenient:* paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | 394 bytes; may contain QNX's own notes on the image. |
 | T-202 | 🟡 | **Report the exact SDP build number** — try `-listInstalledRoots` *(partially answered: the kernel reports build `2026/02/27-11:02:56EST`)* — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
 | T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
@@ -51,7 +51,7 @@ update_trigger: "Continuously"
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
-| T-103 | 🔴 | Write `Chapter01_WhatIsARealTimeSystem.md` | ⬜ | **Next.** Hard vs. soft real-time, determinism, latency, jitter, WCET. No software needed. |
+| T-110 | 🔴 | Write `Chapter02_WhatIsQNX.md` | ⬜ | **Next.** History 1980→2026, the microkernel bet, product family, and how 8.0 relates to the 6.x material online. |
 
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -61,7 +61,7 @@ update_trigger: "Continuously"
 
 | ID | Pri | Task | Status | Notes |
 |----|-----|------|--------|-------|
-| T-110 | 🟠 | `Chapter02_WhatIsQNX.md` | ⬜ | History 1980→2026, microkernel bet, product family |
+
 | T-111 | 🟠 | `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | Automotive, medical, rail, nuclear, robotics; vs Linux/FreeRTOS/VxWorks |
 
 | T-113 | 🟡 | `Setup_04_IDE_And_Tooling.md` | ⬜ | VS Code QNX Toolkit, Momentics, qconn, remote gdb |
@@ -92,6 +92,7 @@ update_trigger: "Continuously"
 | T-135 | 🟠 | `Hardware_01_Public_Boards.md` | ⬜ |
 | T-136 | 🟠 | `Hardware_02_Custom_Board.md` | ⬜ |
 | T-137 | 🟡 | All 7 cheat sheets | ⬜ |
+| T-148 | 🟠 | Clear Lab 01.2's `[UNVERIFIED]` markers from the V6 output | ⏸️ | Blocked on T-020. Real numbers replace the illustrative `expected_output.txt`. |
 | T-138 | 🟡 | Populate `Glossary.md` as terms are introduced | 🔄 |
 | T-139 | 🔵 | Part-review mini-projects (6 of them) | ⬜ |
 
@@ -131,6 +132,8 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-103 | Write `Chapter01_WhatIsARealTimeSystem.md` + `labs/lab01_timing/` | 2026-08-26 | 012 |
+| T-019 | Learner read Chapter 00 | 2026-08-26 | 012 |
 | T-102 | Write `Chapter00_HowToUseThisCourse.md` | 2026-08-26 | 011 |
 | T-015 | Run Setup Guide 03 end to end (block V5) — **milestone M2** | 2026-08-26 | 010 |
 | T-018 | Confirm the SSH account name and `sshd_config` | 2026-08-26 | 010 |
@@ -162,6 +165,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | **Chapter 01 published** with the course's first compiled lab. T-103 and T-019 closed; T-110 (Chapter 02) promoted; T-020 (run block V6) and T-148 (clear the lab's markers) added. |
 | 1.10 | 2026-08-26 | **Chapter 00 published.** T-102 closed; T-103 (Chapter 01) promoted to 🔴; T-019 added (learner reads Chapter 00). |
 | 1.9 | 2026-08-26 | **Block V5 complete.** T-015, T-018, T-147 closed. All three setup guides verified; zero `[UNVERIFIED]` markers remain. **T-102 (Chapter 00) is the next action.** |
 | 1.8 | 2026-08-26 | **M2 reached.** T-015 re-scoped to V5.6–V5.7; T-018 added (confirm the SSH account); T-202 downgraded — the kernel build date is now known. |

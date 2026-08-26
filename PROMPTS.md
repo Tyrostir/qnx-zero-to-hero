@@ -63,6 +63,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#8](#prompt8) | 2026-08-26 | Claude (Opus 5) | V5.3–V5.5 done, stuck at V5.5 (SSH) | 🎉 **M2 — the VM boots** · SSH fix: use `qnxuser` (**D-009**) · boot warnings benign (**D-010**) · **H-9 closed** · Setup 03 → v1.2 |
 | [PROMPT#9](#prompt9) | 2026-08-26 | Claude (Opus 5) | V5.6–V5.7 done; V5 complete; three observations to explain | ✅ **Phase 1 complete** · `Hello from QNX!` ran on target · Setup 03 → v2.0 · **D-009 corrected** · +D-011/012/013 |
 | [PROMPT#10](#prompt10) | 2026-08-26 | Claude (Opus 5) | "Go ahead and write Chapter 00" | 📕 **Chapter 00 published** (1/34) — the template's reference implementation · 3 labs · Glossary +10 |
+| [PROMPT#11](#prompt11) | 2026-08-26 | Claude (Opus 5) | Chapter 00 read; write Chapter 01 | 📕 **Chapter 01 published** (2/34) + **the first compiled lab** `lab01_timing` · block V6 · Glossary +13 |
 
 ---
 
@@ -1365,10 +1366,110 @@ I can write Chapter 01 while you're reading Chapter 00, if you'd rather not seri
 
 ---
 
+## PROMPT#11
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 012 |
+| **Context** | The learner read Chapter 00 and asked for the next chapter. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I read chapter 00, please proceed to write chapter 01
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 01 — What Is a Real-Time System? (2/34)
+
+**`docs/chapters/Chapter01_WhatIsARealTimeSystem.md`** — 1024 lines, ~60 minutes.
+
+And the course's **first compiled lab**: `labs/lab01_timing/`.
+
+## The chapter's argument
+
+It defines real-time **without using the word "fast"**, then spends the rest of the chapter earning that.
+
+**Hard / firm / soft is about consequences, not tightness.** A washing-machine door lock has a comfortable 100 ms deadline and is *hard* — a hand in a spinning drum. A 144 Hz game has a 6.9 ms deadline and is *soft*. That inversion is the point.
+
+**Determinism is bounded-and-knowable, not small.** There's an ASCII histogram contrasting a system with a 2 µs mean and a 40 ms tail against one that's forty times slower and never exceeds 120 µs — and only the second can carry a 1 ms deadline. That's also why an RTOS can benchmark *worse* than Linux and still be the right choice.
+
+**Four latency components, and you own one of them.** Interrupt latency → ISR → scheduling latency → your code. Three belong to the OS. That single fact is what makes "we profiled our function" an inadequate answer, and it's what you're buying when you buy an RTOS.
+
+**Five classic unbounds**, each with its QNX answer and forward reference: interrupt masking, **priority inversion**, unbounded loops, page faults, dynamic allocation. They *compose* — one unfixed makes the total unbounded.
+
+For priority inversion I used **Mars Pathfinder**: in July 1997 the lander began resetting itself on the Martian surface because a high-priority bus task blocked on a mutex held by a low-priority weather task, preempted by medium-priority comms. JPL diagnosed it from Earth and fixed it by enabling priority inheritance — a flag that had been switched off for performance.
+
+## Two structural choices worth flagging
+
+**§4 adapted again — into "The Vocabulary".** Chapter 00 turned "The API" into a notation reference; Chapter 01 turns it into the eight quantities with units, the **`R` vs `C` trap** (deadlines apply to response time; profilers report execution time), utilisation, and the **≈69 % rate-monotonic bound** — you can start missing deadlines with a third of the CPU idle.
+
+I've recorded the rule this establishes: **§4 is whatever precise material the reader will come back to.** From Chapter 05 it becomes literal APIs and stays there.
+
+**Chapter 01 gets a 🏃 Fast-Track Summary even though the TOC tagged it 🐣🚶.** ADR-008 is explicit that a path existing only as a marker is a broken promise. So the box is written *for someone who already knows this material* — it fixes the vocabulary, states the two traps, and sends them to Chapter 02. TOC tag updated. **The tag means "Path C may skip the body", not "Path C is unserved".**
+
+## §5 — the worked example
+
+Budgets a 1 kHz robot joint controller: six components, 205 µs total against a 300 µs deadline, 32 % margin, 20.5 % utilisation. Then it adds a shared mutex with telemetry and **derives a deadline failure from three individually correct components** — no buggy line anywhere — and fixes it with one `pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT)`.
+
+That's Pathfinder in miniature, and it's why real-time is an OS concern rather than only a coding-discipline one.
+
+## 🧪 The first compiled lab
+
+`labs/lab01_timing/` — Makefile calling `qcc` directly (ADR-007; the recursive Makefile system is Chapter 08's job), skeleton with four TODOs, annotated solution, `expected_output.txt`.
+
+**Why a measurement rather than a hello-world.** You already ran a hello-world on the target in V5.6. This one asks for a 1 ms sleep ten thousand times and reports min/mean/p50/p99/max — so **you produce the evidence for the chapter's central claim yourself** rather than taking my word for it.
+
+It's deliberately plain POSIX, so you can build it for Linux too and compare tails.
+
+**💥 Break It** runs it idle, then loaded, then `on -p 63` while still loaded. Prediction: `mean` barely moves, `max` moves a lot, and priority 63 pulls `max` back down on a fully-loaded machine. **If that doesn't reproduce, the chapter is wrong and I'll fix it.**
+
+**🐣 Path A** is paper-only — five systems to classify, and a drone stopping budget whose punchline is that 30 of the 46 ms are physics, not software. I left `prebuilt/` empty rather than shipping a binary I can't verify; that's now a recorded rule, so Path A never becomes the path that quietly gets less.
+
+## ⚠️ What's verified and what isn't
+
+`solution/jitter.c` passes `gcc -fsyntax-only -Wall -Wextra` with **no warnings**. That's a weaker claim than it sounds: it was checked with the *host's GCC 15*, not with **`qcc` (GCC 12.2.0)**, and it has never run on the target. Everything compiled here is marked `[UNVERIFIED]`.
+
+Also: Glossary +13 terms; TOC, chapters index, labs index and README updated.
+
+---
+
+## 👉 Next: block V6 — and it's more important than one lab
+
+```bash
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab01_timing
+host$ make
+host$ file solution/jitter
+host$ scp solution/jitter qnxuser@<ip>:/tmp/
+qnx$ /tmp/jitter
+```
+
+**This is the first Makefile, the first skeleton/solution pair, and the first build-deploy-run cycle in the course.** Whatever breaks here breaks in all 33 remaining chapters — which is why it gets a numbered block rather than a footnote.
+
+Watch for two things: **warnings from `qcc`** (GCC 12 may complain where GCC 15 didn't — worth fixing on the course's first lab, not tolerating), and **`min ≥ 1000 µs`** (if it's lower, the measurement is wrong rather than the sleep being short).
+
+Then V6.3 — the three-run comparison — which tests the chapter's argument directly. `on -p 63` is itself unverified; if the syntax is wrong, `on --help` on the target will give the real one.
+
+**Meanwhile I can write Chapter 02 — What Is QNX?** History 1980→2026, the microkernel bet and why it survived when Mach didn't, the product family, and how QNX 8.0 relates to the QNX 6.x material that dominates search results. Say the word.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.9 | 2026-08-26 | PROMPT#11 logged: Chapter 01 and the first compiled lab. |
 | 2.8 | 2026-08-26 | PROMPT#10 logged: Chapter 00 published. |
 | 2.7 | 2026-08-26 | PROMPT#9 logged: block V5 complete, Phase 1 complete. |
 | 2.6 | 2026-08-26 | PROMPT#8 logged: milestone M2 reached; SSH-as-root diagnosed. |

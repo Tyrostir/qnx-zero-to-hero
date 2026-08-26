@@ -40,15 +40,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **1 / 34** — Ch 00 📕 |
+| Chapters published | **2 / 34** — Ch 00, 01 📕 |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | **Chapter 01 — What Is a Real-Time System?** (T-103) |
-| Next (learner) | 📕 **Read Chapter 00** + its 3 labs; confirm your path (T-019) |
+| Next (me) | **Chapter 02 — What Is QNX?** (T-110) |
+| Next (learner) | 📕 Read Ch 01, then **run block V6** — build/run `labs/lab01_timing/` (T-020) |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -191,6 +191,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 - **Learner's open actions:** none blocking. Optional: T-017 image README · T-014 QSC install route ·
   T-016 sparse-file measurement · T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
+- **Labs:** 1 published (`lab01_timing`, `[UNVERIFIED]` pending V6 — the first compiled lab, so V6 verifies the lab mechanism itself).
 - **Doubts logged:** 13 (D-001…D-013, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
@@ -199,6 +200,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | Regenerated after Session 012: Chapter 01 + the first lab; block V6 pending. |
 | 1.10 | 2026-08-26 | Regenerated after Session 011: Chapter 00 published; Phase 2 begins. |
 | 1.9 | 2026-08-26 | Regenerated after Session 010: **Phase 1 complete**; loop closed; SSH facts corrected; next action is Chapter 00. |
 | 1.8 | 2026-08-26 | Regenerated after Session 009: **M2 reached**; verified target facts recorded; SSH-as-root trap noted. |

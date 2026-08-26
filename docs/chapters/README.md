@@ -15,6 +15,7 @@ The course itself. Chapters are published in order and appear here as they are w
 | # | Chapter | Paths | Time |
 |---|---------|-------|------|
 | 00 | [How To Use This Course](Chapter00_HowToUseThisCourse.md) | 🐣🚶🏃 | 25 m |
+| 01 | [What Is a Real-Time System?](Chapter01_WhatIsARealTimeSystem.md) | 🐣🚶🏃 | 60 m |
 
 
 > 📑 Full chapter list with status, path tags and time estimates:

@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.10
+version: 1.11
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1147,10 +1147,93 @@ alphabetical.
 
 ---
 
+## 2026-08-26 — Session 012 (Chapter 01 and the first compiled lab)
+
+### DECIDED — Chapter 01 gets a 🏃 Fast-Track Summary even though the TOC tags it 🐣🚶
+
+The Table of Contents tagged Chapter 01 as Path A and B only, on the reasonable grounds that an
+experienced engineer already knows what real-time means.
+
+**ADR-008 wins.** Every chapter must carry a genuine Fast-Track Summary a professional could work
+from — a path that exists only as a marker is a broken promise. Chapter 01's box is therefore written
+for someone who *does* know the material: it fixes the vocabulary this course will use strictly,
+states the `R` vs `C` distinction and the ~69 % rate-monotonic bound, and then explicitly sends the
+reader to Chapter 02.
+
+The TOC tag is updated to 🐣🚶🏃. **The tag means "Path C may skip the body", not "Path C is
+unserved".**
+
+---
+
+### DECIDED — Section 4 adapts again, and this is now a pattern
+
+Chapter 00 turned "The API" into *The Notation Reference*; Chapter 01 turns it into *The Vocabulary*
+— eight quantities with symbols and units, the response-time versus execution-time trap, utilisation,
+and the five things a testable timing requirement must name.
+
+**The rule this establishes:** section 4 is *the precise, referenceable material a reader will come
+back to*. In a chapter teaching an API that is function signatures; in a chapter teaching a way of
+thinking it is the definitions. Chapters 02 and 03 will need the same latitude; from Chapter 05
+onwards section 4 becomes literal APIs and stays that way.
+
+---
+
+### DECIDED — The first compiled lab is a measurement, not a "hello world"
+
+`labs/lab01_timing/` asks for a 1 ms sleep ten thousand times and reports min/mean/p50/p99/max.
+
+**Why a measurement.** The course has already run a hello-world on the target (block V5.6), so
+repeating it would teach nothing. A jitter measurement instead makes the learner *produce the
+evidence for the chapter's central claim themselves* — that the mean is a throughput statistic and
+the maximum is the only number a deadline can rest on. Reading that assertion is weak; measuring it
+is not.
+
+**Deliberately plain POSIX, not QNX-specific.** It builds unchanged on Linux, so the learner can run
+both and compare tails. QNX-specific timing (`ClockCycles`, `ClockPeriod`) waits for Chapters 14
+and 26.
+
+**A plain Makefile calling `qcc` directly**, per ADR-007 — the recursive QNX Makefile system is
+Chapter 08's subject and would be a black box here.
+
+---
+
+### DECIDED — Path A activities do not depend on binaries this course cannot build
+
+The Definition of Done asks for a pre-built binary in `labs/labNN_*/prebuilt/` so Path A can run
+something without a compiler.
+
+**`prebuilt/` is left empty, deliberately.** The course does not ship compiled artefacts it has not
+verified, and ADR-024 means the author cannot build them. Rather than shipping an unverified binary
+or quietly dropping the Path A requirement, **Chapter 01's Path A activity is designed to need no
+binary at all**: five systems to classify by consequence, and a drone stopping-distance budget to
+compute on paper — whose punchline is that 30 of the 46 ms are physics, not software.
+
+**The general rule for future chapters:** where a verified binary exists, ship it; where one does
+not, the Path A activity must be answerable from observation and reasoning. Path A must never be the
+path that silently gets less.
+
+---
+
+### VERIFIED — Chapter 01's lab source is syntax-clean, and nothing more
+
+`gcc -fsyntax-only -Wall -Wextra` passes on `solution/jitter.c` with no warnings.
+
+**That is a much weaker claim than it sounds**, and is recorded so it is not mistaken for
+verification: it was checked with the **host's GCC 15**, not with **`qcc` (GCC 12.2.0)**, and it has
+never been run on the target. The lab and both of Chapter 01's compiled exercises are marked
+`[UNVERIFIED]` accordingly.
+
+**Block V6 verifies the lab mechanism itself** — first Makefile, first skeleton/solution pair, first
+build-deploy-run cycle. Whatever breaks there breaks in all 33 remaining chapters, which is why it is
+worth a numbered block rather than a footnote.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | Session 012 appended: Path C served even where the TOC skips it; section 4 as adaptable reference material; the first lab as a measurement; Path A without binaries; the limits of a syntax check. |
 | 1.10 | 2026-08-26 | Session 011 appended: Chapter 00 as the template's reference implementation; its two meta-chapter adaptations; labs grounded in the verified VM. |
 | 1.9 | 2026-08-26 | Session 010 appended: Phase 1 complete; D-009 corrected (`PermitRootLogin no`); target accounts and the default-credential observation; QNX PID semantics; an evidence note. |
 | 1.8 | 2026-08-26 | Session 009 appended: M2 reached; H-9 closed as a failed prediction; the SSH-root refusal; benign boot warnings; pidin as course material. |

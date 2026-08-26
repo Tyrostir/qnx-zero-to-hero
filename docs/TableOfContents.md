@@ -50,7 +50,7 @@ all of Part 0 while your QNX licence request is being processed.*
 | # | Chapter | Paths | Est. | Status |
 |---|---------|-------|------|--------|
 | 00 | [How To Use This Course](chapters/Chapter00_HowToUseThisCourse.md) | 🐣🚶🏃 | 25 m | 📕 |
-| 01 | [What Is a Real-Time System?](chapters/Chapter01_WhatIsARealTimeSystem.md) | 🐣🚶 | 60 m | 📄 |
+| 01 | [What Is a Real-Time System?](chapters/Chapter01_WhatIsARealTimeSystem.md) | 🐣🚶🏃 | 60 m | 📕 |
 | 02 | [What Is QNX?](chapters/Chapter02_WhatIsQNX.md) | 🐣🚶🏃 | 75 m | 📄 |
 | 03 | [Why & Where QNX Is Used](chapters/Chapter03_WhyAndWhereQNXIsUsed.md) | 🐣🚶🏃 | 60 m | 📄 |
 
@@ -261,6 +261,7 @@ documented**; you are not locked in.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | **Chapter 01 published.** Its path tag gains 🏃 — ADR-008 requires a genuine Fast-Track Summary in every chapter, so Path C is served even where it skips the body. |
 | 1.3 | 2026-08-26 | **Chapter 00 published** — the first chapter. |
 | 1.2 | 2026-08-26 | Setup Guide 03 published. |
 | 1.1 | 2026-08-25 | Chapter 33 split into three documented capstone flavours (ADR-019). Setup Guides 01–02 published. |

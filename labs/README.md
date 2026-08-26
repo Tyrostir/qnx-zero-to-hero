@@ -86,3 +86,10 @@ individual lab Makefiles stay short and readable.
 ## Licence
 
 All lab source code is MIT licensed. See [`../LICENSE`](../LICENSE) § 2.
+
+## Published labs
+
+| Lab | Chapter | Title | Paths | Status |
+|-----|---------|-------|-------|--------|
+| [01.2](lab01_timing/) | 01 | Measure jitter | 🚶🏃 | `[UNVERIFIED]` — block V6 |
+

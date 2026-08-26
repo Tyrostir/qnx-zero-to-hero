@@ -1,0 +1,40 @@
+Lab 01.2 — expected output shape
+================================
+
+[UNVERIFIED] — this file records what a CORRECT run should look like.
+It will be replaced with real observed output once block V6 is run.
+
+Your numbers will differ. What must hold is the SHAPE:
+
+  * min   >= 1000 us      (nanosleep guarantees AT LEAST the request)
+  * mean  slightly above 1000 us
+  * max   noticeably higher than mean -- often 2x or more
+  * jitter = max - min
+
+
+Illustrative run on an idle target
+----------------------------------
+
+samples : 10000   requested interval : 1000 us
+min     :  1000 us
+mean    :  1043 us
+p50     :  1032 us
+p99     :  1180 us
+max     :  2350 us
+jitter  :  1350 us  (max - min)
+
+Note: worst case is more than 2x the request. See Chapter 01 section 2.3.
+
+
+How to read it
+--------------
+
+mean 1043 us   <- the datasheet number. A throughput statistic.
+max  2350 us   <- the only number a deadline can be built on.
+
+A task that meets a 1100 us deadline 99% of the time fails a HARD
+requirement 100% of the time.
+
+Why even a good result overshoots: QNX's default clock tick is 1 ms, so a
+1 ms sleep almost always wakes on the NEXT tick. Timer resolution is itself
+a source of jitter, and it is adjustable -- see Chapter 14 (ClockPeriod).
