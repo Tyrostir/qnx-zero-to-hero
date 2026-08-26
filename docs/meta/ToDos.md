@@ -28,10 +28,11 @@ update_trigger: "Continuously"
 
 
 
-| T-015 | 🔴 | **Retry V5.3** — `cd ~/qnx800/images/qemu/qemu` then `mkqnximage --run`, and continue to V5.7 | ⬜ | — | ⭐ Milestone **M2**. The fix is [D-006](Doubts.md#d-006). V5.1–V5.2 ✅ done. |
+| T-015 | 🔴 | **Finish V5.6–V5.7** — `scp` and run `hello_qnx` on the target, then shut down | ⬜ | — | Use **`ssh qnxuser@<ip>`**, not root ([D-009](Doubts.md#d-009)). V5.1–V5.5 ✅ · **M2 reached** 🎉 |
+| T-018 | 🟠 | Confirm the SSH account name — `cat /etc/passwd` and `grep -i permitrootlogin /etc/ssh/sshd_config` on the target | ⬜ | — | Settles [D-009](Doubts.md#d-009). `qnxuser` is inferred from the banner, not yet proven. |
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
 | T-017 | 🔵 | Paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | Two lines; may contain QNX's own notes on the image. |
-| T-202 | 🟠 | **Report the exact SDP build number** — try `-listInstalledRoots` — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
+| T-202 | 🟡 | **Report the exact SDP build number** — try `-listInstalledRoots` *(partially answered: the kernel reports build `2026/02/27-11:02:56EST`)* — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
 | T-014 | 🔵 | *When convenient:* the QSC install route (graphical vs. headless), licence approval latency, and the real portal button labels | ⬜ | — | Non-blocking. Setup 02 §8 currently offers two routes as equals; it should name the one that works. |
 
 | T-013 | 🟠 | `git pull` before each work session | ⬜ | — | The authoring side moves between your sessions. |
@@ -156,6 +157,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | **M2 reached.** T-015 re-scoped to V5.6–V5.7; T-018 added (confirm the SSH account); T-202 downgraded — the kernel build date is now known. |
 | 1.7 | 2026-08-26 | **V5.1–V5.2 passed, V5.3 blocked and fixed.** T-015 re-scoped to the retry; T-016 (sparse-file measurement) and T-017 (image README) added. |
 | 1.6 | 2026-08-26 | **Setup Guide 03 published.** T-112 closed. New learner item T-015 (run block V5) and author item T-147 (clear its markers). |
 | 1.5 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** T-011, T-012, T-141, T-144, T-200 closed. T-202 promoted to a learner item (SDP build number still unreported). T-112 (Setup Guide 03) unblocked and 🔴. **T-102 Chapter 00 off hold.** |

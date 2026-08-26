@@ -99,7 +99,7 @@ Worked / Failed. Notes: ...
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
-| **V5** — the QEMU VM | 🔄 **In progress.** V5.1–V5.2 ✅ · V5.3 blocked on a directory bug, now fixed → **retry** |
+| **V5** — the QEMU VM | 🔄 **V5.1–V5.5 ✅ — the VM boots (M2 🎉).** V5.6–V5.7 remain; SSH needs `qnxuser` (D-009) |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -519,10 +519,10 @@ or `Ctrl+A` then `X`. 📋 **Report:** which one you used and whether it worked.
 | — | Write `Setup_03_QEMU_VM.md` + `tools/qemu/` | 🤖 | V4.4 | **T-112** | ✅ done 2026-08-26 |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
-| V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | 🔄 **blocked → fix in D-006, retry** |
-| V5.4 | First contact (`pidin`, `/proc/boot`) | 👤 | V5.3 | Setup 03 §8 | ⬜ |
-| V5.5 | Networking + SSH ⚠️ | 👤 | V5.3 | Setup 03 §9 · §12.1 | ⬜ |
-| V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ⬜ |
+| V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
+| V5.4 | First contact (`pidin`, `/proc/boot`) | 👤 | V5.3 | Setup 03 §8 | ✅ — excellent course material |
+| V5.5 | Networking + SSH ⚠️ | 👤 | V5.3 | Setup 03 §9 | ✅ IP `192.168.122.46` · **SSH root refused → D-009** |
+| V5.6 | **Run `hello_qnx` on the target** 🎉 | 👤 | V5.5 | Setup 03 §10 | ⬜ **next — use `qnxuser@`** |
 | V5.7 | Graphics + clean shutdown | 👤 | V5.3 | Setup 03 §11 · §12.2 | ⬜ |
 | — | Clear Setup Guide 03's markers | 🤖 | V5.7 | — | ⏸️ |
 
@@ -560,6 +560,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V5.3 – V5.5** | ✅ 🎉 **M2 REACHED** | **QNX 8.0.0 boots** (kernel build `2026/02/27-11:02:56EST`, host `qnxqemu`). 31 processes, 207 threads, 8 CPUs, 3659/4095 MB free. **Bridged networking worked on WSL2** — `192.168.122.46` on `vtnet0` — so hazard **H-9** did not materialise. **One real failure:** `sshd` refuses password auth for root (`PermitRootLogin prohibit-password`) → **D-009**, use `qnxuser`. Four benign boot warnings explained → **D-010**. `pidin`, `pidin info`, `ls /proc/boot` captured as course material. Setup Guide 03 → **v1.2**, §§4–9 verified. |
 | 2026-08-26 | **V5.1 – V5.2** | ✅ **Passed, with 3 bugs found** | QSTI was **already installed** with SDP (archives `qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.{0,1}`, ~1.9 GB). Unpack produced `qemu/output/` with `ifs.bin` (20 MB), `disk-qemu` (47 GB apparent), `procnto-smp-instr.sym` (12 MB) and the **`mkifs` build files**. Bugs: **(a)** `unpack_qemu_image.sh` extracts into a nested `qemu/` — the guide assumed `output/` in place → **D-006**; **(b)** `-listAvailablePackages` does not exist → **D-007**; **(c)** the 47 GB disk is undocumented → **D-008**. |
 | 2026-08-26 | **V5.3** | ❌ **Blocked → fixed** | `mkqnximage --run` refused: *"neither an existing mkqnximage virtual image nor an empty directory"*. Cause: run from `~/qnx800/images/qemu` instead of `~/qnx800/images/qemu/qemu`. Fix documented (**D-006**); `--force` explicitly warned against. **Awaiting retry.** |
 | 2026-08-26 | **V3 + V4 (all)** | ✅ **Complete** | SDP 8.0 installed at `~/qnx800`; cross-compile proven; `24 passed · 3 warnings · 0 failed`. **T-011 and T-012 cleared; T-200 closed.** Setup Guide 02 → **v2.0**, all markers removed. **Risk R2 closed.** Two real bugs found in the guide — see below. **Still open:** T-202 (SDP build number) and the QSC install route. |
@@ -599,6 +600,24 @@ future readers than a step that silently worked.
 | Disk consumed | **~43 GB** (951 GB free → 908 GB) |
 | SDP build number | ⬜ **not captured — T-202** |
 
+### QNX target observed (2026-08-26) — verified, for chapter front matter
+
+| Item | Value |
+|------|-------|
+| `uname -a` | `QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64` |
+| **Kernel build** | **`2026/02/27-11:02:56EST`** ⭐ this is the version identity chapters record |
+| Kernel binary | `procnto-smp-instr` — SMP, instrumented (supports kernel tracing → Ch 26) |
+| QSTI image stamp | `qnx_sdp8.0_qemu_quickstart_20260606` (6 June 2026) |
+| Hostname | `qnxqemu` |
+| Guest resources | 8 CPUs · 4095 MB RAM (3659 MB free at idle) |
+| At idle | **31 processes, 207 threads** |
+| Network | `vtnet0` (virtio) · `192.168.122.46/24` via libvirt's `virbr0` |
+| Console login | `root` / `root` |
+| **SSH login** | **`qnxuser`** — root refused by `sshd` (D-009) |
+| VNC | runs by default, password `qnxuser` |
+| `slm` components | 22, from `slog2` through `apk_start` |
+| Package manager | `apk` (Alpine's), on the target |
+
 ### Bugs this block found in Setup Guide 02
 
 | # | Bug | Fix |
@@ -616,6 +635,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | **V5.3–V5.5 passed — M2 reached.** QNX target facts recorded. H-9 (the `virbr0` prediction) did not materialise. New blocker D-009: SSH refuses root. |
 | 1.5 | 2026-08-26 | **V5.1–V5.2 passed; V5.3 blocked and fixed.** Three bugs found in Setup Guide 03 → D-006/D-007/D-008. Retry pending. |
 | 1.4 | 2026-08-26 | **Block V5 added** for Setup Guide 03 — 7 checkpoints ending at a booting QNX VM running the learner's own binary. V5.1 also closes T-202. |
 | 1.3 | 2026-08-26 | **Blocks V3 and V4 complete — all verification done.** SDP toolchain table added; three guide bugs recorded; R2 closed; T-202 and the QSC install route flagged as the only open detail. |

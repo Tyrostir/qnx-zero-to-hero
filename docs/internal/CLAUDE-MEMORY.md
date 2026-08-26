@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.5
+version: 1.6
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -171,13 +171,13 @@ filesystem costume.
 | Phase | **1 — Environment setup** |
 | Plan | ✅ Approved 2026-08-25 |
 | Chapters published | **0 / 34** |
-| Setup guides published | **3 / 5** — 01, 02 ✅ verified · 03 §§4–5 ✅, §§7+ pending the V5.3 retry |
+| Setup guides published | **3 / 5** — 01, 02 ✅ verified · 03 §§4–9 ✅, §§10–11 pending V5.6 |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
 | QNX SDP | ✅ **8.0 installed** at `~/qnx800` · cross-compiler **GCC 12.2.0** · cross-compile proven |
-| QNX VM booting | ❌ Not yet — Setup Guide 03 is written; the learner runs block V5 next |
+| QNX VM booting | ✅ 🎉 **YES** — QNX 8.0.0 boots, `192.168.122.46`. **Milestone M2 reached 2026-08-26.** |
 | VM booting | ❌ Not yet |
-| Doubts logged | 8 (D-001…D-008, all answered) |
+| Doubts logged | 10 (D-001…D-010, all answered) |
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
@@ -274,6 +274,12 @@ Much of what is online about QNX is stale. These were checked against live QNX s
 - Non-commercial **forbids**: production use, distribution, commercial products, customer demos.
 - Also exists: **QNX Developer Desktop** (self-hosted QNX 8.0 XFCE desktop).
 - OSS ports: `github.com/qnx-ports` and `gitlab.com/qnx/ports` · dashboard `oss.qnx.com`.
+- ✅ **VERIFIED TARGET (2026-08-26):** `QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64`;
+  kernel `procnto-smp-instr` (SMP + instrumented → Ch 26 tracing); 31 processes / 207 threads;
+  8 CPUs; 4095 MB RAM; net `vtnet0` (virtio) `192.168.122.46/24` via libvirt `virbr0`;
+  console `root`/`root`; **SSH `qnxuser`** (root refused, D-009); VNC password `qnxuser`;
+  `apk` package manager on target; **`slm`** = QNX's `systemd`, 22 components on this image;
+  `qconn` (remote debug, port 8000) starts automatically.
 - Docs: `qnx.com/developers/docs/8.0/` and `qnx.com/developers/docs/qnxeverywhere/`.
 - Also available as source material: **QNX Porting Guide (Linux→QNX)**, **DDK Developer's Guide**,
   **Hardware Interfacing Guide** → feed Ch 19, 20, 22.
@@ -323,6 +329,7 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **009** | 2026-08-26 | Claude (Opus 5) | 🎉 **MILESTONE M2 — THE VM BOOTS.** QNX 8.0.0 up, 31 processes, `192.168.122.46`. **H-9 closed** — the `virbr0` bridge worked on WSL2 first try, contrary to prediction. **New blocker diagnosed:** `sshd` refuses root *password* auth (`PermitRootLogin prohibit-password`) — use `qnxuser` (**D-009**, hazard **H-11**). Four benign boot warnings explained (**D-010**). Setup Guide 03 → **v1.2**, §§4–9 verified: real boot log, `slm`'s 22 components, `pidin` with live message passing in the `REPLY` column, `ldqnx-64.so.2` found in `/proc/boot`. |
 | **008** | 2026-08-26 | Claude (Opus 5) | **First real run of Setup Guide 03; three bugs fixed.** V5.1–V5.2 passed, V5.3 blocked: `unpack_qemu_image.sh` extracts into a **nested `qemu/`**, so `mkqnximage` was run one level too high — fix is `cd qemu`, and **never `--force`** (D-006). `-listAvailablePackages` does not exist; replaced course-wide (D-007). The 47 GB sparse `disk-qemu` documented (D-008). Setup Guide 03 → v1.1, Setup Guide 02 → v2.1, `qnx-vm.sh` path fixed. **ADR-025** adds the `/btw` convention. |
 | **007** | 2026-08-26 | Claude (Opus 5) | **Setup Guide 03 published** (729 lines) from QNX's official QSTI-for-QEMU docs, read live. Key finding: **QSTI and `mkqnximage` are not alternatives** — QSTI is the image, `mkqnximage --run` is the launcher. Documented the underlying QEMU flags, first-contact commands, SSH, and running the Setup Guide 02 binary on the target. Predicted three WSL2 failure modes (chiefly the `virbr0` bridge → H-9). Wrote `tools/qemu/qnx-vm.sh`. Added verification block **V5** (7 checkpoints); V5.1 also closes T-202. |
 | **006** | 2026-08-26 | Claude (Opus 5) | **Blocks V3 + V4 complete — all verification done.** QNX SDP 8.0 installed at `~/qnx800`; cross-compile proven (`ldqnx-64.so.2` interpreter; Linux refuses to run the binary); `24 passed · 3 warnings · 0 failed`. Setup Guide 02 → **v2.0**, all markers cleared. **Three real bugs found by running the guide**: missing `#include <unistd.h>`, a false claim that `file` prints "QNX", and a disk estimate ~4× low (~43 GB actual). `PLAN.md` disk budget corrected to ~50 GB. **Risk R2 closed.** T-202 (SDP build number) still open. Learner pushed to GitHub manually. |
@@ -348,7 +355,8 @@ that is precisely why the onboarding documents exist.
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
-| **H-9** | **Setup Guide 03's default networking may not work on WSL2.** It uses `bridge,br=virbr0`, which libvirt creates as a systemd service — and WSL2 does not enable systemd by default. Documented in §12.1 with three fallbacks, but **unverified**. If the learner reports no IP, this is the first place to look. | ⚠️ Predicted |
+| ~~H-9~~ | Predicted that `bridge,br=virbr0` would fail on WSL2 without systemd. **It did not** — the bridge worked first try, `192.168.122.46`. Installing `libvirt-daemon-system` in Setup Guide 01 was sufficient. §12.1 keeps the fallbacks but is downgraded to a contingency. | ✅ Closed 2026-08-26 |
+| **H-11** | **SSH to the QNX target must use `qnxuser`, never `root`.** `sshd` ships with `PermitRootLogin prohibit-password`, so root password auth always fails even though `root`/`root` works at the console. Applies to `scp` too. The `qnxuser` name is inferred from the login banner and **not yet confirmed** against `/etc/passwd` (T-018). | ⚠️ Open |
 | **H-8** | **T-202 — the SDP build number was never captured.** `PLAN.md` §5 requires every chapter's front matter to record the SDP build it was written against (Risk R5). No chapter can state it today. Ask the learner for `qnxsoftwarecenter_clt -listInstalled` before writing chapters that depend on it. | ⬜ Open |
 | **H-6** | Risk **R10** — authoring all three paths in full costs ~20–30 % more effort per chapter. | ✅ Accepted deliberately |
 | **H-7** | `CompactContext.md` (Tier 2) must never gain Tier 3 detail, even though it is the "re-prime a session" document. **This file is the Tier 3 equivalent.** | ⚠️ Ongoing discipline |
@@ -359,6 +367,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | Session 009: **M2 reached.** Verified target facts recorded; H-9 closed, H-11 opened; doubts to D-010. |
 | 1.5 | 2026-08-26 | Session 008: nested `qemu/qemu` trap, ADR-025, H-10, doubts to D-008. |
 | 1.4 | 2026-08-26 | Session 007: Setup Guide 03 published; QSTI/`mkqnximage` distinction recorded; H-9 added. |
 | 1.3 | 2026-08-26 | Session 006: SDP verified, both setup guides done, H-3 closed, H-8 added (SDP build number), Chapter 00 off hold. |

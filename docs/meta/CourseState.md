@@ -27,11 +27,11 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Current phase** | **Phase 1 — Environment setup** *(host + toolchain done; VM remaining)* |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
 | **Chapters published** | **0 / 34** |
-| **Setup guides published** | **3 / 5** — 01, 02 ✅ verified · 03 §§4–5 ✅ verified, §§7+ pending V5.3 retry |
+| **Setup guides published** | **3 / 5** — 01, 02 ✅ verified · 03 §§4–9 ✅ verified, §§10–11 pending |
 | **Labs completed** | **0 / 21** |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
-| **QNX VM booting?** | ❌ Not yet |
+| **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
 | **Blocked on** | **Nothing.** Setup Guide 03 awaits its first real run (block V5). |
 | **Last session** | 2026-08-26 (Session 004) |
 
@@ -55,8 +55,8 @@ OVERALL                    [                    ]   0 %   (0/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | ⭐ **Retry V5.3:** `cd ~/qnx800/images/qemu/qemu` *(note `qemu` twice)* then `mkqnximage --run`. **Do not use `--force`** — see [D-006](Doubts.md#d-006). Then continue through V5.7. |
-| 🤖 **Me — next turn** | Clear the rest of Setup Guide 03's markers from your V5.3–V5.7 output. Then **Chapter 00**. |
+| 👤 **You — do next** | **V5.6:** `ssh qnxuser@192.168.122.46` *(not `root` — [D-009](Doubts.md#d-009))*, then `scp` and run `hello_qnx` on the target. Then V5.7 and shut down. |
+| 🤖 **Me — next turn** | Clear Setup Guide 03 §§10–11 from your V5.6–V5.7 output, then **Chapter 00**. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -183,7 +183,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |-------|-----------|-------|
 | Setup 01 — Prerequisites | 📕 **Published ✅ verified** | v2.0 — executed end to end on the host. All expected output is real. Risk R9 did not materialise. |
 | Setup 02 — Account, Licence, SDP | 📕 **Published ✅ verified** | v2.0 — executed end to end. Three real bugs found and fixed. Disk cost corrected to ~43 GB. |
-| Setup 03 — QEMU VM ⭐ | 📕 **Published** | v1.0 — QSTI → `unpack_qemu_image.sh` → `mkqnximage --run`. Steps `[UNVERIFIED]` pending block V5. Ships `tools/qemu/qnx-vm.sh`. |
+| Setup 03 — QEMU VM ⭐ | 📕 **Published** | v1.2 — §§4–9 ✅ verified against QNX 8.0.0. Real boot log, `pidin`, `ifconfig`. §§10–11 pending V5.6. |
 | Setup 04 — IDE & Tooling | 📄 | |
 | Setup 05 — Troubleshooting | 📄 | Grows continuously |
 | Hardware 01 — Public Boards | 📄 | |
@@ -198,7 +198,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |-----------|-----------|--------|--------------|
 | **M0** Plan approved | `PLAN.md` status = Approved | ⬜ In progress | — |
 | **M1** "I get it" | Ch 00–03 read | ⬜ | — |
-| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | 🔄 In progress — host ready | — |
+| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | 🎉 **VM BOOTS** — hello-world pending V5.6 | 2026-08-26 |
 | **M3** "I speak QNX" | Ch 09–15 + labs done | ⬜ | — |
 | **M4** "I can extend the OS" | Resource manager written and working | ⬜ | — |
 | **M5** "I own the image" | Custom IFS boots | ⬜ | — |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 009 — 2026-08-26 🎉 **Milestone M2**
+
+| | |
+|---|---|
+| **Goal** | Get the VM booting and unblock the learner at V5.5. |
+| **Done** | 🎉 **THE VM BOOTS.** QNX 8.0.0, kernel build `2026/02/27-11:02:56EST`, 31 processes / 207 threads / 8 CPUs<br>• **Hazard H-9 did not materialise** — bridged `virbr0` networking worked on WSL2 first try, `192.168.122.46` on a virtio `vtnet0`<br>• **Diagnosed V5.5's blocker:** `sshd` refuses *password* auth for root (`PermitRootLogin prohibit-password`, the OpenSSH default). The password was never wrong. Fix: `ssh qnxuser@<ip>` → **D-009**<br>• Explained the four alarming-but-benign boot warnings → **D-010**<br>• Setup Guide 03 → **v1.2**, §§4–9 now ✅ verified with real output throughout<br>• §8 rewritten around real `pidin`: the STATE column, the 256-priority scale in use, drivers as user-space processes, and **live message passing visible in the `REPLY` column** (`fullscreen-winmgr` → `screen` → `io-hid`)<br>• `/proc/boot` listing shows **`ldqnx-64.so.2`** — the exact file Linux could not find in Setup Guide 02<br>• `slm`'s 22 components documented as the QNX answer to `systemd`<br>• Partial answer to T-202: the kernel build date is now known |
+| **Learner decisions** | — |
+| **Questions logged** | **D-009, D-010** |
+| **Blockers** | None — V5.6 just needs `qnxuser` instead of `root` |
+| **Next session** | V5.6–V5.7 output, then **Chapter 00** |
 
 ### Session 008 — 2026-08-26
 
@@ -321,6 +332,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | Session 009: **M2 reached — the VM boots.** Setup Guide 03 §§4–9 verified; D-009/D-010; H-9 closed. |
 | 1.7 | 2026-08-26 | Session 008: V5.3 diagnosed and fixed; three bugs corrected; D-006/007/008 logged; ADR-025. |
 | 1.6 | 2026-08-26 | Session 007: Setup Guide 03 published; block V5 defined; next action is booting the VM. |
 | 1.5 | 2026-08-26 | Session 006: blocks V3/V4 verified, SDP installed, Setup Guide 02 → v2.0, all markers cleared, Chapter 00 off hold. |

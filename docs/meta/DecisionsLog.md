@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.7
+version: 1.8
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -888,10 +888,109 @@ measured rather than guessed again.
 
 ---
 
+## 2026-08-26 — Session 009 🎉 (Milestone M2: the VM boots)
+
+### 🎉 VERIFIED — QNX 8.0.0 boots on QEMU/KVM under WSL2
+
+**Milestone M2 reached.** The target identifies itself as:
+
+```text
+QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64
+```
+
+| Item | Value |
+|------|-------|
+| Kernel | `procnto-smp-instr` — **SMP** and **instrumented** (supports kernel tracing, Ch 26) |
+| Build | `2026/02/27-11:02:56EST` · image stamp `20260606` |
+| At idle | **31 processes, 207 threads**, 3659/4095 MB free, 8 CPUs |
+| Network | `vtnet0` (virtio) · `192.168.122.46/24` |
+| Startup | `slm` with **22 components**, `slog2` first, `qconn` and `sshd` among them |
+
+This is the version identity `PLAN.md` section 5 requires in every chapter's front matter, and it
+partially answers **T-202**.
+
+---
+
+### CLOSED — Hazard H-9: the `virbr0` bridge prediction was wrong
+
+Session 007 predicted that QSTI's default `bridge,br=virbr0` networking would fail on WSL2, because
+the bridge is created by libvirt, which runs under systemd, which WSL2 does not enable by default.
+Three fallbacks were documented.
+
+**None were needed.** The bridge worked on the first attempt, on libvirt's default
+`192.168.122.0/24` subnet. Installing `libvirt-daemon-system` in Setup Guide 01 was sufficient;
+WSL2's networking carried it without systemd supervising anything.
+
+**Consequences.** Setup Guide 03 section 12.1 is downgraded from "the most likely failure in this
+guide" to a contingency, with the successful result stated up front so no reader troubleshoots a
+problem they do not have. The fallbacks are kept - they are correct, just unnecessary here.
+
+> Worth recording that a prediction failed. The guide was written with an honest guess clearly
+> labelled as a guess. Reality disagreed, and the document now says so. That is the protocol working
+> in the direction people forget to check.
+
+---
+
+### VERIFIED — `sshd` refuses root password authentication (the V5.5 blocker)
+
+`root`/`root` logs in perfectly at the serial console and is refused over SSH:
+
+```text
+root@192.168.122.46: Permission denied (publickey,password).
+```
+
+**Cause.** OpenSSH has shipped `PermitRootLogin prohibit-password` as its default since version 7.0.
+Root may authenticate with a **key**; a password attempt is rejected regardless of correctness. The
+error's `(publickey,password)` lists what the *server* offered - password was on offer, but not for
+root.
+
+**Remedies, best first:** use **`qnxuser`** and `sudo -i`; or set `PermitRootLogin yes` in
+`/etc/ssh/sshd_config` (may not survive a reboot, since a QSTI system is largely rebuilt from the
+image - itself a preview of Ch 21); or install a key, which is what Chapter 08's debug loop will want
+anyway.
+
+**`qnxuser` is inferred, not confirmed.** The evidence is circumstantial but strong: the login
+banner gives `qnxuser` as the VNC password, the image ships `system_files.custom.sudoers` and
+`data_files.custom.var_users`, and the banner instructs `sudo apk update` - advice that only makes
+sense for a non-root account. Confirmation via `/etc/passwd` is **T-018**. Logged as **D-009** and
+hazard **H-11**; `scp` is affected identically.
+
+---
+
+### VERIFIED — Four boot-log warnings are benign
+
+`ACPI table not found`, `Unable to start "uname" (2)`, `slog2_api: cannot connect to slogger2 server`
+and `rm: /etc/ca-certificates/extracted: No such file`. Three are startup-ordering artefacts; one is
+a cleanup script tidying a file that was never there.
+
+**Why this earns a doubt entry.** A learner meeting their first QNX boot cannot tell noise from
+failure, and these appear *before* the login prompt - the most alarming possible position. Logged as
+**D-010**, with the general rule: early-boot complaints about services that start later are almost
+always ordering noise.
+
+---
+
+### VERIFIED — The `pidin` output is better teaching material than anything written from documentation
+
+The captured listing is now the backbone of Setup Guide 03 section 8 and feeds Chapters 09, 11 and 13:
+
+- **Drivers are user-space processes.** `devb-eide`, `io-sock`, `io-usb-otg`, `devc-ser8250`,
+  `drm-virtio` all have PIDs. Only `procnto` is the kernel. The microkernel argument needs no prose.
+- **The 256-priority scale is visibly in use:** `0f` idle, `10r` services, `21r`/`25r` drivers,
+  `254i`/`255i` kernel interrupt threads.
+- **Live message passing.** `fullscreen-winmgr` sits in `REPLY 249881` (waiting on `screen`), and
+  `screen` thread 13 sits in `REPLY 184343` (waiting on `io-hid`). A chain of synchronous `MsgSend`
+  calls, visible in one column, on a system nobody instrumented.
+- **`ldqnx-64.so.2` is in `/proc/boot`** - the exact file Linux could not find in Setup Guide 02.
+  The loop that guide opened is closed by a directory listing.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | Session 009 appended: M2 reached; H-9 closed as a failed prediction; the SSH-root refusal; benign boot warnings; pidin as course material. |
 | 1.7 | 2026-08-26 | Session 008 appended: the nested `qemu/` trap, the non-existent CLT option, the QSTI image contents, ADR-025, and an open disk-budget revision. |
 | 1.6 | 2026-08-26 | Session 007 appended: QSTI/`mkqnximage` distinction, QSTI's default QEMU configuration, Ubuntu 26.04 advantage, predicted WSL2 bridge failure (H-9), and the `qnx-vm.sh` convention. |
 | 1.5 | 2026-08-26 | Session 006 appended: SDP verified, 3 guide bugs recorded, R2 closed, T-202 opened, history published. |

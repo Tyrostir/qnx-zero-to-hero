@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.1
+version: 1.2
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -68,8 +68,10 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-006](#d-006) | Setup/Install | Why does `mkqnximage --run` say my directory "is neither that of an existing mkqnximage virtual image nor an empty directory"? | ✅ |
 | [D-007](#d-007) | Toolchain | Why does `qnxsoftwarecenter_clt -listAvailablePackages` fail with "Unknown argument"? | ✅ |
 | [D-008](#d-008) | Setup/Install | Why is `disk-qemu` 47 GB, and do I really need that much disk? | ✅ |
+| [D-009](#d-009) | Setup/Install | Why does SSH refuse `root`/`root` when the console accepts it? | ✅ |
+| [D-010](#d-010) | Debug | The boot log has errors in it — `ACPI table not found`, `Unable to start "uname"`, `slogger2` not connecting. Is my system broken? | ✅ |
 
-**Open questions: 0** · **Needs verification: 1** *(D-006, pending the learner's next run)* · **Answered: 8**
+**Open questions: 0** · **Needs verification: 1** *(D-009's `qnxuser` account name)* · **Answered: 10**
 
 ---
 
@@ -597,9 +599,170 @@ asks for `df -h` before and after. `PLAN.md`'s disk budget flagged for another r
 
 ---
 
+## D-009
+
+### Why does SSH refuse `root`/`root` when the serial console accepts it?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, verification block V5.5 |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered *(the `qnxuser` account name still to be confirmed on the target)* |
+
+**Question (verbatim).** *"I used root as username and root as password. I am able to login to qnx.
+… I tried root as username and root as password. Still I am not able to ssh to qnx."*
+
+```text
+root@192.168.122.46's password:
+Permission denied, please try again.
+root@192.168.122.46: Permission denied (publickey,password).
+```
+
+**Short answer.**
+Your password is correct. **`sshd` refuses password authentication for `root` by design** —
+`PermitRootLogin prohibit-password`, the OpenSSH default since version 7.0. Root may use a key, never
+a password. Use **`ssh qnxuser@<ip>`** and then `sudo -i`.
+
+**Full answer.**
+
+**Why this is confusing.** The same credentials that work at the console fail over SSH, which makes
+it look like a password problem. It is not. Two different things authenticate you:
+
+| Route | Checked by | Result |
+|-------|-----------|--------|
+| Serial console | `login` → PAM → the shadow file | ✅ `root`/`root` accepted |
+| SSH | **`sshd`'s own policy**, *before* the password is even considered | ❌ refused for root |
+
+**Read the error precisely.** `Permission denied (publickey,password)` lists the methods the
+**server** was willing to offer. Password is on that list — just not for `root`. Since OpenSSH 7.0
+the shipped default has been:
+
+```text
+PermitRootLogin prohibit-password
+```
+
+Root may authenticate with a **key**; a password attempt is rejected however correct it is. This is
+sensible hardening: remote root password login is the most brute-forced door on the internet.
+
+**Three ways forward, best first.**
+
+**1. Use the unprivileged account (recommended).**
+
+```bash
+host$ ssh qnxuser@192.168.122.46
+qnx$  sudo -i
+```
+
+The QSTI image is built around a `qnxuser` account. The evidence is all in the login banner: the VNC
+server's default password is `qnxuser`, the image ships a `sudoers` configuration, and the banner
+tells you to run `sudo apk update` — advice that only makes sense for a non-root user. The unpacked
+image also contains `system_files.custom.sudoers` and `data_files.custom.var_users` snippets.
+
+If the name turns out to be different, the target will tell you:
+
+```bash
+qnx# cat /etc/passwd
+qnx# grep -iE 'PermitRootLogin|PasswordAuthentication|AllowUsers' /etc/ssh/sshd_config
+```
+
+**2. Allow root over SSH.** Fine on a disposable VM on a private virtual network; never on anything
+reachable from outside.
+
+```bash
+qnx# echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+qnx# slay -f sshd && sshd
+```
+
+⚠️ This may not survive a reboot — most of a QSTI system is rebuilt from the image at boot. That is
+itself a preview of Chapter 21: durable changes go into the *image*, not into a running system.
+
+**3. Use a key (what you will actually want).**
+
+```bash
+host$ ssh-keygen -t ed25519 -C qnx-lab
+host$ ssh-copy-id qnxuser@192.168.122.46
+```
+
+Note that a key also satisfies `prohibit-password` — so `ssh-copy-id root@...` would work too, once
+you have a way to place the key.
+
+> 💡 **Do this before Chapter 08.** That chapter has you running `gdb` across this link and
+> redeploying binaries constantly. A password prompt in that loop gets old within minutes.
+
+**Related.** [Setup Guide 03 §9.3](../guides/Setup_03_QEMU_VM.md#93--ssh-as-root-will-be-refused--use-qnxuser) ·
+[§13.4a](../guides/Setup_03_QEMU_VM.md) · Chapter 08 · Chapter 28 (security)
+
+**Action taken.** Setup Guide 03 → v1.2: §9.3 rewritten around the real failure with all three
+remedies, §9.5 added for key-based auth, §10.2's `scp` changed to `qnxuser@`, and a troubleshooting
+entry added.
+
+---
+
+## D-010
+
+### The boot log has errors in it. Is my system broken?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Setup Guide 03, verification block V5.3 — first successful boot |
+| **Category** | Debug |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *(Implicit, from the reported boot log.)*
+
+```text
+ACPI table not found (0x4746434d)
+Unable to start "uname" (2)
+slog2_api: cannot connect to slogger2 server...errno=No such file or directory
+rm: /etc/ca-certificates/extracted: No such file or directory
+```
+
+**Short answer.**
+No. All four are harmless. Three are **startup-ordering artefacts** — something ran before the
+service it needed had started — and one is a cleanup script tidying a file that was never there.
+Your boot reached a login prompt, which is the only verdict that counts.
+
+**Full answer.**
+
+| Message | What is really happening |
+|---------|--------------------------|
+| `ACPI table not found (0x4746434d)` | QEMU's minimal firmware does not present the ACPI table QNX looks for. QNX falls back to other hardware discovery and continues. On real hardware you would normally see the table found. |
+| `Unable to start "uname" (2)` | Error **2** is `ENOENT` — *no such file*. A startup script called `uname` before the disk holding `/usr/bin` was mounted. Purely cosmetic: `uname -a` works perfectly once you are logged in. |
+| `slog2_api: cannot connect to slogger2 server` | The system logger had not started **yet**. The very next line says so: *"Registration will be attempted when it is running."* `slm` then starts `slogger2` as its first component. |
+| `rm: /etc/ca-certificates/extracted: No such file` | A cleanup script removing something that does not exist on a first boot. |
+
+> 💡 **A habit worth forming on any embedded system.** Early-boot complaints about services that
+> start *later* are almost always ordering noise. The messages worth chasing are the ones that appear
+> **after** the subsystem in question has started — and the ones that stop the boot.
+
+**How to check properly rather than by eye.** Once `slogger2` is up, the system log is the
+authoritative record:
+
+```bash
+qnx# slog2info
+```
+
+Chapter 24 covers `slog2` — QNX's structured, low-overhead logging system — and Chapter 25 turns this
+kind of triage into a method.
+
+**The reassuring counter-evidence in your own log.** `slm` reported all 22 components active,
+`devb-eide` found the QEMU hard disk, filesystems mounted, `io-sock` came up with a working IP,
+`sshd` and `qconn` started, and you got a login prompt. A genuinely broken boot does not get that far.
+
+**Related.** [Setup Guide 03 §7](../guides/Setup_03_QEMU_VM.md#7-step-4--boot-qnx-) ·
+Chapters 24, 25
+
+**Action taken.** Setup Guide 03 §7 now shows the real boot log with all four messages explained in a
+table, so the next reader does not stop to debug them.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | +D-009 (SSH refuses root by design), D-010 (benign boot-log warnings). |
 | 1.1 | 2026-08-26 | +D-006 (the `mkqnximage` nested-directory trap), D-007 (`-listAvailablePackages` does not exist), D-008 (the 47 GB sparse disk image). `/btw` convention documented. |
 | 1.0 | 2026-08-25 | Created. Seeded with D-001…D-005 from the learner's opening request. |

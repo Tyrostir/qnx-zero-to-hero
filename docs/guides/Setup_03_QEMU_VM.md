@@ -1,15 +1,15 @@
 ---
 title: "Setup Guide 03 — Your First QNX VM on QEMU"
 document_id: SETUP-03
-version: 1.1
-status: Published — §§4–5 ✅ verified; §§7–11 [UNVERIFIED] pending retry of block V5.3
+version: 1.2
+status: Published — §§4–9 ✅ verified; §§10–11 pending block V5.6
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "🐣 A · 🚶 B · 🏃 C — everyone"
 est_time: "45–75 minutes (plus a ~2–4 GB download)"
 prereqs: "Setup Guide 01 and Setup Guide 02, both complete"
 sdp_version: "QNX SDP 8.0"
-verified_on: "§§4–5 executed on Ubuntu 26.04 / WSL2, 2026-08-26 — three corrections applied. §§7 onwards not yet reached."
+verified_on: "§§4–9 executed on Ubuntu 26.04 / WSL2 against QNX 8.0.0 (kernel build 2026/02/27), 2026-08-26. §§10–11 not yet reached."
 ---
 
 # 🖥️ Setup Guide 03 — Your First QNX VM on QEMU
@@ -164,9 +164,9 @@ and `mkqnximage --run` boots them under QEMU.*
 
 ---
 
-## 4. Step 1 — Install the QEMU Quick Start image ⚠️
+## 4. Step 1 — Install the QEMU Quick Start image ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26.**
 
 The image is **not** part of the base SDP install. It is a separate package you add through QNX
 Software Center — the same tool you used in Setup Guide 02.
@@ -250,9 +250,9 @@ host$ cat ~/qnx800/images/qemu/README.md
 
 ---
 
-## 5. Step 2 — Unpack the image ⚠️
+## 5. Step 2 — Unpack the image ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26.**
 
 ```bash
 host$ cd ~/qnx800/images/qemu
@@ -381,9 +381,9 @@ roughly like this —
 
 ---
 
-## 7. Step 4 — Boot QNX ⚠️
+## 7. Step 4 — Boot QNX ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26** — this is where milestone **M2 "It boots"** is reached.
 
 Every terminal needs the SDP environment before `mkqnximage` exists. If you added the line to
 `~/.bashrc` in Setup Guide 02 §10.5, this is already done for you:
@@ -436,6 +436,74 @@ host$ mkqnximage --run
 ✅ **Expected:** the terminal fills with boot messages, an SDL window may open, and after a few
 seconds you reach a login prompt.
 
+✅ **Real boot output**, abridged — this is what a healthy boot looks like:
+
+```text
+SeaBIOS (version 1.17.0-debian-1.17.0-1ubuntu1)
+iPXE (https://ipxe.org) 00:02.0 ...
+Booting from ROM..
+non UEFI or UEFI+CSM boot
+ACPI table not found (0x4746434d)
+overriding mask for controller 2, vector_base 0
+Startup complete
+Unable to start "uname" (2)
+slog2_api: cannot connect to slogger2 server...errno=No such file or directory
+qh: slogger2 does not appear to be running.  Registration will be attempted when it is running.
+slm: [COMMAND] startup 'all'
+slm: Component 'slog2': Mark active
+slm: Component 'pci-server': Mark active
+slm: Component 'devb': Mark active
+slm: Component 'io-sock': Mark active
+slm: Component 'ssh': Mark active
+slm: Component 'qconn': Mark active
+   ... 22 components in all ...
+slm: [START] Component 'slog2'
+slm: Component 'slog2': Spawned process with pid 20483
+Path=0 - Intel 82371SB
+ target=0 lun=0     Direct-Access(0) -          QEMU HARDDISK    Rev: 2.5+
+---> Mounting file systems
+---> Starting io-hid
+rm: /etc/ca-certificates/extracted: No such file or directory
+---> Starting Screen...
+---> Starting Window Manager...
+---> Starting sensor framework...
+
+To exit QEMU, type <ctrl>a x
+
+Generating VNC server password file
+Process count:31
+---> Starting Demolauncher...
+---> Configuring PAM
+login:
+```
+
+> ⚠️ **Four alarming-looking lines that are all harmless.** Do not chase these.
+>
+> | Message | Why it is fine |
+> |---------|----------------|
+> | `ACPI table not found` | QEMU's minimal firmware does not present the ACPI table QNX looks for. QNX falls back to other discovery and carries on. |
+> | `Unable to start "uname" (2)` | Error 2 is `ENOENT`. A startup script called `uname` before the disk holding it was mounted. Cosmetic — `uname` works fine once you are logged in (§8.1). |
+> | `slog2_api: cannot connect to slogger2 server` | The system logger had not started **yet**. Note the very next line: *"Registration will be attempted when it is running."* This is a startup-ordering artefact, not a failure. |
+> | `rm: /etc/ca-certificates/extracted: No such file...` | A cleanup script removing something that was not there on a first boot. |
+>
+> 💡 **A useful habit.** On an unfamiliar embedded system, early-boot errors about services that
+> start *later* are almost always ordering noise. The ones worth chasing appear **after** the
+> subsystem in question has started.
+
+> 💡 **Read the `slm:` lines — that is the whole system being assembled.** **`slm`** is QNX's
+> *System Launch and Monitor*: the process that starts everything else and can restart it if it
+> dies. Its 22 components on this image are, in order: `slog2`, `pci-server`, `pci-server-patchup`,
+> `devb`, `root-fs`, `random`, `fsevmgr`, `devc`, `pipe`, `dumper`, `devc-pty`, `io-sock`,
+> `network-init`, `ssh`, `qconn`, `console`, `mqueue`, `post_start`, `iousb`, `set-host`,
+> `ca-trust-init`, `pam`, `apk_start`.
+>
+> 🐧 **In Linux this would be…** `systemd`. But `slm` is a few hundred KB, its configuration is a
+> single readable `slm.cfg` in `/proc/boot`, and restarting a dead driver is its core job rather
+> than a feature. Chapter 27 covers this properly under high availability.
+
+> 💡 **`qconn` is in that list.** That is the remote-debug agent, already running and listening on
+> port 8000. Chapter 08 attaches `gdb` to it — nothing extra to install.
+
 ### 7.1 Log in
 
 | | |
@@ -443,13 +511,42 @@ seconds you reach a login prompt.
 | **Username** | `root` |
 | **Password** | `root` |
 
-```text
-QNX Neutrino (localhost) (ttyp0)
+✅ **Real output** — the image greets you with ASCII art, a list of sample applications, and some
+important notes:
 
+```text
 login: root
 Password:
-#
+
+ ██████╗           ██╗  ██╗
+██╔═══██╗          ╚██╗██╔╝     Welcome to QNX 8.0 Non-Commercial!
+██║   ██║███╗   ██╗ ╚███╔╝
+ ...
+
+Here's how to run some of the bundled samples:
+  $ gles2-gears                 Displays hardware-rendered content using OpenGL ES 2.x.
+  $ gles2-maze                  Shows how to use texture, vertex, and fragment shaders.
+  $ camera_example3_viewfinder  Displays a simulated camera signal or live camera feed.
+  $ st                          The default terminal. Run it to open a new instance.
+
+The apk package manager is now available to further customize your target software.
+  # sudo apk update
+  # apk list --available
+  # sudo apk add [PACKAGE]
+
+Note: The VNC server is now run by default.  It is setup with a default password=qnxuser.
+
+[root@qnxqemu ~]#
 ```
+
+> 💡 **Three things in that banner matter later.**
+>
+> 1. **`apk`** — QNX 8.0 ships Alpine Linux's package manager. You can install extra software on the
+>    target, if the VM has internet (§13.5).
+> 2. **The VNC server runs by default**, password `qnxuser`. So the graphical desktop is reachable
+>    from a VNC client even if the SDL window misbehaves under WSLg.
+> 3. **`sudo`** appears in the instructions — which tells you there is a **non-root user** on this
+>    image. Remember that; it is the answer to §9.3.
 
 > 🎉 **That `#` is the milestone.** You are looking at a shell running on a real QNX microkernel
 > system. Milestone **M2 — "It boots"**.
@@ -481,9 +578,10 @@ host$ ~/exercises/qnx-zero-to-hero/tools/qemu/qnx-vm.sh stop
 
 ---
 
-## 8. Step 5 — First contact: look around ⚠️
+## 8. Step 5 — First contact: look around ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26.** Every output below is real, from a QNX 8.0.0 QSTI image on
+> Ubuntu 26.04 / WSL2.
 
 Five commands. Type them in the VM, at the `qnx#` prompt.
 
@@ -493,7 +591,20 @@ Five commands. Type them in the VM, at the `qnx#` prompt.
 qnx# uname -a
 ```
 
-✅ **Expected:** something like `QNX localhost 8.0.0 <build> x86_64`.
+✅ **Real output:**
+
+```text
+QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64
+```
+
+| Field | Meaning |
+|-------|---------|
+| `QNX` | The OS name — `procnto` reporting itself |
+| `qnxqemu` | The hostname the image ships with |
+| `8.0.0` | QNX OS version |
+| `2026/02/27-11:02:56EST` | **The exact kernel build timestamp.** This is the version identity that matters — chapters record it, and a different one may behave differently |
+| `x86pc` | The machine class |
+| `x86_64` | The architecture — matching your `gcc_ntox86_64` toolchain |
 
 ### 8.2 What is running? — `pidin`
 
@@ -501,48 +612,161 @@ qnx# uname -a
 qnx# pidin
 ```
 
-**`pidin`** — *process information* — is QNX's `ps`, and you will use it constantly. Expect to see
-`procnto` as process 1, plus drivers and services.
+**`pidin`** — *process information* — is QNX's `ps`, and you will use it constantly.
 
-> 🐧 **In Linux this would be…** `ps aux`. But `pidin` shows something `ps` cannot: each thread's
-> **blocking state** — `REPLY`, `RECEIVE`, `SEND`, `NANOSLEEP`. From Chapter 13 onwards that column
-> is how you debug message passing, and it is the reason `pidin` has no real Linux equivalent.
+✅ **Real output**, heavily abridged — the full listing is about 200 lines:
+
+```text
+     pid tid name                         prio STATE          Blocked
+       1   1 /proc/boot/procnto-smp-instr   0f RUNNING
+       1   9 /proc/boot/procnto-smp-instr 255i RUNNING
+       1  11 /proc/boot/procnto-smp-instr 255i INTR
+       1  25 /proc/boot/procnto-smp-instr   1f NANOSLEEP
+       1  26 /proc/boot/procnto-smp-instr  10r RECEIVE        1
+   16386   1 proc/boot/slm                 30r RECEIVE        2
+   20483   1 proc/boot/slogger2            10r RECEIVE        1
+   20484   1 proc/boot/pci-server          10r RECEIVE        1
+   32773   1 proc/boot/devb-eide           10r SIGWAITINFO
+   32773   3 proc/boot/devb-eide          254i INTR
+   81927   1 proc/boot/devc-ser8250        25r RUNNING
+   81931   1 system/bin/io-sock            21r SIGWAITINFO
+   81933   1 system/bin/io-usb-otg         10r SIGWAITINFO
+  155663   1 system/bin/qconn              10r SIGWAITINFO
+  249881   1 system/bin/screen             10r SIGWAITINFO
+  249881  13 system/bin/screen             10r REPLY          184343
+  282650   1 system/bin/drm-virtio         10r SIGWAITINFO
+  397328   1 system/bin/fullscreen-winmgr  10r REPLY          249881
+ 13529107   1 system/bin/login             10r REPLY          1
+ 13651992   1 usr/bin/pidin                10r RUNNING        1
+```
+
+**How to read a line.** `pid` `tid` `name` `prio` `STATE` `Blocked`. QNX schedules **threads**, not
+processes, so one process appears once per thread.
+
+**The `prio` column** is a number plus a letter for the scheduling policy — `f` FIFO, `r`
+round-robin. QNX has **256 priorities** (Chapter 11). Note the range already in use here: `0f` idle,
+`1f`, `10r` ordinary services, `21r`/`25r` drivers, and `254i`/`255i` on the kernel's
+interrupt-handling threads at the very top.
+
+> 🐧 **In Linux this would be…** `ps aux`. But look at the **STATE** column — that is what `ps`
+> cannot give you:
+>
+> | State | The thread is… |
+> |-------|----------------|
+> | `RUNNING` | executing on a CPU right now |
+> | `READY` | runnable, waiting for a CPU |
+> | `RECEIVE` | **blocked waiting for a message** — the number in `Blocked` is the channel |
+> | `REPLY` | **blocked waiting for a reply** — the number is the **PID it is waiting on** |
+> | `INTR` | waiting for an interrupt |
+> | `NANOSLEEP`, `CONDVAR`, `SEM`, `SIGWAITINFO` | sleeping, on a condvar, on a semaphore, waiting for a signal |
+>
+> From Chapter 13 onwards this column is how you debug message passing, and it is why `pidin` has no
+> real Linux equivalent.
+
+> 💡 **You are already looking at live message passing.** `fullscreen-winmgr` is in `REPLY 249881` —
+> blocked waiting for process `249881`, which is `screen`. And `screen` thread 13 is in
+> `REPLY 184343`, waiting on `io-hid`. That is a chain of synchronous `MsgSend` calls, visible in a
+> single column, on a system nobody instrumented. Chapter 13 makes this the centre of the course.
 
 ### 8.3 The proof that this is a microkernel
 
-```bash
-qnx# pidin | head -20
-```
+Read the *names* in that listing:
 
-> 💡 **Look at what is a *process* here.** On Linux, filesystem and network drivers live *inside*
-> the kernel. On QNX they are ordinary user-space processes sitting in that list. That is the
-> microkernel bet in one screenful: a driver crash kills a process, not the machine. Chapter 09
-> takes this apart properly.
+| Process | On Linux this would be… |
+|---------|-------------------------|
+| `devb-eide` | the IDE/SATA block driver — **kernel code** |
+| `io-sock` | the entire TCP/IP stack — **kernel code** |
+| `io-usb-otg` | the USB stack — **kernel code** |
+| `devc-ser8250` | the serial driver — **kernel code** |
+| `drm-virtio` | the graphics driver — **kernel code** |
+| `fs-qnx6.so`, `fs-dos.so` | filesystems — **kernel code** |
+
+On QNX every one of them is an **ordinary user-space process** with a PID you can see, stop, and
+restart. Only `procnto` (pid 1) is the kernel.
+
+> 💡 **That is the microkernel bet, in one screenful.** A bug in the USB stack kills PID 81933. It
+> does not panic the machine. Chapter 09 takes this apart properly; Chapter 27 shows how a driver
+> can be restarted automatically after it dies.
 
 ### 8.4 The pathname space
 
 ```bash
 qnx# ls /
-qnx# ls /proc
-qnx# ls /dev
+qnx# ls /proc/boot
 ```
 
-> 💡 **`/proc/boot` is worth a look.** It contains the files that came out of `ifs.bin` — the image
-> you booted, visible as a filesystem. Chapter 16 explains why *everything* in QNX is a path.
+✅ **Real output:**
 
-### 8.5 How much memory?
+```text
+bin   data  etc   lib  proc  sbin  system  usr  x86_64
+boot  dev   home  opt  root  sys   tmp     var
+```
+
+```text
+ability           libqcrypto.so.1.0       pci_hw-Intel_x86.so.3.1
+build             libqh.so.1              pci_hw.cfg
+cat               libregex.so.1           pci_patchup
+devb-eide         libsecpol.so.1          pidin
+devc-ser8250      libslog2.so             procnto-smp-instr
+fs-dos.so         libsocket.so            sh
+fs-qnx6.so        ldqnx-64.so.2           slm
+io-blk.so         libc.so.6               slogger2
+ksh               mount                   startup-script
+                  pci-server              toybox
+```
+*(abridged — the real listing is about 80 entries)*
+
+> 🎉 **Look what is sitting in `/proc/boot`: `ldqnx-64.so.2`.**
+>
+> That is the exact file your Linux machine could not find in Setup Guide 02, when it refused to run
+> your binary with `cannot execute: required file not found`. It was never missing — it was just on
+> the wrong computer. It lives here, inside the boot image, and it is why your program will run in
+> §10.
+
+> 💡 **`/proc/boot` *is* `ifs.bin`, unpacked.** Everything the system needed before it could mount a
+> disk: the kernel, the C library, the dynamic linker, a shell, the disk driver, the serial driver,
+> and `slm` — the launcher that started everything else. Roughly 80 files, 20 MB. Chapter 21 has you
+> choose that list yourself.
+
+### 8.5 How much memory, and how many CPUs?
 
 ```bash
 qnx# pidin info
 ```
 
-Shows the QNX version, boot time and free memory.
+✅ **Real output:**
+
+```text
+CPU:X86_64 Release:8.0.0  FreeMem:3659MB/4095MB BootTime:Aug 26 07:57:24 UTC 2026
+Processes: 31, Threads: 207
+Processor1: 524974 Intel 686 F6M141S1 2495MHz FPU
+... (8 processors)
+```
+
+> 💡 **31 processes, 207 threads, and 3.6 GB of 4 GB still free.** A complete real-time OS —
+> networking, USB, graphics, a window manager, SSH, a VNC server and a debug agent — in under
+> 450 MB. Note also that **QEMU gave the guest all 8 virtual CPUs**, and QNX is using them:
+> `procnto-smp-instr` is the **SMP** kernel.
+
+### 8.6 Optional: the sample applications
+
+The image ships with demos, listed in the login banner:
+
+```bash
+qnx# gles2-gears     # hardware-rendered OpenGL ES
+qnx# gles2-maze      # texture, vertex and fragment shaders
+qnx# st              # a new terminal window
+```
+
+These need the graphical window (§12.2). **Nothing in this course requires them** — every lab is
+text — but they are a quick way to see that the graphics stack is alive.
 
 ---
 
-## 9. Step 6 — Networking and SSH ⚠️
+## 9. Step 6 — Networking and SSH ✅
 
-`[UNVERIFIED]`
+> ✅ **Verified 2026-08-26** — including one failure that needs a fix. Read §9.3 before you reach for
+> `scp`.
 
 The serial console works, but it is a single terminal with no scrollback worth having. SSH is how you
 will actually work.
@@ -555,6 +779,23 @@ Inside the VM:
 qnx# ifconfig
 ```
 
+✅ **Real output**, abridged to the interface that matters:
+
+```text
+vtnet0: flags=8863<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> metric 0 mtu 1500
+        ether 52:54:00:e1:bb:9d
+        inet 192.168.122.46 netmask 0xffffff00 broadcast 192.168.122.255
+        media: Ethernet autoselect (10Gbase-T <full-duplex>)
+        status: active
+```
+
+| Interface | What it is |
+|-----------|-----------|
+| **`vtnet0`** | ⭐ Your network. A **virtio** network device — a paravirtualised NIC, so the guest talks to QEMU directly instead of pretending to be real hardware. That is why it reports 10 Gb/s. |
+| `lo0` | Loopback, `127.0.0.1` |
+| `enc0` | IPsec encapsulation — unused |
+| `pflog0`, `pfsync0` | The **pf** packet filter's logging and state-sync interfaces. QNX inherits `pf` from NetBSD. Unused here, relevant in Chapter 28. |
+
 Or, from **another host terminal** (leave the VM running):
 
 ```bash
@@ -562,23 +803,108 @@ host$ cd ~/qnx800/images/qemu/qemu
 host$ mkqnximage --getip
 ```
 
-### 9.2 SSH in
-
-```bash
-host$ ssh root@<the-ip-address>
+```text
+192.168.122.46
 ```
 
-Password: `root`.
+> ⚠️ **Run it from the inner `qemu/` directory.** From one level up you get
+> `There's no virtual machine in this directory` — the same nested-directory trap as §7,
+> with a different message. See [D-006](../meta/Doubts.md#d-006).
 
-> ⚠️ **If the IP is missing or unreachable, do not fight it here** — go to
-> [§12.1](#121-networking-the-virbr0-bridge). Bridged networking is the single most likely thing to
-> fail on a WSL2 host, and it has a specific cause and fix.
+> 🎉 **Bridged networking works on WSL2.** This was flagged as the most likely failure in the whole
+> guide — the `virbr0` bridge needs libvirt, which needs systemd, which WSL2 does not enable by
+> default. **It worked anyway**, on the `192.168.122.x` subnet libvirt uses by default. §12.1 keeps
+> the fallbacks documented in case your machine is less lucky.
 
----
+### 9.2 Check you can reach it
+
+```bash
+host$ ping -c3 192.168.122.46
+```
+
+### 9.3 ⚠️ SSH as `root` will be refused — use `qnxuser`
+
+```bash
+host$ ssh root@192.168.122.46
+```
+
+❌ **What actually happens:**
+
+```text
+root@192.168.122.46's password:
+Permission denied, please try again.
+root@192.168.122.46: Permission denied (publickey,password).
+```
+
+**The password is not wrong.** `root`/`root` logs in perfectly on the serial console. What is
+refusing you is **`sshd`**, not the password database.
+
+> 💡 **Why.** Since OpenSSH 7.0 the default has been `PermitRootLogin prohibit-password`: root may
+> authenticate with a **key**, never with a password, no matter how correct the password is. It is a
+> sensible hardening default — remote root password login is the single most brute-forced door on
+> the internet — and QSTI ships with it. The clue is in the error: `(publickey,password)` lists the
+> methods the *server* offered, and password was not on offer **for root**.
+
+**✅ Use the unprivileged account instead:**
+
+```bash
+host$ ssh qnxuser@192.168.122.46
+```
+
+The image is built around a `qnxuser` account — the login banner names `qnxuser` as the VNC password,
+the image includes a `sudoers` configuration, and the banner tells you to run `sudo apk update`. That
+`sudo` only makes sense for a non-root user.
+
+Once in, become root normally:
+
+```bash
+qnx$ sudo -i
+```
+
+<details>
+<summary>If <code>qnxuser</code> is not the account name, find out from the console</summary>
+
+At the serial console, as root:
+
+```bash
+qnx# cat /etc/passwd
+qnx# grep -iE 'PermitRootLogin|PasswordAuthentication|AllowUsers' /etc/ssh/sshd_config
+```
+
+`/etc/passwd` lists every account with a real shell. `sshd_config` tells you exactly what the server
+will accept.
+</details>
+
+### 9.4 Alternative — allow root over SSH
+
+Reasonable on a disposable VM on a private virtual network; **never** on anything reachable from
+outside. At the serial console:
+
+```bash
+qnx# echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+qnx# slay -f sshd && sshd
+```
+
+> ⚠️ **This may not survive a reboot.** Most of a QSTI system is rebuilt from the image at boot. If
+> the change vanishes, that is why — and it is a preview of Chapter 21, where you put changes into
+> the *image* rather than patching a running system.
+
+### 9.5 Better — use a key, and stop typing passwords
+
+The cleanest answer, and the one you will want by Chapter 08:
+
+```bash
+host$ ssh-keygen -t ed25519 -C qnx-lab          # if you have no key yet
+host$ ssh-copy-id qnxuser@192.168.122.46
+host$ ssh qnxuser@192.168.122.46                # no password
+```
+
+> 💡 **Worth doing now rather than later.** Chapter 08 has you running `gdb` across this link and
+> redeploying binaries constantly. A password prompt in that loop gets old within minutes.
 
 ## 10. Step 7 — Run your binary 🎉 ⚠️
 
-`[UNVERIFIED]`
+`[UNVERIFIED]` — *the last unverified step in this guide.*
 
 This is the payoff. Rebuild the program from Setup Guide 02 and run it **on QNX**.
 
@@ -596,8 +922,11 @@ host$ ./hello_qnx
 ### 10.2 Copy it to the target
 
 ```bash
-host$ scp hello_qnx root@<the-ip-address>:/tmp/
+host$ scp hello_qnx qnxuser@<the-ip-address>:/tmp/
 ```
+
+> ⚠️ **`qnxuser`, not `root`** — `scp` runs over SSH, so it hits the same refusal as §9.3. If you
+> enabled `PermitRootLogin` in §9.4, `root@` works too.
 
 ### 10.3 Run it
 
@@ -652,9 +981,15 @@ trouble is.
 
 ### 12.1 Networking: the `virbr0` bridge
 
-**The problem.** The default launch uses `bridge,br=virbr0`. That bridge is created by **libvirt**,
-which runs as a **systemd** service. WSL2 does not enable systemd by default, so `libvirtd` may never
-start and `virbr0` may not exist. QEMU then fails to attach a network, and the VM boots with no IP.
+> ✅ **Verified 2026-08-26: this did NOT happen.** On Ubuntu 26.04 / WSL2 the bridge worked out of
+> the box and the VM came up on `192.168.122.46` — libvirt's default subnet. **You can most likely
+> skip this section.** It stays because the concern is real on other setups, and because if your VM
+> boots with no IP, this is still the first place to look.
+
+**The theory.** The default launch uses `bridge,br=virbr0`. That bridge is created by **libvirt**,
+which runs as a **systemd** service. WSL2 does not enable systemd by default, so `libvirtd` might
+never start and `virbr0` might not exist. QEMU would then fail to attach a network, and the VM would
+boot with no IP.
 
 **Check:**
 
@@ -694,8 +1029,10 @@ host$ systemctl is-active libvirtd
    You would then reach the VM at `ssh -p 2222 root@localhost`. Port **8000** matters later: it is
    `qconn`, the remote-debug agent used in Chapter 08.
 
-> 📋 **This is the single most valuable thing to report back.** Whichever route works becomes the
-> documented one, and the others become the troubleshooting section.
+> 💡 **Why it worked anyway.** Installing `libvirt-daemon-system` in Setup Guide 01 was enough:
+> the package sets up `virbr0` and the default `192.168.122.0/24` network, and WSL2's networking
+> stack carried it without systemd having to supervise anything. A pleasant surprise, and evidence
+> that Setup Guide 01's package list was right.
 
 ### 12.2 Graphics: `sdl,gl=on`
 
@@ -759,6 +1096,13 @@ then `wsl --shutdown` from Windows PowerShell. Without KVM the VM still runs —
 
 See [§12.1](#121-networking-the-virbr0-bridge). Almost certainly the `virbr0` bridge.
 
+### 13.4a SSH says `Permission denied` for `root`, but the console accepts `root`/`root`
+
+Not a password problem — `sshd` refuses **password** authentication for root by design
+(`PermitRootLogin prohibit-password`). Use **`ssh qnxuser@<ip>`** and `sudo -i`, or enable root
+login. Full explanation and all three options in [§9.3](#93--ssh-as-root-will-be-refused--use-qnxuser)
+and [D-009](../meta/Doubts.md#d-009).
+
 ### 13.5 The VM has an IP but cannot reach the internet
 
 QNX's documented cause is a **bridge subnet clash**. Their fix is to move the bridge to the
@@ -819,9 +1163,10 @@ The official QNX troubleshooting page is
 - [ ] `unpack_qemu_image.sh` produced `output/ifs.bin` and `output/disk-qemu.vmdk`
 - [ ] `mkqnximage --run` boots to a login prompt
 - [ ] Logged in as `root` / `root` and reached a `#` prompt
-- [ ] `pidin` lists processes, including `procnto`
+- [ ] `pidin` lists processes, including `procnto` and user-space drivers
+- [ ] `ls /proc/boot` shows `ldqnx-64.so.2` — the linker Linux could not find
 - [ ] The VM has an IP address
-- [ ] `ssh root@<ip>` works
+- [ ] `ssh qnxuser@<ip>` works *(root over SSH is refused by default — §9.3)*
 - [ ] **`hello_qnx` copied across and printed `Hello from QNX!`** 🎉
 - [ ] `Ctrl+A X` (or `mkqnximage --stop`) shuts it down cleanly
 
@@ -853,7 +1198,9 @@ that runs them, and a network between them.
 | Launch | `mkqnximage --run` |
 | Find the IP | `mkqnximage --getip` |
 | Stop | `mkqnximage --stop`, or `Ctrl+A` then `X` |
-| Credentials | `root` / `root` |
+| Console credentials | `root` / `root` |
+| **SSH** | **`qnxuser`** — root is refused over SSH by default ([§9.3](#93--ssh-as-root-will-be-refused--use-qnxuser)) |
+| VNC password | `qnxuser` |
 | Defaults | 8 CPUs · 4 GB RAM · 1280×768 @ 60 |
 | RAM ceiling | ⚠️ above **16 GB** may misbehave |
 | Official guide | [QSTI for QEMU](https://www.qnx.com/developers/docs/qnxeverywhere/com.qnx.doc.target_images/topic/qsti_qemu/about.html) |
@@ -864,5 +1211,6 @@ that runs them, and a network between them.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | **§§7–9 verified — the VM boots.** Real boot log added with the four benign startup warnings explained and `slm`'s 22 components listed. §7.1 shows the real login banner (`apk`, the VNC server, and the `sudo` hint). §8 rewritten around real `uname`/`pidin`/`pidin info`/`ls /proc/boot` output — including live message passing visible in the `REPLY` column, and `ldqnx-64.so.2` sitting in `/proc/boot`. §9 rewritten: real `ifconfig`, and **the one real failure — `sshd` refuses password login for root** (`PermitRootLogin prohibit-password`); use `qnxuser`, or enable root login, or use a key (**D-009**). §12.1 downgraded: the `virbr0` bridge **worked** on WSL2. |
 | 1.1 | 2026-08-26 | **§§4–5 verified; three corrections.** (a) `unpack_qemu_image.sh` extracts into a nested **`qemu/`** subdirectory, so the image is at `~/qnx800/images/qemu/qemu` — §5 now shows the tree and §7 `cd`s into it, with the `mkqnximage` error quoted and an explicit warning **not** to use the `--force` it suggests (**D-006**). (b) `-listAvailablePackages` does not exist; replaced with `-listAccessible` and the real option table (**D-007**). (c) Real file listings added, including the 47 GB `disk-qemu` and what `procnto-smp-instr.sym`, `build/` and `option_files/` are for (**D-008**). Also: the QSTI package may already be installed with SDP — check before downloading. |
 | 1.0 | 2026-08-26 | Created from QNX's official *QSTI for QEMU* documentation (read 2026-08-26). Documents the QSTI → `unpack_qemu_image.sh` → `mkqnximage --run` flow, the underlying QEMU configuration, first-contact commands, SSH, the cross-compile-and-run payoff, and three predicted WSL2 failure modes. All steps `[UNVERIFIED]` pending block V5. |

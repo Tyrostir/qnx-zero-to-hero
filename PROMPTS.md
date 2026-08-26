@@ -60,6 +60,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#5](#prompt5) | 2026-08-26 | Claude (Opus 5) | Commits pushed manually; blocks V2–V4 complete, output in `toAgent/2.BlockV2V3V4Output.md` | ✅ **All verification done** · Setup Guide 02 → v2.0 · 3 guide bugs fixed · R2 closed · Chapter 00 off hold |
 | [PROMPT#6](#prompt6) | 2026-08-26 | Claude (Opus 5) | "Go for B" — write Setup Guide 03, the QEMU VM | ✅ **Setup Guide 03 published** (729 lines) · `tools/qemu/qnx-vm.sh` · block V5 defined |
 | [PROMPT#7](#prompt7) | 2026-08-26 | Claude (Opus 5) | Stuck at V5.3; log in `toAgent/3.BlockV5.1V5.3-StuckAtV5.3.md`; document the `/btw` questions | ✅ Diagnosed: nested `qemu/` directory · 3 bugs fixed · **D-006/007/008** · **ADR-025** (`/btw`) |
+| [PROMPT#8](#prompt8) | 2026-08-26 | Claude (Opus 5) | V5.3–V5.5 done, stuck at V5.5 (SSH) | 🎉 **M2 — the VM boots** · SSH fix: use `qnxuser` (**D-009**) · boot warnings benign (**D-010**) · **H-9 closed** · Setup 03 → v1.2 |
 
 ---
 
@@ -969,10 +970,178 @@ host$ cat ~/qnx800/images/qemu/README.md                  # 394 bytes  (T-017)
 
 ---
 
+## PROMPT#8
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 009 |
+| **Context** | The learner retried V5.3 with the D-006 fix, reached a booting VM, and was blocked at V5.5 (SSH). |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I executed V5.3 to V5.5 and I am stuck at V5.5. Please refer  toAgent/5.BlockV5.3V5.5-StuckAtV5.5.md file
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 🎉 Milestone M2 — QNX boots
+
+```text
+QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64
+Processes: 31, Threads: 207    FreeMem: 3659MB/4095MB    8 processors
+vtnet0: inet 192.168.122.46
+```
+
+The `#` prompt in that log is a real QNX microkernel system running on your laptop. Everything from Chapter 06 onwards is now executable.
+
+## 🎯 Your blocker: `sshd` refuses root — use `qnxuser`
+
+```bash
+host$ ssh qnxuser@192.168.122.46
+qnx$  sudo -i
+```
+
+**Your password was never wrong.** `root`/`root` works at the console because `login` checks the shadow file. SSH fails because **`sshd` rejects root before the password is even considered**.
+
+Since OpenSSH 7.0 the shipped default is `PermitRootLogin prohibit-password`: root may authenticate with a **key**, never with a password. Your error message says so, if you read it precisely —
+
+```text
+Permission denied (publickey,password).
+```
+
+— that lists the methods the *server* offered. Password was on offer, just not for root.
+
+**Why `qnxuser`?** Your own login banner gave it away three times: the VNC server's default password is `qnxuser`, the image ships a `sudoers` config, and the banner tells you to run `sudo apk update` — advice that only makes sense for a non-root account.
+
+If the name turns out to be something else, the target will tell you:
+
+```bash
+qnx# cat /etc/passwd
+qnx# grep -iE 'PermitRootLogin|PasswordAuthentication' /etc/ssh/sshd_config
+```
+
+Two alternatives are in §9.4 (`PermitRootLogin yes` — may not survive a reboot) and §9.5 (**use a key** — do this now; Chapter 08 runs `gdb` across this link and a password prompt in that loop gets old fast). Logged as **D-009**.
+
+⚠️ **`scp` runs over SSH**, so V5.6 needs `scp hello_qnx qnxuser@192.168.122.46:/tmp/` too.
+
+## ✅ I was wrong about the networking
+
+I predicted the `virbr0` bridge would be the most likely failure in the whole guide — libvirt needs systemd, WSL2 doesn't enable it. **It worked first try**, on libvirt's default `192.168.122.0/24` subnet. Installing `libvirt-daemon-system` back in Setup Guide 01 was enough.
+
+Hazard **H-9 closed**, §12.1 downgraded from "most likely failure" to a contingency, with the success stated up front so nobody troubleshoots a problem they don't have. The fallbacks stay — they're correct, just unnecessary here.
+
+## 😌 Those boot errors are all harmless — D-010
+
+Four alarming lines, none of them a problem:
+
+| Message | Reality |
+|---|---|
+| `ACPI table not found` | QEMU's firmware doesn't present it; QNX falls back and carries on |
+| `Unable to start "uname" (2)` | Error 2 is `ENOENT` — a script called `uname` before the disk was mounted. Cosmetic |
+| `slog2_api: cannot connect to slogger2` | The logger hadn't started **yet**. The next line literally says it'll retry |
+| `rm: /etc/ca-certificates/extracted` | Cleanup script tidying a file that was never there |
+
+> **A habit worth forming:** early-boot complaints about services that start *later* are almost always ordering noise. The ones worth chasing appear **after** that subsystem started — or stop the boot entirely.
+
+## 💎 Your `pidin` output is the best teaching material in the course so far
+
+I rewrote §8 around it. Three things it shows that no amount of documentation could:
+
+**1. Drivers are ordinary processes.** `devb-eide` (disk), `io-sock` (the entire TCP/IP stack), `io-usb-otg` (USB), `devc-ser8250` (serial), `drm-virtio` (graphics) — every one has a PID. On Linux all five are kernel code. Only `procnto` is the kernel here. **That's the microkernel argument, and it needs no prose.**
+
+**2. The 256-priority scale, visibly in use.** `0f` idle → `10r` services → `21r`/`25r` drivers → `254i`/`255i` kernel interrupt threads. Chapter 11 explains it; your listing demonstrates it.
+
+**3. Live message passing, in the `REPLY` column:**
+
+```text
+397328  1 system/bin/fullscreen-winmgr  10r REPLY  249881   ← waiting on screen
+249881 13 system/bin/screen             10r REPLY  184343   ← waiting on io-hid
+```
+
+A chain of synchronous `MsgSend` calls, visible in one column, on a system nobody instrumented. That is Chapter 13's entire subject, already running.
+
+**And the detail I enjoyed most** — your `ls /proc/boot` contains:
+
+```text
+ldqnx-64.so.2
+```
+
+That's the exact file your Linux machine couldn't find in Setup Guide 02 when it refused to run your binary. **It was never missing. It was just on the wrong computer.** It lives in the boot image, and it's why `hello_qnx` will run in V5.6.
+
+I also documented `slm` — QNX's answer to `systemd`, 22 components on your image, configuration in a single readable `slm.cfg`. **`qconn` is one of them**, already listening on port 8000, so Chapter 08's remote debugging needs nothing installed.
+
+## 📕 Setup Guide 03 → v1.2
+
+**§§4–9 are now ✅ verified**, with real output throughout: the boot log with the four warnings explained, the real login banner (`apk`, VNC, the `sudo` hint), real `uname`/`pidin`/`pidin info`/`ls /proc/boot`, real `ifconfig` with `vtnet0`/`pflog0`/`enc0` explained, and §9.3 built entirely around the SSH refusal.
+
+**Only §§10–11 remain unverified** — the last two steps in the guide.
+
+Bonus: **T-202 is partly answered.** The kernel reports its build as `2026/02/27-11:02:56EST`, which is the version identity chapter front matter needs.
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `docs/guides/Setup_03_QEMU_VM.md` | → **v1.2.** §§4–9 verified; §7 boot log + warnings; §7.1 real banner; §8 rewritten around `pidin`; §9 rewritten around the SSH fix; §12.1 downgraded; §13.4a added |
+| `docs/meta/Doubts.md` | **+D-009** (SSH refuses root by design) · **+D-010** (benign boot warnings) |
+| `docs/meta/DecisionsLog.md` | Session 009: M2 · **H-9 closed as a failed prediction** · the SSH refusal · `pidin` as course material |
+| `docs/internal/VerificationRuns.md` | V5.3–V5.5 ✅ · **verified QNX target facts table** for chapter front matter |
+| `docs/meta/CourseState.md` | **M2 dated 2026-08-26**; VM booting ✅; Session 009 |
+| `docs/meta/CompactContext.md` | Verified target facts recorded for future sessions |
+| `docs/meta/ToDos.md` | T-015 → V5.6–V5.7; **T-018** added (confirm the SSH account); T-202 downgraded |
+| `docs/internal/CLAUDE-MEMORY.md` | Session 009; **H-9 closed, H-11 opened** (SSH must use `qnxuser`) |
+| `toAgent/README.md` | Drop 4 indexed |
+
+---
+
+## 👉 Finish V5.6 — you're two commands away
+
+```bash
+host$ scp /tmp/hello_qnx qnxuser@192.168.122.46:/tmp/
+host$ ssh qnxuser@192.168.122.46
+qnx$  cd /tmp && chmod +x hello_qnx && ./hello_qnx
+```
+
+Expected:
+
+```text
+Hello from QNX!
+My process ID is <pid>
+```
+
+**That's the whole loop closed** — written on Linux, compiled by a cross-compiler into a binary your own machine physically refuses to run, moved across a virtual network, executed on a real-time microkernel.
+
+Then V5.7: `mkqnximage --stop` (from `~/qnx800/images/qemu/qemu`) or `Ctrl+A` `X`.
+
+And while you're logged in, one small thing that settles **T-018**:
+
+```bash
+qnx# cat /etc/passwd
+```
+
+`qnxuser` is my inference from the banner, not something I've proven.
+
+**After that, Setup Guide 03 is fully verified and Chapter 00 is next.**
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.6 | 2026-08-26 | PROMPT#8 logged: milestone M2 reached; SSH-as-root diagnosed. |
 | 2.5 | 2026-08-26 | PROMPT#7 logged: V5.3 diagnosed and unblocked; `/btw` convention adopted. |
 | 2.4 | 2026-08-26 | PROMPT#6 logged: Setup Guide 03 published. |
 | 2.3 | 2026-08-26 | PROMPT#5 logged: blocks V2–V4 complete, all `[UNVERIFIED]` markers cleared. |
