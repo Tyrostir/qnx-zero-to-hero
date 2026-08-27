@@ -65,6 +65,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#10](#prompt10) | 2026-08-26 | Claude (Opus 5) | "Go ahead and write Chapter 00" | 📕 **Chapter 00 published** (1/34) — the template's reference implementation · 3 labs · Glossary +10 |
 | [PROMPT#11](#prompt11) | 2026-08-26 | Claude (Opus 5) | Chapter 00 read; write Chapter 01 | 📕 **Chapter 01 published** (2/34) + **the first compiled lab** `lab01_timing` · block V6 · Glossary +13 |
 | [PROMPT#12](#prompt12) | 2026-08-26 | Claude (Opus 5) | What are `clock_gettime`, `nanosleep`, `perror`, `qsort` — C++ or QNX? Which files? | ✅ **D-014** · lab README → v1.1 · **`PLAN.md` rule 1 extended to library functions** · audit found 5 more in Ch 01 |
+| [PROMPT#13](#prompt13) | 2026-08-26 | Claude (Opus 5) | Chapter 01 done; write Chapter 02 | 📕 **Chapter 02 published** (3/34) · history verified from primary sources · block V7 · Glossary +10 |
 
 ---
 
@@ -1583,10 +1584,139 @@ Say the word for **Chapter 02 — What Is QNX?** whenever you're ready.
 
 ---
 
+## PROMPT#13
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 014 |
+| **Context** | The learner finished Chapter 01 and asked for the next chapter. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I am done with Chapter 01. GO ahead with Chapter 02
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 02 — What Is QNX? (3/34)
+
+935 lines, ~75 minutes. Part 0 is now three-quarters done.
+
+## I verified the history instead of writing it from memory
+
+Chapter 02 is history-heavy, and a wrong date in a published chapter is a nastier error than a wrong command — nobody's build fails, so nobody finds it. So I checked against **QNX's own "A little history" page** and **BlackBerry's SDP 8.0 announcement** before writing:
+
+| | |
+|---|---|
+| **1980** | Dan Dodge and Gordon Bell, University of Waterloo graduates, found **Quantum Software Systems Limited**. Product: **QUNIX** |
+| **1982** | First commercial release, Intel **8088**. AT&T's lawyers object to the *Unix* trademark → renamed **QNX** |
+| **~1991** | **QNX 4** — 32-bit and **POSIX**. The decision that makes your C knowledge transferable |
+| **1995** | **QNX Neutrino** — the origin of `procnto` |
+| **2004 / 2010** | Harman, then RIM/BlackBerry for ~$200 M |
+| **21 Mar 2024** | **QNX SDP 8.0 GA** — what you installed |
+
+> One trap I flagged: QNX's co-founder **Gordon Bell is not the DEC computer architect** of the same name. Search engines conflate them cheerfully.
+
+## The chapter's argument, and one point the usual telling omits
+
+The microkernel bet, stated as one decision: **`procnto` provides scheduling, memory, timers and message passing, and nothing else.** Everything else — every driver, the TCP/IP stack, filesystems, graphics — is an ordinary process.
+
+**The point I think is under-told:** the familiar benefit is fault isolation. The one that actually put QNX in vehicles is that isolation can be **demonstrated to a third party**. Under ISO 26262 you must produce *evidence* of freedom from interference. In a monolithic kernel every privileged component is potentially in scope — your safety case has to reason about the graphics driver, because it runs with the same authority as your safety task. With MMU-enforced process boundaries the argument becomes structural.
+
+That resolves a historical puzzle worth knowing: microkernels largely *lost* the 1990s performance argument, and Mach survives mainly as a hybrid inside macOS. QNX kept the design — and what turned out to be worth having wasn't the isolation, it was the ability to prove it.
+
+**I also wrote down what it costs.** §2.2 lists messages instead of function calls, context switches, 31 processes at idle, an unfamiliar driver model — and says plainly:
+
+> *For a build server or a laptop, this trade is simply bad. **QNX is not a better Linux.** It is a different answer to a different requirement.*
+
+A course that only argues for its subject produces readers who can't tell when *not* to use it — which is the judgement an employer is actually paying for.
+
+## §4 — the section I expect you'll use most
+
+It's **The Product & Version Map**, including **four reliable signals for spotting stale QNX material**:
+
+| Signal | Means |
+|---|---|
+| `blackberry.qnx.com` | Pre-2025 |
+| "QNX Neutrino RTOS 6.x" in a product name | The 6.x line |
+| **`io-pkt`** | Pre-8.0 — your `pidin` showed **`io-sock`** |
+| `docs/6.5.0/` or `docs/7.0.0/` in a URL | Read the number |
+
+> **Concepts age well; commands age badly.** There isn't much written about QNX, and the best explanations are often old. Telling you to avoid old sources would be bad advice — the rule is to read them for understanding and verify every command.
+
+I put this course inside that warning too: its own guides have been wrong five times so far.
+
+## §5 decodes *your* system
+
+```text
+procnto-smp-instr
+│   │  │   └── instrumented — kernel tracing compiled in (Ch 26 will work here)
+│   │  └────── SMP — multi-core
+│   └───────── nto — NeuTrinO
+└───────────── proc — the process manager
+```
+
+Then `uname -a` field by field, and the observation I like most in the chapter: **one file out of about eighty in `/proc/boot` is the kernel.** The other seventy-nine are ordinary programs and libraries whose Linux equivalents live *inside* `vmlinuz`.
+
+That ratio is the microkernel bet expressed as a directory listing. Nothing in §§1–3 is theoretical — you can `ls` it.
+
+## 🧪 Labs — no compiler needed
+
+| | |
+|---|---|
+| **02.1** | Identify your system and place it on the version map |
+| **02.2** | **Kill `vncserv`, watch the system shrug, restart it** — a different PID comes back ([D-013](docs/meta/Doubts.md#d-013)) |
+| 💥 **Break It** | **Try to `slay procnto`.** Predict first: refused, or does the VM stop? |
+| 🐣 **Path A** | Date five documentation snippets. Paper only |
+
+The break-it is my favourite so far, because *either outcome teaches the same thing*. In 02.2 you kill a server and the OS doesn't notice; here you reach the one component that **is** the OS. QNX's whole design is about keeping that set as small as possible — one file in eighty.
+
+⚠️ Lab 02.2 uses `vncserv` deliberately: `slay io-sock` would be the more dramatic demo, but it kills the SSH session carrying your command. That version is in the mastery check, and in **V7.3** for the serial console.
+
+## ✅ The new rule held
+
+Session 013's library-function rule was applied *while writing* rather than after. `MsgSend`/`MsgReply` and `open`/`read`/`write` are explained on first use; every shell command in the labs is tabled with its standard.
+
+**The audit afterwards found nothing to fix** — the first evidence the rule change works.
+
+The `open`/`read`/`write` note carries the thesis restated at API level: they're *unchanged* on QNX, and become messages to a user-space process underneath. Your code can't tell. That's what "POSIX-compliant" buys.
+
+---
+
+### What changed on disk
+
+`docs/chapters/Chapter02_WhatIsQNX.md` (new, 935 lines) · Glossary +10 terms with **POSIX** promoted from a planning stub · **block V7** added · `DecisionsLog` Session 014 · `ReferenceLinks` records the history verification · TOC, chapters index, README, `CourseState`, `CompactContext`, `ToDos`, `CLAUDE-MEMORY`.
+
+---
+
+## 👉 Two blocks are open, and they're independent
+
+| | | |
+|---|---|---|
+| **V6** | Build `labs/lab01_timing/` with `qcc`, run it, do the loaded/priority comparison | Needs the toolchain |
+| **V7** | Chapter 02's labs — kill and restart `vncserv`, then try to `slay procnto` | **No compiler.** ~20 min |
+
+**V7 is the cheaper one** if you want a quick session: four commands, and it demonstrates the thing Chapter 02 spends 900 lines arguing.
+
+**Next up is Chapter 03 — Why & Where QNX Is Used**, which closes Part 0: automotive, medical, rail, robotics; QNX versus Linux, FreeRTOS, VxWorks and Zephyr; and — in the same spirit as §2.2 — **when the honest answer is "use Linux".** Say the word.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.11 | 2026-08-26 | PROMPT#13 logged: Chapter 02 published. |
 | 2.10 | 2026-08-26 | PROMPT#12 logged: a course rule gap found by the learner and fixed at rule level. |
 | 2.9 | 2026-08-26 | PROMPT#11 logged: Chapter 01 and the first compiled lab. |
 | 2.8 | 2026-08-26 | PROMPT#10 logged: Chapter 00 published. |

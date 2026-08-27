@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.10
+version: 1.11
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -46,7 +46,7 @@ hands-on work. You write Markdown; you do not run software. The course is
 **6 parts, 34 chapters, ~21 labs, 1 capstone**, published as Markdown *and* PDF, teaching QNX SDP 8.0
 on a QEMU/KVM virtual machine at zero cost.
 
-**Progress: Phase 2. 2/34 chapters. 1 lab. 3/5 setup guides, all verified.**
+**Progress: Phase 2. 3/34 chapters. 1 lab. 3/5 setup guides, all verified.**
 
 **Cadence: one chapter per turn**, committed and pushed, with `docs/meta/` updated each time.
 
@@ -170,7 +170,7 @@ filesystem costume.
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ Approved 2026-08-25 |
-| Chapters published | **2 / 34** — Ch 00 📕 (sets the template) · Ch 01 📕 (first compiled lab) |
+| Chapters published | **3 / 34** — Ch 00 📕 (template) · Ch 01 📕 (first compiled lab) · Ch 02 📕 (history verified from primary sources) |
 | Setup guides published | **3 / 5** — **all three ✅ verified end to end**; zero `[UNVERIFIED]` markers in the course |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
@@ -181,7 +181,7 @@ filesystem costume.
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
-| Blocker | **None.** **Chapter 02 (T-110) is the next action.** Block V6 (the first lab build) is with the learner. |
+| Blocker | **None.** **Chapter 03 (T-111) is the next action** and closes Part 0. Blocks V6 and V7 are with the learner. |
 
 **Always confirm against [`docs/meta/CourseState.md`](../meta/CourseState.md) — it is authoritative.**
 
@@ -342,6 +342,8 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **014** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 02 published** (935 lines). The microkernel bet with its costs stated honestly ("QNX is not a better Linux"); §1.3 argues the real payoff is **evidence, not reliability**. §4 becomes The Product & Version Map with **four signals for spotting stale QNX material**; §5 decodes the learner's own `procnto-smp-instr` and `/proc/boot`. **History verified from primary sources** — QNX's own history page and BlackBerry's SDP 8.0 GA announcement (21 Mar 2024) — rather than from memory. Glossary +10; **block V7** added. |
+| **013** | 2026-08-26 | Claude (Opus 5) | 🔧 **D-014 and a rule gap.** The learner found four unexplained library functions in Chapter 01's lab. Fixed at rule level: `PLAN.md` §2 rule 1 now covers library functions, with a §17 checkbox. An audit found five more in Chapter 01. Hazard **H-12**. |
 | **012** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 01 published** (1024 lines) + **the course's first compiled lab**, `labs/lab01_timing/` (Makefile calling `qcc` directly per ADR-007, skeleton with 4 TODOs, annotated solution, expected output). Real-time defined without "fast"; hard/firm/soft by consequence; the four latency components and five classic unbounds; Mars Pathfinder as the priority-inversion illustration; §4 adapted into "The Vocabulary" (`R` vs `C`, the ≈69 % rate-monotonic bound); §5 budgets a 1 kHz loop and derives an inversion failure. Glossary +13. **Block V6 added** — it verifies the lab mechanism itself, so whatever breaks there breaks in every later chapter. |
 | **011** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 00 published** — the first of 34, and the reference implementation of `PLAN.md` §5. Three labs on the verified VM, including a **💥 Break It** that teaches reading an error instead of reaching for `--force`. §4 is a notation reference; §5 explains *why* each chapter element exists. Glossary +10 terms. Style audit clean. **Next: Chapter 01.** |
 | **010** | 2026-08-26 | Claude (Opus 5) | ✅ **PHASE 1 COMPLETE.** `hello_qnx` ran on the target (PID 14032920) — the edit → cross-compile → deploy → run loop is closed. Block V5 complete, milestone M2 complete. Setup Guide 03 → **v2.0**; **zero `[UNVERIFIED]` markers remain anywhere in the course**. ✏️ **D-009 corrected:** the image ships `PermitRootLogin no`, not `prohibit-password` — keys do not help root, and §9.5 had wrongly said they would. `/etc/passwd` read into the guide. +D-011, D-012, D-013. **Next: Chapter 00.** |
@@ -384,6 +386,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | Session 014: Chapter 02 published; history verified from primary sources. |
 | 1.10 | 2026-08-26 | Session 013: D-014 closed a rule-#4 gap; H-12 added; the writing rules now cover library functions. |
 | 1.9 | 2026-08-26 | Session 012: Chapter 01 + the first lab; block V6 opened. |
 | 1.8 | 2026-08-26 | Session 011: Chapter 00 published; it is now the reference implementation for the chapter template. |

@@ -40,15 +40,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **2 / 34** — Ch 00, 01 📕 |
+| Chapters published | **3 / 34** — Ch 00, 01, 02 📕 |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | **Chapter 02 — What Is QNX?** (T-110) |
-| Next (learner) | 📕 Read Ch 01, then **run block V6** — build/run `labs/lab01_timing/` (T-020) |
+| Next (me) | **Chapter 03 — Why & Where QNX Is Used** (T-111) — closes Part 0 |
+| Next (learner) | 📕 Read Ch 02 · **blocks V6** (build the lab) and **V7** (kill/restart a service) are both open |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -201,6 +201,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | Regenerated after Session 014: Chapter 02 published; block V7 open. |
 | 1.12 | 2026-08-26 | Regenerated after Session 013: writing rules now cover library functions. |
 | 1.11 | 2026-08-26 | Regenerated after Session 012: Chapter 01 + the first lab; block V6 pending. |
 | 1.10 | 2026-08-26 | Regenerated after Session 011: Chapter 00 published; Phase 2 begins. |

@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.4
+version: 1.5
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -112,6 +112,9 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Microkernel** | An OS design in which the kernel provides only what cannot live anywhere else — on QNX: scheduling, memory management, timers and message passing — and everything else, including **every driver, filesystem and the network stack**, runs as an ordinary user-space process. QNX has held this design since 1980. Contrast **monolithic kernel**. | 02 |
+| **Monolithic kernel** | An OS design in which drivers, filesystems and the network stack all run **inside** kernel space with full privilege. Faster in the common case; a fault anywhere can halt the machine. Linux and Windows. | 02 |
+| **Momentics** | QNX's Eclipse-based IDE, shipped with the SDP since 2002. VS Code with the QNX Toolkit is now a first-class alternative. | 02 |
 | **`mkqnximage`** | The SDP tool that builds, launches (`--run`), stops (`--stop`) and queries (`--getip`) a QNX virtual machine. It identifies an image directory by the presence of `local/` and `output/`. Not the same thing as **QSTI**, which is the image it launches. | 00 |
 | **Message passing** | QNX's fundamental IPC: a *synchronous* `MsgSend()` → `MsgReceive()` → `MsgReply()` exchange between processes. Everything in QNX — files, devices, drivers — is built on it. | 13 🌱 |
 | **Microkernel** | An OS design where the kernel provides only scheduling, IPC, interrupt dispatch, timers and basic memory management. Drivers, filesystems and network stacks run as ordinary user-space processes. | 09 🌱 |
@@ -124,6 +127,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Neutrino** | The QNX microkernel line introduced in **1995**, and the origin of `procnto`. Present-day products are called *QNX OS*; "Neutrino RTOS" in a product name signals **6.x-era material**. The name survives internally — the `nto` in `procnto` and in `gcc_ntox86_64`. | 02 |
 | **Neutrino** | The historical product name of the QNX microkernel OS (SDP 6.x/7.x era). Surviving in the `nto` in tool names like `gcc_ntox86_64`. | 02 🌱 |
 | **`nto`** | Abbreviation of "Neutrino", used throughout QNX target triples and tool names. | 08 🌱 |
 
@@ -137,6 +141,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`procnto`** | The QNX kernel — *process manager* + *Neutrino*. Provides scheduling, memory management, timers and message passing, **and nothing else**. Always pid 1. Ships in variants: `-smp` (multi-core), `-instr` (kernel tracing compiled in, needed for Ch 26). | 02, 09 |
 | **`pthread_*`** | The POSIX threads API — `<pthread.h>`. Standard POSIX, not QNX-specific, and identical on Linux. ⚠️ Unlike most POSIX calls, these **return an error number directly** rather than returning `-1` and setting `errno`. | 01, 10, 12 |
 | **POSIX.1b** | The 1993 *real-time extensions* to POSIX. Source of `clock_gettime`, `nanosleep`, POSIX timers, real-time signals, message queues and priority scheduling. Where the standardised real-time vocabulary comes from. | 01 |
 | **Priority inversion** | A high-priority thread blocked on a lock held by a low-priority thread that is itself preempted by a medium-priority thread — so the highest-priority thread waits on the lowest, for unbounded time. Caused the Mars Pathfinder resets in 1997. Fixed by **priority inheritance**. | 01, 12 |
@@ -145,7 +150,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | **Process ID (QNX)** | A 32-bit identifier that is neither small nor sequential — expect values like `14032920`. A QNX PID names an **addressable message-passing endpoint**, so IDs are spread across a large space to make a stale reference fail rather than reach a recycled process. | 00 |
 | **Pathname space** | QNX's unified namespace mapping paths to the processes that serve them. When you `open("/dev/ser1")`, the process manager tells you which server owns that path; you then message that server directly. | 16 🌱 |
 | **`pidin`** | *Process Information* — the most important QNX diagnostic command. Shows processes, threads, priorities, blocking states, memory, and what each thread is waiting on. | 07 🌱 |
-| **POSIX** | The IEEE standard for Unix-like OS interfaces. QNX is POSIX-compliant, which is why your C/C++ knowledge transfers. | 02 🌱 |
+| **POSIX** | The IEEE standard for Unix-like OS interfaces. QNX has been POSIX-compliant since QNX 4 (~1991), which is why your C/C++ knowledge transfers unchanged — `open`, `read`, `pthread_*` and the C library behave exactly as on Linux. On QNX these become **messages to a user-space process**, and your code cannot tell. | 02 |
 | **PPS** | *Persistent Publish/Subscribe* — a QNX filesystem-based pub/sub service for loosely-coupled communication between components. Objects look like files under `/pps`. | 24 🌱 |
 | **Priority inheritance** | A protocol where a thread holding a mutex temporarily inherits the priority of the highest-priority thread waiting for it — the standard cure for **priority inversion**. | 12 🌱 |
 | **Priority inversion** | A high-priority thread is blocked by a low-priority thread holding a resource, while a medium-priority thread runs — inverting the intended ordering. Famously nearly killed the Mars Pathfinder mission. | 11 🌱 |
@@ -156,6 +161,9 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **QNX OS** | The operating system itself. Formerly *QNX Neutrino RTOS*; current version **8.0**, GA 21 March 2024. Distinct from **QNX SDP**, which is the OS plus the toolchain. | 02 |
+| **QNX SDP** | *QNX Software Development Platform* — the OS **plus** the cross-toolchain, headers, libraries, target images and IDE. What you install on your Linux host (`~/qnx800`). | 02 |
+| **QNX Everywhere** | The **free, non-commercial licence tier**, announced January 2024. Covers learning, academia, hobby projects and writing training material. Not for production or distribution. | 02, 04 |
 | **`qnxuser`** | The unprivileged account (UID 1000) on the QSTI QEMU image, password `qnxuser`, holding full `sudo`. **The account you must use for SSH** — the image ships `PermitRootLogin no`, so `root` is refused by password *and* key. | 00 |
 | **QSTI** | *Quick Start Target Image* — QNX's official **pre-built** system image for QEMU and Raspberry Pi. Installed as a QNX Software Center package and launched with `mkqnximage --run`. The course's day-one target. | 00 |
 | **`qcc` / `q++`** | The QNX C and C++ compiler drivers — wrappers around GCC that select the right target, headers and libraries. | 08 🌱 |
@@ -179,6 +187,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`slay`** | QNX command that terminates processes **by name** rather than by PID — roughly Linux's `pkill`. `slay -f` forces. Because QNX drivers are ordinary processes, `slay` can stop a network stack or a disk driver, which has no equivalent on a monolithic kernel. | 02, 25 |
 | **SDP** | *Software Development Platform* — the complete QNX package installed on your host: OS images, cross-compilers, IDE, tools, BSPs. | 05 🌱 |
 | **`sigevent`** | A QNX structure describing "what should happen when this event occurs" — deliver a pulse, send a signal, unblock a thread, create a thread. The glue between timers/interrupts and your code. | 14 🌱 |
 | **SIL** | *Safety Integrity Level* (1–4) from IEC 61508. QNX OS is certified to SIL 3. | 29 🌱 |
@@ -217,6 +226,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | Chapter 02: +10 terms (microkernel, monolithic kernel, Momentics, Neutrino, `procnto`, QNX OS, QNX SDP, QNX Everywhere, `slay`) and **POSIX** expanded from its planning stub. |
 | 1.4 | 2026-08-26 | +`pthread_*` from the Chapter 01 library-function audit. |
 | 1.3 | 2026-08-26 | Chapter 01 lab: +5 terms (`errno`, header file, ISO C standard library, `libc`, POSIX.1b) from [D-014](../meta/Doubts.md#d-014). |
 | 1.2 | 2026-08-26 | Chapter 01: +13 terms (real-time system, determinism, deadline, hard real-time, latency, jitter, period, response time, WCET, utilisation, rate-monotonic, priority inversion). |

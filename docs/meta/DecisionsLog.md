@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.12
+version: 1.13
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1295,10 +1295,103 @@ Two traps documented alongside, because neither is a matter of style:
 
 ---
 
+## 2026-08-26 — Session 014 (Chapter 02)
+
+### VERIFIED — QNX's history, from primary sources rather than memory
+
+Chapter 02 is history-heavy, and asserting wrong dates in a published chapter is a different kind of
+error from a wrong command: nobody's build fails, so nobody finds it. The timeline was therefore
+checked against QNX's own account and BlackBerry's announcements before publishing.
+
+| Fact | Source |
+|------|--------|
+| 1980 founding by **Dan Dodge** and **Gordon Bell**, University of Waterloo graduates, as **Quantum Software Systems Limited**; product **QUNIX** | QNX's *"A little history"* |
+| AT&T cease-and-desist over the Unix trademark forces the rename to **QNX** | same |
+| First commercial release **1982**, for the Intel **8088** | same |
+| **QNX 4 around 1991** — 32-bit and **POSIX support** | same |
+| **QNX Neutrino, 1995** — the origin of `procnto` | same |
+| Eclipse founding member; **Momentics Tool Suite, 2002** | Wikipedia / QNX |
+| **Harman International, 2004**; **RIM/BlackBerry, 2010**, ~$200 million | Wikipedia |
+| **QNX Everywhere announced January 2024** | BlackBerry |
+| **QNX SDP 8.0 general availability, 21 March 2024** | BlackBerry press release + SDP 8.0 release notes |
+
+**One trap worth recording.** QNX's co-founder **Gordon Bell is not the DEC computer architect of the
+same name** (Bell's Law, the Gordon Bell Prize). Search engines conflate them freely. Noted in the
+chapter so a reader chasing the history does not end up in the wrong biography.
+
+---
+
+### DECIDED — Chapter 02 states the microkernel's costs, not only its benefits
+
+The obvious way to write this chapter is as an argument for QNX. Section 2.2 instead lists what the
+design costs — a message where a monolithic kernel makes a function call, context switches across
+address spaces, 31 processes at idle, and a driver model nobody arrives already knowing — and says
+plainly:
+
+> "For a build server or a laptop, this trade is simply bad... **QNX is not a better Linux.** It is a
+> different answer to a different requirement."
+
+**Why this matters more than it looks.** A course that only argues for its subject produces readers
+who cannot tell when *not* to use it — which is the judgement an employer is actually paying for.
+Chapter 03 is built on the same principle and will include the cases where the honest answer is
+"use Linux".
+
+The section also credits Linux's movement in QNX's direction (FUSE, DPDK, SPDK, `PREEMPT_RT`) and
+names what remains genuinely different: a **certified** version with a vendor's evidence package.
+
+---
+
+### DECIDED — The real argument for the microkernel is evidence, not reliability
+
+Section 1.3 makes a point the usual telling omits. Fault isolation is the *familiar* benefit; the one
+that put QNX in vehicles is that isolation can be **demonstrated to a third party**.
+
+Under ISO 26262, freedom from interference must be shown with evidence. In a monolithic kernel every
+privileged component is potentially in scope — the safety case has to reason about the graphics
+driver, because it runs with the same authority as the safety task. With hardware-enforced process
+boundaries, the argument becomes structural and the scope shrinks to the microkernel plus the
+components actually chosen.
+
+> This also explains the historical puzzle the chapter raises: microkernels largely *lost* the 1990s
+> performance argument, and Mach survives mainly as a hybrid inside macOS. QNX kept the design, and
+> what turned out to be worth having was not the isolation itself but the ability to prove it.
+
+---
+
+### DECIDED — Section 4 becomes "how to date what you read"
+
+Following the pattern from Chapters 00 and 01, section 4 holds the chapter's referenceable material —
+here, the product family and version map, plus **four signals for spotting stale QNX documentation**:
+the `blackberry.qnx.com` domain, "Neutrino" in a product name, `io-pkt` where 8.0 uses `io-sock`, and
+the version segment in a documentation URL.
+
+**Why this earns a whole section.** There is not a great deal written about QNX, and much of the best
+explanatory material is old. Telling a learner to avoid old sources would be bad advice; teaching
+them the rule — **concepts age well, commands age badly** — is the useful version.
+
+The section explicitly includes this course in the warning: its own guides have been wrong five times
+so far, which is why `[UNVERIFIED]` exists.
+
+---
+
+### VERIFIED — The library-function audit was applied during authoring, not after
+
+Hazard **H-12** and the new `PLAN.md` section 17 checkbox were applied while writing rather than
+afterwards. Chapter 02 introduces `MsgSend`/`MsgReply` (with headers, blocking behaviour and a
+pointer to Chapter 13) and `open`/`read`/`write` (POSIX, with the observation that they are
+*unchanged* on QNX and become messages underneath — which is the chapter's thesis restated at the
+API level). Every shell command in the labs is tabled with its standard and purpose.
+
+**The audit found nothing to fix afterwards**, which is the first evidence that the rule change from
+Session 013 works.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | Session 014 appended: history verified from primary sources; the microkernel's costs stated honestly; evidence rather than reliability as the real argument; section 4 as documentation-dating; the library-function rule applied during authoring. |
 | 1.12 | 2026-08-26 | Session 013 appended: the writing rules did not cover library functions; the fix at rule level; five more instances found by auditing; the substance of D-014. |
 | 1.11 | 2026-08-26 | Session 012 appended: Path C served even where the TOC skips it; section 4 as adaptable reference material; the first lab as a measurement; Path A without binaries; the limits of a syntax check. |
 | 1.10 | 2026-08-26 | Session 011 appended: Chapter 00 as the template's reference implementation; its two meta-chapter adaptations; labs grounded in the verified VM. |

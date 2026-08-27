@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6 (first lab build) pending**
+status: Active — V1–V5 ✅ complete; **V6 and V7 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -100,7 +100,8 @@ Worked / Failed. Notes: ...
 | **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
 | **V5** — the QEMU VM | ✅ 🎉 **Complete 2026-08-26.** Boots, networked, and runs a cross-compiled binary |
-| **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all 33 remaining chapters use |
+| **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all remaining chapters use |
+| **V7** — process isolation | ⬜ Chapter 02's labs. No compiler needed — can be done in any order with V6 |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -570,6 +571,62 @@ of Chapter 14.
 
 ---
 
+## 7c. Block V7 — Chapter 02's process-isolation labs
+
+> 🎯 **Goal:** demonstrate on a real system that a service can die and be restarted, and find the one
+> component that cannot.
+> ⏱️ 20 minutes. **No compiler needed.**
+> 📖 [Chapter 02 Labs 02.2 and 💥 Break It](../chapters/Chapter02_WhatIsQNX.md)
+
+### V7.1 — Kill and restart a service
+
+```bash
+qnx# pidin | grep vncserv
+qnx# slay vncserv
+qnx# pidin | grep vncserv
+qnx# pidin info
+qnx# vncserv &
+qnx# pidin | grep vncserv
+```
+
+📋 **Paste all six.**
+🎯 **The claim:** the process disappears, the system is unaffected, and a restart produces a **new
+PID**. This is Chapter 02's whole thesis, and the foundation Chapter 27 builds high availability on.
+
+⚠️ **Unverified specifics:** whether `slay vncserv` is the right syntax, and whether `vncserv &`
+restarts cleanly without arguments. If either differs, please paste what worked.
+
+### V7.2 — 💥 Try to kill the kernel
+
+```bash
+qnx# slay procnto-smp-instr
+```
+
+📋 **Report which happened**, with the exact message:
+
+1. **Refused** with an error — the predicted outcome
+2. **The VM halted** — equally instructive; reboot with `mkqnximage --run`
+3. **Nothing happened** — worth knowing
+
+🎯 **Why it earns a checkpoint:** the chapter claims `procnto` is different *in kind* from every other
+process. This is the only experiment that tests it, and the guide currently only predicts the result.
+
+### V7.3 — Optional: the honest version of the same demo
+
+```bash
+qnx# slay io-sock
+```
+
+⚠️ **Only from the serial console — this will kill any SSH session**, since `io-sock` *is* the network
+stack.
+
+📋 **Report:** did the system survive? Could you restart networking, or did it need a reboot?
+🎯 **Why:** killing the *TCP/IP stack* and having the machine shrug is the demonstration nobody
+forgets — and it is impossible on a monolithic kernel. Mastery-check question 4 asserts this outcome
+without having tested it.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -600,6 +657,10 @@ of Chapter 14.
 | V6.3 | 💥 Loaded, then at priority 63 | 👤 | V6.2 | **Ch 01 §2.3's central claim** | ⬜ |
 | V6.4 | Optional: interval scaling | 👤 | V6.2 | Ch 14 preview | ⬜ |
 | — | Clear Lab 01.2's markers | 🤖 | V6.3 | — | ⏸️ |
+| **V7.1** | Kill and restart `vncserv` | 👤 | — | Lab 02.2 | ⬜ |
+| V7.2 | 💥 Try to `slay procnto` | 👤 | — | Ch 02 Break It | ⬜ |
+| V7.3 | Optional: `slay io-sock` from the console | 👤 | — | Ch 02 mastery Q4 | ⬜ |
+| — | Clear Chapter 02's lab markers | 🤖 | V7.2 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -719,6 +780,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-08-26 | **Block V7 added** for Chapter 02 — kill/restart a service, and try to kill the kernel. Needs no compiler, so it is independent of V6. |
 | 1.8 | 2026-08-26 | **Block V6 added** for Chapter 01's `lab01_timing` — 4 checkpoints. V6.3 tests the chapter's central claim directly. |
 | 1.7 | 2026-08-26 | **Block V5 complete — all verification done.** Setup Guide 03 → v2.0; D-009 corrected (`PermitRootLogin no`); target account facts recorded. |
 | 1.6 | 2026-08-26 | **V5.3–V5.5 passed — M2 reached.** QNX target facts recorded. H-9 (the `virbr0` prediction) did not materialise. New blocker D-009: SSH refuses root. |

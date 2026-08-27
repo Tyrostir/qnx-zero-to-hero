@@ -31,6 +31,7 @@ update_trigger: "Continuously"
 
 
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
+| T-021 | 🟠 | **Run block V7** — Chapter 02's labs: kill and restart `vncserv`, then try to `slay procnto` | ⬜ | — | **No compiler needed**, so independent of V6. V7.2 tests a claim the chapter only predicts. |
 | T-020 | 🔴 | **Run block V6** — build `labs/lab01_timing/` with `qcc`, deploy, run, and do the loaded/priority comparison | ⬜ | — | Verifies the **lab mechanism** all 33 remaining chapters depend on. V6.3 tests Chapter 01's central claim; if it does not reproduce, the chapter is wrong. |
 | T-017 | 🔵 | *When convenient:* paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | 394 bytes; may contain QNX's own notes on the image. |
 | T-202 | 🟡 | **Report the exact SDP build number** — try `-listInstalledRoots` *(partially answered: the kernel reports build `2026/02/27-11:02:56EST`)* — `~/qnx/qnxsoftwarecenter/qnxsoftwarecenter_clt -listInstalled` | ⬜ | — | Every chapter's front matter must record the SDP build it was written against (`PLAN.md` §5, Risk R5). No chapter can state it today. |
@@ -51,7 +52,7 @@ update_trigger: "Continuously"
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
-| T-110 | 🔴 | Write `Chapter02_WhatIsQNX.md` | ⬜ | **Next.** History 1980→2026, the microkernel bet, product family, and how 8.0 relates to the 6.x material online. |
+| T-111 | 🔴 | Write `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | **Next.** Automotive, medical, rail, robotics; vs Linux/FreeRTOS/VxWorks/Zephyr; and when to say "use Linux". Closes Part 0. |
 
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -62,7 +63,7 @@ update_trigger: "Continuously"
 | ID | Pri | Task | Status | Notes |
 |----|-----|------|--------|-------|
 
-| T-111 | 🟠 | `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | Automotive, medical, rail, nuclear, robotics; vs Linux/FreeRTOS/VxWorks |
+
 
 | T-113 | 🟡 | `Setup_04_IDE_And_Tooling.md` | ⬜ | VS Code QNX Toolkit, Momentics, qconn, remote gdb |
 | T-114 | 🟡 | `Setup_05_Troubleshooting.md` | ⬜ | Starts small, grows with every failure we hit |
@@ -133,6 +134,7 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-110 | Write `Chapter02_WhatIsQNX.md` | 2026-08-26 | 014 |
 | T-149 | Audit published chapters for unexplained library calls (found 5 in Ch 01; all fixed) | 2026-08-26 | 013 |
 | T-103 | Write `Chapter01_WhatIsARealTimeSystem.md` + `labs/lab01_timing/` | 2026-08-26 | 012 |
 | T-019 | Learner read Chapter 00 | 2026-08-26 | 012 |
@@ -167,6 +169,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | **Chapter 02 published.** T-110 closed; T-111 (Chapter 03) promoted; T-021 added (run block V7). |
 | 1.12 | 2026-08-26 | D-014 answered; T-149 added and closed the same session (audit published chapters against the new library-function rule). |
 | 1.11 | 2026-08-26 | **Chapter 01 published** with the course's first compiled lab. T-103 and T-019 closed; T-110 (Chapter 02) promoted; T-020 (run block V6) and T-148 (clear the lab's markers) added. |
 | 1.10 | 2026-08-26 | **Chapter 00 published.** T-102 closed; T-103 (Chapter 01) promoted to 🔴; T-019 added (learner reads Chapter 00). |

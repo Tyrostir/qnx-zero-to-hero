@@ -26,7 +26,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **2 / 34** |
+| **Chapters published** | **3 / 34** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -38,7 +38,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 ### Progress bar
 
 ```text
-Part 0  Orientation        [██████████          ]  50 %   (2/4 chapters)
+Part 0  Orientation        [███████████████     ]  75 %   (3/4 chapters)
 Part 1  Environment        [                    ]   0 %   (0/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
@@ -46,7 +46,7 @@ Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [█                   ]   6 %   (2/34)
+OVERALL                    [██                  ]   9 %   (3/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [█                   ]   6 %   (2/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 01](../chapters/Chapter01_WhatIsARealTimeSystem.md)** (~60 min), then run **block V6** — build and run `labs/lab01_timing/`. V6.3 tests the chapter's central claim directly; if it does not reproduce, the chapter is wrong. |
-| 🤖 **Me — next turn** | **Chapter 02 — What Is QNX?** (T-110). History 1980→2026, the microkernel bet, the product family, and how 8.0 relates to the 6.x material that dominates search results. |
+| 👤 **You — do next** | 📕 **Read [Chapter 02](../chapters/Chapter02_WhatIsQNX.md)** (~75 min). Two verification blocks are open and independent: **V6** (build `labs/lab01_timing/`) and **V7** (Chapter 02's kill-and-restart labs — no compiler needed). |
+| 🤖 **Me — next turn** | **Chapter 03 — Why & Where QNX Is Used** (T-111) — the argument you have at work: automotive, medical, rail, robotics; QNX vs Linux, FreeRTOS, VxWorks, Zephyr; and when the honest answer is "use Linux". Closes Part 0. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -113,7 +113,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |---|---------|-----------|----------------|-------|
 | 00 | How To Use This Course | 📕 | — | v1.0. Sets the template for all 34 chapters. |
 | 01 | What Is a Real-Time System? | 📕 | — | v1.0. Ships `labs/lab01_timing/`. |
-| 02 | What Is QNX? | 📄 | — | |
+| 02 | What Is QNX? | 📕 | — | v1.0. History verified against QNX's own account. |
 | 03 | Why & Where QNX Is Used | 📄 | — | |
 
 ### Part 1 — Environment
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 014 — 2026-08-26 📕 **Chapter 02**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 02 — What Is QNX? |
+| **Done** | 📕 **Chapter 02 published** (935 lines)<br>• The **microkernel bet** stated as one architectural decision, with **its costs given honestly** — messages instead of calls, more context switches, an unfamiliar driver model, and a plain statement that QNX is *not a better Linux*<br>• §1.3 argues the real payoff is **evidence, not reliability**: isolation you can point at is what makes ASIL D tractable, which is why the design outlived its performance rationale where Mach did not<br>• §4 adapts into **The Product & Version Map**, including **four reliable signals for spotting stale QNX material** (`blackberry.qnx.com`, "Neutrino" in a product name, `io-pkt` vs `io-sock`, the version segment in a doc URL) and the rule that concepts age well while commands age badly<br>• §5 decodes the learner's own system: `procnto-smp-instr` component by component, the `uname` fields, and `/proc/boot` as the microkernel bet *expressed as a directory listing* — one kernel file in about eighty<br>• **History verified against primary sources** rather than memory: QNX's own "A little history" page (1980 founding, the AT&T letter, QNX 4 ~1991, Neutrino 1995) and BlackBerry's announcement of **SDP 8.0 GA on 21 March 2024**<br>• Labs: identify your system · **kill `vncserv` and restart it** · 💥 try to `slay procnto` · 🐣 a paper exercise dating five documentation snippets<br>• **The §17 library-function audit was applied at authoring time** — `MsgSend`/`MsgReply` and `open`/`read`/`write` explained on first use, every shell command tabled with its standard<br>• Glossary +10 terms, and **POSIX** promoted from a planning stub; verification block **V7** added |
+| **Learner decisions** | "Done with Chapter 01, go ahead with Chapter 02" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 03 — Why & Where QNX Is Used** (closes Part 0) |
 
 ### Session 013 — 2026-08-26 🔧 **A rule gap closed**
 
@@ -376,6 +387,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | Session 014: **Chapter 02 published** — 3/34. Block V7 added. |
 | 1.12 | 2026-08-26 | Session 013: D-014 answered; the writing rules extended to library functions. |
 | 1.11 | 2026-08-26 | Session 012: **Chapter 01 published** — 2/34 — plus the course's first compiled lab and block V6. |
 | 1.10 | 2026-08-26 | Session 011: **Chapter 00 published** — 1/34. Phase 2 begins. |
