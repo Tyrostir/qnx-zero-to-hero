@@ -93,6 +93,7 @@ update_trigger: "Continuously"
 | T-136 | 🟠 | `Hardware_02_Custom_Board.md` | ⬜ |
 | T-137 | 🟡 | All 7 cheat sheets | ⬜ |
 | T-148 | 🟠 | Clear Lab 01.2's `[UNVERIFIED]` markers from the V6 output | ⏸️ | Blocked on T-020. Real numbers replace the illustrative `expected_output.txt`. |
+
 | T-138 | 🟡 | Populate `Glossary.md` as terms are introduced | 🔄 |
 | T-139 | 🔵 | Part-review mini-projects (6 of them) | ⬜ |
 
@@ -132,6 +133,7 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-149 | Audit published chapters for unexplained library calls (found 5 in Ch 01; all fixed) | 2026-08-26 | 013 |
 | T-103 | Write `Chapter01_WhatIsARealTimeSystem.md` + `labs/lab01_timing/` | 2026-08-26 | 012 |
 | T-019 | Learner read Chapter 00 | 2026-08-26 | 012 |
 | T-102 | Write `Chapter00_HowToUseThisCourse.md` | 2026-08-26 | 011 |
@@ -165,6 +167,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | D-014 answered; T-149 added and closed the same session (audit published chapters against the new library-function rule). |
 | 1.11 | 2026-08-26 | **Chapter 01 published** with the course's first compiled lab. T-103 and T-019 closed; T-110 (Chapter 02) promoted; T-020 (run block V6) and T-148 (clear the lab's markers) added. |
 | 1.10 | 2026-08-26 | **Chapter 00 published.** T-102 closed; T-103 (Chapter 01) promoted to 🔴; T-019 added (learner reads Chapter 00). |
 | 1.9 | 2026-08-26 | **Block V5 complete.** T-015, T-018, T-147 closed. All three setup guides verified; zero `[UNVERIFIED]` markers remain. **T-102 (Chapter 00) is the next action.** |

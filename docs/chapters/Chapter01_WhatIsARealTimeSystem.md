@@ -6,7 +6,7 @@ paths: ["🐣 A", "🚶 B", "🏃 C (summary only)"]
 est_time: "60 minutes reading · 30 minutes labs"
 prereqs: "Chapter 00. No software required to read; the labs need a booting VM (Setup Guides 01–03)."
 status: Published
-version: 1.0
+version: 1.2
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -304,6 +304,11 @@ for (n = head; n != NULL; n = n->next)   /* how long is this list? */
 InterruptEnable();
 ```
 
+> 📖 **`InterruptDisable()` / `InterruptEnable()`** — QNX calls, declared in `<sys/neutrino.h>`.
+> Each takes no arguments and returns nothing. They switch hardware interrupt delivery off and on for
+> the whole processor. **These are QNX-specific**, unlike almost everything else you will meet before
+> Chapter 13; Chapter 19 covers when — and how rarely — you should use them.
+
 While interrupts are off, **nothing** can preempt — not even the highest-priority thread in the
 system. Interrupt latency becomes the length of that loop.
 
@@ -349,6 +354,12 @@ client's priority** while handling that client's request. Chapters 12 and 13.
 while (!converged) { refine(); }     /* how many iterations? */
 qsort(data, n, ...);                  /* what is the largest n? */
 ```
+
+> 📖 **`qsort()`** — the ISO C standard library's sort, from `<stdlib.h>`. It sorts an array in place
+> using a comparison function you supply. It is used here as a cautionary example because **the C
+> standard does not specify its worst case** — it need not even be quicksort. Full signature and
+> arguments: [Lab 01.2's README](../../labs/lab01_timing/README.md) and
+> [D-014](../meta/Doubts.md#d-014).
 
 If you cannot state an upper bound on the iterations, you cannot state a WCET.
 
@@ -571,6 +582,25 @@ pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);   /* ← the whole f
 pthread_mutex_init(&data_lock, &attr);
 ```
 
+**The three calls, since this is their first appearance in the course.** All are **POSIX threads**
+(`pthread`) functions from `<pthread.h>` — standard POSIX, **not QNX inventions**, and identical on
+Linux:
+
+| Call | Arguments | Returns | Does |
+|------|-----------|---------|------|
+| `pthread_mutexattr_init` | pointer to a `pthread_mutexattr_t` you own | `0`, or an error number | Initialises an **attributes object** — a bundle of settings, not a mutex |
+| `pthread_mutexattr_setprotocol` | that object; a protocol constant | `0`, or an error number | Sets the protocol. `PTHREAD_PRIO_INHERIT` = priority inheritance; `PTHREAD_PRIO_NONE` is the default |
+| `pthread_mutex_init` | the mutex to create; the attributes to create it *with* | `0`, or an error number | Creates the mutex, **applying those attributes** |
+
+> ⚠️ **These return an error number directly — they do not set `errno`.** Most POSIX functions return
+> `-1` and set `errno`; the `pthread_*` family is the well-known exception. `if (rc != 0)`, not
+> `if (rc == -1)`.
+
+> 💡 **Read the shape, not the API.** A mutex is created *with* attributes, so the protocol must be
+> chosen **before** the mutex exists — you cannot switch on priority inheritance later, under load,
+> when you discover you needed it. That is an architectural decision disguised as an initialisation
+> detail, and it is exactly the flag JPL had to change on Mars.
+
 Chapter 12 covers this properly. For now, note the shape of the thing: **a timing failure with no
 buggy line of code, fixed by a scheduling policy rather than by making anything faster.**
 
@@ -674,6 +704,16 @@ The `prio` column is a **number** plus a **letter** for the scheduling policy �
 **What it does.** Ask to sleep for exactly 1 ms, ten thousand times, and measure how long each sleep
 actually took. The difference between request and reality *is* jitter.
 
+> 🐣 **Not sure what `clock_gettime`, `nanosleep`, `perror` or `qsort` are?** The lab's
+> [README §*The library functions this lab uses*](../../labs/lab01_timing/README.md) explains all
+> four — what they do, their arguments, what they return, and which header each lives in.
+>
+> **Short version: none of them is QNX-specific.** Two are from the **ISO C standard library**
+> (`qsort`, `perror`) and two from **POSIX.1b**, the 1993 *real-time extensions* (`nanosleep`,
+> `clock_gettime`). The code lives in `libc.so.6` — one of the ~80 files you listed in `/proc/boot`
+> in Chapter 00. That your ordinary C knowledge works unchanged here **is** the meaning of "QNX is
+> POSIX-compliant"; QNX's own calls arrive in Chapter 13. See [D-014](../meta/Doubts.md#d-014).
+
 **Step 1 — build it on the host.**
 
 ```bash
@@ -720,8 +760,9 @@ jitter  :  1350 us  (max - min)
 
 **Why even a good result overshoots.** QNX's default clock tick is **1 ms**. A 1 ms sleep almost
 always wakes on the *next* tick, so 1000 µs requested becomes 1000–2000 µs actual. Timer resolution
-is itself a source of jitter, and it is adjustable — Chapter 14 covers `ClockPeriod()` and QNX's
-timer machinery.
+is itself a source of jitter, and it is adjustable: **`ClockPeriod()`** — a QNX call in
+`<sys/neutrino.h>` that reads or sets the system clock's tick interval — is Chapter 14's subject,
+along with the rest of QNX's timer machinery.
 
 </details>
 
@@ -1021,4 +1062,6 @@ QNX 8.0 relates to everything you will find written about QNX 6.x online.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | **Library-function audit** under the new `PLAN.md` §2/§17 rule. Explained on first use: `InterruptDisable`/`InterruptEnable` (§3.2, QNX-specific), `qsort` (§3.2, with a pointer to the full signature), the three `pthread_mutexattr_*`/`pthread_mutex_init` calls (§5.3 — including the trap that the `pthread_*` family returns an error number rather than setting `errno`), and `ClockPeriod` (§ lab notes). |
+| 1.1 | 2026-08-26 | Lab 01.2 now points at the lab README's explanation of `clock_gettime`, `nanosleep`, `perror` and `qsort` before the build step, and states up front that none is QNX-specific ([D-014](../meta/Doubts.md#d-014)). |
 | 1.0 | 2026-08-26 | Created. Defines real-time, determinism, hard/firm/soft, the four latency components, the five classic unbounds, and the vocabulary (`T`, `D`, `R`, `C`, WCET, jitter, utilisation). Worked example budgets a 1 kHz control loop and derives a priority-inversion failure. Lab 01.1 verified against QNX 8.0.0; Lab 01.2 and the break-it exercise are `[UNVERIFIED]` pending block V6. |

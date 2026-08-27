@@ -211,6 +211,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 *Newest first. One entry per working session.*
 
+### Session 013 — 2026-08-26 🔧 **A rule gap closed**
+
+| | |
+|---|---|
+| **Goal** | Answer the learner's question about Lab 01.2's library functions, and fix the rule that let it happen. |
+| **Done** | • **D-014** answers `clock_gettime`, `nanosleep`, `perror` and `qsort` in full: none is C++, **none is QNX-specific** — two are ISO C, two are POSIX.1b real-time extensions; declarations in `<time.h>`/`<stdio.h>`/`<stdlib.h>`, code in `libc.so.6`, which the learner had already seen in `/proc/boot`<br>• `labs/lab01_timing/README.md` → **v1.1**: a new *"The library functions this lab uses"* section with signatures, arguments, return values, headers, and how to look any function up (read the header first)<br>• Two traps documented that are not style: `(a>b)-(a<b)` instead of `a-b` in a comparator, because the obvious form **overflows** and mis-sorts silently; and sorting *after* the measurement, because `qsort`'s worst case is unspecified — Chapter 01 §3.2's *unbounded computation*, in the lab that teaches it<br>• Chapter 01 → v1.1: Lab 01.2 now points at that section before the build step<br>• **The rule itself was the bug.** `PLAN.md` §2 rule 1 said "define every *term*", which technically excused four unexplained function calls. Extended to library functions, with a matching checkbox in the §17 Definition of Done<br>• **Audited the published chapters under the new rule** and found five more unexplained calls **in Chapter 01 itself**: `InterruptDisable`/`InterruptEnable` (QNX-specific), `qsort` in §3.2, and the three `pthread_*` calls in §5.3 — now all explained, including the trap that the `pthread_*` family returns an error number rather than setting `errno`. Chapter 01 → v1.2<br>• Glossary +6 terms; hazard **H-12** recorded |
+| **Learner decisions** | — |
+| **Questions logged** | **D-014** |
+| **Blockers** | None |
+| **Next session** | **Chapter 02 — What Is QNX?** (block V6 still with the learner) |
+
 ### Session 012 — 2026-08-26 📕 **Chapter 01 + the first lab**
 
 | | |
@@ -365,6 +376,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | Session 013: D-014 answered; the writing rules extended to library functions. |
 | 1.11 | 2026-08-26 | Session 012: **Chapter 01 published** — 2/34 — plus the course's first compiled lab and block V6. |
 | 1.10 | 2026-08-26 | Session 011: **Chapter 00 published** — 1/34. Phase 2 begins. |
 | 1.9 | 2026-08-26 | Session 010: **Phase 1 complete.** Block V5 done, Setup Guide 03 → v2.0, D-009 corrected, doubts to D-013. Next: Chapter 00. |

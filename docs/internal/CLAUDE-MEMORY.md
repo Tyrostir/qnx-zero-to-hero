@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.9
+version: 1.10
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -177,7 +177,7 @@ filesystem costume.
 | QNX SDP | ✅ **8.0 installed** at `~/qnx800` · cross-compiler **GCC 12.2.0** · cross-compile proven |
 | QNX VM booting | ✅ 🎉 **YES** — QNX 8.0.0 boots, `192.168.122.46`. **Milestone M2 reached 2026-08-26.** |
 | VM booting | ❌ Not yet |
-| Doubts logged | 13 (D-001…D-013, all answered) |
+| Doubts logged | 14 (D-001…D-014, all answered) |
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
@@ -227,7 +227,10 @@ Permanent, not one-off. Sourced from [`PROMPTS.md`](../../PROMPTS.md).
 
 ### Writing rules (non-negotiable — from `PLAN.md` §2 and §10)
 
-1. Define every term on first use; add it to `Glossary.md`.
+1. Define every term on first use; add it to `Glossary.md`. **This includes library
+   functions** — purpose, arguments, return value, header — or a link to where they are explained.
+   Chapter 01's lab shipped with four unexplained functions (D-014); `PLAN.md` §2 and §17 now make
+   this checkable.
 2. **Why → How → API → Lab → Break it → Mastery check.**
 3. Every QNX concept gets a **🐧 "In Linux this would be…"** box.
 4. No black boxes — explain every flag and every magic number.
@@ -367,6 +370,7 @@ that is precisely why the onboarding documents exist.
 | ~~H-3~~ | Setup Guides 01 and 02 are both verified end to end. Three real bugs were found in Setup Guide 02 by running it. | ✅ Closed 2026-08-26 |
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
+| **H-12** | **Lab code is easy to under-explain.** Chapter 01's lab called `clock_gettime`, `nanosleep`, `perror` and `qsort` with no explanation of any — a course-rule-#4 violation that the writing rules missed because they spoke only of *terms*, not functions. Before publishing a lab, list every library call in it and confirm each is explained or linked. | ⚠️ Rule added to `PLAN.md` §2 and §17 |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
 | ~~H-9~~ | Predicted that `bridge,br=virbr0` would fail on WSL2 without systemd. **It did not** — the bridge worked first try, `192.168.122.46`. Installing `libvirt-daemon-system` in Setup Guide 01 was sufficient. §12.1 keeps the fallbacks but is downgraded to a contingency. | ✅ Closed 2026-08-26 |
 | **H-11** | **SSH to the QNX target must use `qnxuser`/`qnxuser`, never `root`.** The image ships **`PermitRootLogin no`** — root is refused by password *and* key. Applies to `scp` too. Confirmed against `/etc/passwd` and `sshd_config` 2026-08-26. | ✅ Documented (D-009) |
@@ -380,6 +384,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | Session 013: D-014 closed a rule-#4 gap; H-12 added; the writing rules now cover library functions. |
 | 1.9 | 2026-08-26 | Session 012: Chapter 01 + the first lab; block V6 opened. |
 | 1.8 | 2026-08-26 | Session 011: Chapter 00 published; it is now the reference implementation for the chapter template. |
 | 1.7 | 2026-08-26 | Session 010: **Phase 1 complete.** Loop closed; D-009 corrected; H-11 resolved; doubts to D-013. |

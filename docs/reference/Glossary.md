@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.2
+version: 1.4
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -61,6 +61,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`errno`** | A per-thread integer that failing library calls set to say *why* they failed. Meaningful **only immediately after** a call that reported failure — a successful call may leave anything in it. Always test the return value first, then read `errno`. `perror()` and `strerror()` turn it into text. | 01 |
 | **ETFS** | *Embedded Transaction Filesystem* — a QNX filesystem designed for raw NAND flash with power-fail robustness. | 20 🌱 |
 
 ## F
@@ -74,6 +75,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Header file** | A `.h` file holding *declarations* — signatures, types, constants — that the compiler reads. It contains no machine code; that lives in a library. On QNX, target headers are under `$QNX_TARGET/usr/include/`. Reading the header is the authoritative way to check a signature for *your* version. | 01 |
 | **Hard real-time** | A system in which missing a deadline is a failure, possibly causing harm. The value of a late result is *negative*. Contrast **firm** (value zero) and **soft** (value diminishing). Hardness is about **consequences**, not tightness. | 01 |
 | **HAM** | *High Availability Manager* — a QNX process that monitors other processes and automatically restarts them (or runs recovery actions) on failure. | 27 🌱 |
 | **Hard real-time** | A deadline miss is a *system failure*. Airbag deployment, flight control. Contrast **soft real-time**. | 01 🌱 |
@@ -83,6 +85,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **ISO C standard library** | The set of functions defined by the C language standard itself — `printf`, `malloc`, `qsort`, `perror` — available on every conforming C implementation. Distinct from **POSIX**, which adds operating-system services on top. | 01 |
 | **IFS** | *Image FileSystem* — the bootable image containing the kernel, essential drivers and startup files. Built by `mkifs`; mounted read-only at `/proc/boot` on a running system. | 21 🌱 |
 | **`io-pkt`** | The **legacy** QNX network stack (SDP 6.x/7.x). Largely replaced in QNX 8.0 by `io-sock`. Still widely referenced online — a common source of confusion. | 23 🌱 |
 | **`io-sock`** | The QNX 8.0 network stack manager. | 23 🌱 |
@@ -101,6 +104,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`libc`** | The C library: the shared object holding the machine code for the standard C and POSIX functions. On QNX it is `libc.so.6`, and it lives in `/proc/boot` because nothing — not even the shell — can run without it. | 01 |
 | **Latency** | Elapsed time from stimulus to response. Decomposes into interrupt latency, ISR duration, scheduling latency and execution time — **three of the four belong to the OS**. | 01 |
 | **Learning path** | One of three routes through the same chapters: 🐣 **A** (understand, no coding), 🚶 **B** (full course with all labs), 🏃 **C** (QNX deltas only, ~1 week). Markers inside each chapter, not separate documents. | 00 |
 
@@ -133,6 +137,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`pthread_*`** | The POSIX threads API — `<pthread.h>`. Standard POSIX, not QNX-specific, and identical on Linux. ⚠️ Unlike most POSIX calls, these **return an error number directly** rather than returning `-1` and setting `errno`. | 01, 10, 12 |
+| **POSIX.1b** | The 1993 *real-time extensions* to POSIX. Source of `clock_gettime`, `nanosleep`, POSIX timers, real-time signals, message queues and priority scheduling. Where the standardised real-time vocabulary comes from. | 01 |
 | **Priority inversion** | A high-priority thread blocked on a lock held by a low-priority thread that is itself preempted by a medium-priority thread — so the highest-priority thread waits on the lowest, for unbounded time. Caused the Mars Pathfinder resets in 1997. Fixed by **priority inheritance**. | 01, 12 |
 | **Period (`T`)** | The interval between successive releases of a periodic task. | 01 |
 | **`pidin`** | *Process information* — QNX's `ps`, and the single most-used diagnostic command in this course. Lists **threads**, with each one's priority, scheduling policy and **blocking state**. `ps` has no equivalent for that last column. | 00 |
@@ -211,6 +217,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | +`pthread_*` from the Chapter 01 library-function audit. |
+| 1.3 | 2026-08-26 | Chapter 01 lab: +5 terms (`errno`, header file, ISO C standard library, `libc`, POSIX.1b) from [D-014](../meta/Doubts.md#d-014). |
 | 1.2 | 2026-08-26 | Chapter 01: +13 terms (real-time system, determinism, deadline, hard real-time, latency, jitter, period, response time, WCET, utilisation, rate-monotonic, priority inversion). |
 | 1.1 | 2026-08-26 | Chapter 00: +10 terms (learning path, core lab, critical path, doubt, `[UNVERIFIED]`, `pidin`, QNX process ID, QSTI, `mkqnximage`, `qnxuser`). Sections L and U added and the index kept alphabetical. |
 | 1.0 | 2026-08-25 | Seeded with 55 terms during planning. All marked 🌱 pending their chapter. |

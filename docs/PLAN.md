@@ -1,7 +1,7 @@
 ---
 title: "QNX Zero to Hero — Master Course Plan"
 document_id: PLAN
-version: 1.2
+version: 1.3
 status: "✅ Approved by the learner, 2026-08-25"
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -86,7 +86,7 @@ Seven rules that govern every page written:
 
 | # | Rule | What it means in practice |
 |---|------|---------------------------|
-| 1 | **From scratch, always** | Never assume a term. First use of any term → defined inline **and** added to `Glossary.md`. |
+| 1 | **From scratch, always** | Never assume a term. First use of any term → defined inline **and** added to `Glossary.md`. **This includes library functions**: any function a chapter or lab calls must be explained on first use — what it does, its arguments, its return value, and which header it lives in — or linked to where that explanation is. |
 | 2 | **Why before how** | Every mechanism starts with the *problem it solves*, then the *design*, then the *API*. |
 | 3 | **Compare to what you know** | Every QNX concept gets a "🐧 In Linux this would be…" box. Analogy is the fastest teacher. |
 | 4 | **Nothing is a black box** | If we run a command, we explain every flag. If there is a magic number, we explain where it came from. |
@@ -703,6 +703,7 @@ The course is **done** when every box below is ticked.
 - [ ] ≥1 🐧 "In Linux this would be…" comparison box
 - [ ] Mastery check with 5 questions + collapsed answers
 - [ ] Cheat-sheet table
+- [ ] **Every library function the chapter or its labs call is explained on first use** (purpose, arguments, return value, header) or linked to where it is
 - [ ] New terms added to `Glossary.md`
 - [ ] New links added to `ReferenceLinks.md` with verification date
 - [ ] Exports to PDF without errors
@@ -723,6 +724,7 @@ The course is **done** when every box below is ticked.
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
+| 1.3 | 2026-08-26 | Rule 1 (§2) extended to library functions, and a matching checkbox added to the per-chapter Definition of Done (§17). Prompted by [D-014](meta/Doubts.md#d-014): Chapter 01's lab used four library functions without explaining any of them — a rule-#4 violation the rules did not catch because they spoke only of *terms*. |
 | 1.2 | 2026-08-26 | Disk budget corrected from ~25 GB to ~50 GB after measuring a real SDP install (§7.1). |
 | 1.1 | 2026-08-25 | **Approved by the learner.** Amendments: all three paths authored in full (§3, §17); capstone ships in three domain flavours (§4.0.1); VM strategy revised to QSTI → CTI → `mkifs` (§7); risks R9 (host newer than documented) and R10 (three-path authoring cost) added. | AI Author |
 | 1.0 | 2026-08-25 | Initial complete plan drafted; 6 parts / 34 chapters / 3 paths defined. | AI Author |

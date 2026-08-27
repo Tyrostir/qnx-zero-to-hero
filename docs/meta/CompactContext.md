@@ -158,7 +158,8 @@ Part 6  Ch 31–34  Real hardware, custom board bring-up, CAPSTONE, career
 
 ## WRITING RULES (non-negotiable)
 
-1. Define every term on first use; add it to `Glossary.md`.
+1. Define every term on first use; add it to `Glossary.md`. **Library functions count** —
+   purpose, arguments, return, header (`PLAN.md` §2, §17; D-014).
 2. **Why → How → API → Lab → Break it → Mastery check.**
 3. Every QNX concept gets a **🐧 "In Linux this would be…"** box.
 4. No black boxes — explain every flag, every magic number.
@@ -192,7 +193,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
   T-016 sparse-file measurement · T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
 - **Labs:** 1 published (`lab01_timing`, `[UNVERIFIED]` pending V6 — the first compiled lab, so V6 verifies the lab mechanism itself).
-- **Doubts logged:** 13 (D-001…D-013, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
+- **Doubts logged:** 14 (D-001…D-014, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
@@ -200,6 +201,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | Regenerated after Session 013: writing rules now cover library functions. |
 | 1.11 | 2026-08-26 | Regenerated after Session 012: Chapter 01 + the first lab; block V6 pending. |
 | 1.10 | 2026-08-26 | Regenerated after Session 011: Chapter 00 published; Phase 2 begins. |
 | 1.9 | 2026-08-26 | Regenerated after Session 010: **Phase 1 complete**; loop closed; SSH facts corrected; next action is Chapter 00. |

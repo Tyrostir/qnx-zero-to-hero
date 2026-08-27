@@ -64,6 +64,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#9](#prompt9) | 2026-08-26 | Claude (Opus 5) | V5.6–V5.7 done; V5 complete; three observations to explain | ✅ **Phase 1 complete** · `Hello from QNX!` ran on target · Setup 03 → v2.0 · **D-009 corrected** · +D-011/012/013 |
 | [PROMPT#10](#prompt10) | 2026-08-26 | Claude (Opus 5) | "Go ahead and write Chapter 00" | 📕 **Chapter 00 published** (1/34) — the template's reference implementation · 3 labs · Glossary +10 |
 | [PROMPT#11](#prompt11) | 2026-08-26 | Claude (Opus 5) | Chapter 00 read; write Chapter 01 | 📕 **Chapter 01 published** (2/34) + **the first compiled lab** `lab01_timing` · block V6 · Glossary +13 |
+| [PROMPT#12](#prompt12) | 2026-08-26 | Claude (Opus 5) | What are `clock_gettime`, `nanosleep`, `perror`, `qsort` — C++ or QNX? Which files? | ✅ **D-014** · lab README → v1.1 · **`PLAN.md` rule 1 extended to library functions** · audit found 5 more in Ch 01 |
 
 ---
 
@@ -1465,10 +1466,128 @@ Then V6.3 — the three-run comparison — which tests the chapter's argument di
 
 ---
 
+## PROMPT#12
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 013 |
+| **Context** | The learner read Chapter 01's lab source and found four unexplained library functions. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> In lab01_timing, you have mentioned below functions: i) clock_gettime ii) nanosleep iii) perror iv) qsort And I don't know what those functions are? Are they part of c++ or are they part of qnx itself? Can you add explanation of those functions (what they do? What are the arguments to they? what those functions return) And In which files those functions live?
+
+### Standing instructions
+
+| # | Instruction | Recorded as |
+|---|-------------|-------------|
+| SI-14 | Every **library function** a chapter or lab calls must be explained on first use — purpose, arguments, return value, header — or linked to where it is. | `PLAN.md` §2 rule 1 and §17 Definition of Done; hazard **H-12** |
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+Good catch, and a fair one — **this was a gap in the course, not in your knowledge.** Course rule #4 is *"nothing is a black box"*, and I shipped a lab that called four functions and explained none of them.
+
+## The direct answer
+
+**None of the four is C++, and none is QNX-specific.**
+
+| Function | Standard | Header |
+|---|---|---|
+| `qsort` | **ISO C** — the C language standard itself | `<stdlib.h>` |
+| `perror` | **ISO C** | `<stdio.h>` |
+| `nanosleep` | **POSIX.1b** — the 1993 *real-time extensions* | `<time.h>` |
+| `clock_gettime` | **POSIX.1b** | `<time.h>` |
+
+- **C++?** No — they're **C**. C++ inherits the whole C library, so you *can* call them from C++ (`<cstdlib>`, `<cstdio>`, `<ctime>`), but they aren't C++ features.
+- **QNX?** Not one of them. QNX's own calls — `MsgSend`, `ChannelCreate`, `InterruptAttach` — live in `<sys/neutrino.h>` and arrive in Chapter 13.
+
+**Which files they live in — two different answers, and both matter:**
+
+| | |
+|---|---|
+| **Declarations** (what the compiler reads) | `$QNX_TARGET/usr/include/time.h`, `stdio.h`, `stdlib.h` |
+| **Machine code** (what runs) | **`libc.so.6`** — which you've already seen: it's one of the ~80 files you listed in `/proc/boot` |
+
+```bash
+host$ grep -n "nanosleep" $QNX_TARGET/usr/include/time.h
+qnx#  ls /proc/boot/libc.so.6
+```
+
+> 💡 **Your question has a nice answer hiding in it.** "QNX is POSIX-compliant" has been an abstract claim in the Glossary since planning. Here it is concretely: four functions you can read in a header on your own disk, running from a library you've already seen in the boot image, behaving exactly as they would on Linux. That's what the claim *means*.
+
+Full signatures, every argument, every return value, and the clock-choice reasoning are now in **`labs/lab01_timing/README.md` § *The library functions this lab uses***, and in **D-014**.
+
+## Two traps in that lab worth knowing about
+
+Neither is style — both are ways to be silently wrong.
+
+**1. The comparator returns `(a > b) - (a < b)`, not `a - b`.** The obvious version **overflows**: with `a` very negative and `b` very positive, `a - b` wraps and returns the *wrong sign*. Your array comes back subtly mis-sorted, with no error reported anywhere.
+
+**2. The lab sorts *after* the measurement loop, never inside it.** `qsort` isn't necessarily quicksort, and **its worst case is unspecified by the C standard** — which makes it exactly the *unbounded computation* Chapter 01 §3.2 warns about, sitting unremarked inside the lab that teaches it.
+
+> Nothing is wrong with `qsort`. What matters is *where* you call it. Real-time discipline is less about forbidden functions than about keeping unbounded work off the deadline path.
+
+## 🔧 I fixed the rule, not just the instance
+
+`PLAN.md` §2 rule 1 read: *"Never assume a **term**. First use of any term → defined inline."* A function isn't a term — so four unexplained calls passed every check the course had.
+
+**Rule 1 now covers library functions**, and there's a matching checkbox in the §17 Definition of Done so it's verifiable rather than merely intended.
+
+## 😬 Then I audited, and found five more — in the same chapter
+
+A case-sensitive sweep of both published chapters turned up nine function references. Two are invented placeholders in illustrative snippets. **Five were real, unexplained calls in Chapter 01 itself:**
+
+| Call | Where | Now |
+|---|---|---|
+| `InterruptDisable()` / `InterruptEnable()` | §3.2 | Explained — and flagged as **QNX-specific**, unusual this early |
+| `qsort()` | §3.2 | Explained, with a pointer to the full signature |
+| `pthread_mutexattr_init`, `pthread_mutexattr_setprotocol`, `pthread_mutex_init` | §5.3 | Explained in a table |
+| `ClockPeriod()` | lab notes | Named as a QNX call in `<sys/neutrino.h>` |
+
+The `pthread_*` entry carries a trap worth having early: **that family returns an error number directly rather than returning `-1` and setting `errno`** — the well-known exception to the POSIX convention. `if (rc != 0)`, not `if (rc == -1)`.
+
+And a point about §5.3's fix that I'd previously left implicit: a mutex is created *with* attributes, so **priority inheritance must be chosen before the mutex exists.** You can't switch it on later, under load, when you discover you needed it. That's an architectural decision disguised as an initialisation detail — and it's exactly the flag JPL had to change on Mars.
+
+**The audit is now standing procedure before publishing any chapter.**
+
+---
+
+### What changed on disk
+
+| File | Change |
+|------|--------|
+| `labs/lab01_timing/README.md` | → **v1.1.** New *"The library functions this lab uses"* — all four with signatures, arguments, returns, headers, `CLOCK_MONOTONIC` vs `CLOCK_REALTIME`, and how to look anything up (read the header first) |
+| `docs/chapters/Chapter01_WhatIsARealTimeSystem.md` | → **v1.2.** Points at that section; five more calls explained |
+| `docs/PLAN.md` | → v1.3. **Rule 1 extended to library functions**; §17 checkbox added |
+| `docs/meta/Doubts.md` | **+D-014**, in full |
+| `docs/reference/Glossary.md` | +6 terms: `errno`, header file, ISO C standard library, `libc`, POSIX.1b, `pthread_*` |
+| `docs/meta/DecisionsLog.md` | Session 013: the rule gap, the fix at rule level, the audit results |
+| `docs/internal/CLAUDE-MEMORY.md` | Hazard **H-12** — lab code is easy to under-explain |
+
+---
+
+## 👉 Where we are
+
+**Block V6 is still with you** — building `lab01_timing` with `qcc` and running it. That's unchanged, and the README you'll be reading is now considerably more useful than it was an hour ago.
+
+**Keep asking questions like this one.** It found a real defect in the course's process, not just in one file — which is worth more than the four answers. If anything else in Chapter 01 assumes knowledge you don't have, say so; that's precisely the feedback Chapter 00 asked for.
+
+Say the word for **Chapter 02 — What Is QNX?** whenever you're ready.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.10 | 2026-08-26 | PROMPT#12 logged: a course rule gap found by the learner and fixed at rule level. |
 | 2.9 | 2026-08-26 | PROMPT#11 logged: Chapter 01 and the first compiled lab. |
 | 2.8 | 2026-08-26 | PROMPT#10 logged: Chapter 00 published. |
 | 2.7 | 2026-08-26 | PROMPT#9 logged: block V5 complete, Phase 1 complete. |

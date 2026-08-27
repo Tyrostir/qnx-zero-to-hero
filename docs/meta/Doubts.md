@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.3
+version: 1.4
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -73,8 +73,9 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-011](#d-011) | Setup/Install | Explain the target's `/etc/passwd` and `sshd_config` — what is there, and what is *not*? | ✅ |
 | [D-012](#d-012) | Setup/Install | SSH as `root` seemed to accept the `qnxuser` password. Why? | ✅ |
 | [D-013](#d-013) | Concept | Why is my process ID `14032920` instead of a small number? | ✅ |
+| [D-014](#d-014) | Toolchain | `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in? | ✅ |
 
-**Open questions: 0** · **Needs verification: 0** · **Answered: 13**
+**Open questions: 0** · **Needs verification: 0** · **Answered: 14**
 
 ---
 
@@ -1031,10 +1032,152 @@ first surprising number a reader meets is explained where they meet it.
 
 ---
 
+## D-014
+
+### `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Chapter 01, reading `labs/lab01_timing/solution/jitter.c` |
+| **Category** | Toolchain |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).** *"In lab01_timing, you have mentioned below functions: i) clock_gettime
+ii) nanosleep iii) perror iv) qsort And I don't know what those functions are? Are they part of c++
+or are they part of qnx itself? Can you add explanation of those functions (what they do? What are
+the arguments to they? what those functions return) And In which files those functions live?"*
+
+**Short answer.**
+**None of the four is C++, and none is QNX-specific.** Two (`qsort`, `perror`) are from the **ISO C
+standard library**; two (`nanosleep`, `clock_gettime`) are from **POSIX.1b**, the 1993 *real-time
+extensions*. They are declared in `<stdlib.h>`, `<stdio.h>` and `<time.h>`, and the code lives in
+**`libc.so.6`** — which you have already seen sitting in `/proc/boot`.
+
+**This was a gap in the course, not in your knowledge.** Rule #4 of this course is *"nothing is a
+black box"*, and the lab used four functions without explaining any of them. Fixed — see *Action
+taken*.
+
+**Full answer.**
+
+### Where each one comes from
+
+| Function | Standard | Header | Since |
+|----------|----------|--------|-------|
+| `qsort` | **ISO C** — the C language standard itself | `<stdlib.h>` | C89 |
+| `perror` | **ISO C** | `<stdio.h>` | C89 |
+| `nanosleep` | **POSIX.1b** *(real-time extensions)* | `<time.h>` | POSIX 1993 |
+| `clock_gettime` | **POSIX.1b** | `<time.h>` | POSIX 1993 |
+
+**On the three parts of your question:**
+
+- **C++?** No — they are **C**. C++ inherits the whole C library, so you *may* call them from C++
+  (spelled `<cstdlib>`, `<cstdio>`, `<ctime>`), but they are not C++ features.
+- **QNX?** **No, not one of them.** This is precisely what "QNX is POSIX-compliant" means in
+  practice: your existing C knowledge transfers unchanged. QNX's *own* calls — `MsgSend`,
+  `ChannelCreate`, `InterruptAttach` — live in `<sys/neutrino.h>` and arrive from Chapter 13. This is
+  the same distinction that caused the `getpid` warning in Setup Guide 02 §11.2: ordinary POSIX calls
+  live in the ordinary POSIX headers.
+- **Which two are the "real-time" ones?** `nanosleep` and `clock_gettime`. They exist because
+  POSIX.1b was written for exactly the kind of system this course is about.
+
+### Which files they live in
+
+| | |
+|---|---|
+| **Declarations** — what the compiler reads | `$QNX_TARGET/usr/include/time.h`, `stdio.h`, `stdlib.h` |
+| **Machine code** — what actually runs | **`libc.so.6`** on the target |
+
+Both are inspectable:
+
+```bash
+host$ grep -n "nanosleep" $QNX_TARGET/usr/include/time.h
+qnx#  ls /proc/boot/libc.so.6
+```
+
+> 💡 **`libc.so.6` is in `/proc/boot` for a reason.** The C library must be available before any disk
+> is mounted, because nothing — not even the shell — runs without it. It sits beside
+> `ldqnx-64.so.2`, the dynamic linker whose absence on Linux is why your cross-compiled binary would
+> not run there.
+
+### The four, in brief
+
+```c
+#include <time.h>
+int clock_gettime(clockid_t clock_id, struct timespec *tp);
+```
+Writes the current value of a clock into `*tp`. Returns `0`, or `-1` with `errno` set.
+**`struct timespec` has two fields** — `tv_sec` and `tv_nsec` — which is why the lab's `elapsed_us()`
+must combine both; subtracting `tv_nsec` alone breaks whenever an interval crosses a second boundary.
+Use **`CLOCK_MONOTONIC`**, never `CLOCK_REALTIME`, for durations: the latter can be stepped backwards
+by NTP mid-measurement.
+
+```c
+#include <time.h>
+int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
+```
+Suspends the calling thread for **at least** `*rqtp`. `rmtp` receives the unslept remainder if a
+signal interrupts; pass `NULL` if you do not care. Returns `0`, or `-1` with `EINTR` / `EINVAL`.
+**"At least" is the guarantee the lab tests** — which is why `min` in your output must be ≥ 1000 µs.
+
+```c
+#include <stdio.h>
+void perror(const char *s);
+```
+Prints `s`, `": "`, and a description of the current `errno` to stderr. Returns nothing.
+📖 **`errno`** is a per-thread integer set by failing library calls; it is meaningful only
+*immediately after* a call that reported failure, so always check the return value first.
+
+```c
+#include <stdlib.h>
+void qsort(void *base, size_t nmemb, size_t size,
+           int (*compar)(const void *, const void *));
+```
+Sorts `nmemb` elements of `size` bytes in place, calling **your** comparator. Returns nothing. The
+comparator returns negative / zero / positive.
+
+> 💡 **Two details in the lab worth understanding**, because both are traps rather than style:
+>
+> **`return (a > b) - (a < b);` instead of `return a - b;`** — the obvious version **overflows**. With
+> `a` very negative and `b` very positive, `a - b` wraps and returns the *wrong sign*, leaving the
+> array subtly mis-sorted with no error reported anywhere. The comparison form has no arithmetic to
+> overflow.
+>
+> **The lab sorts *after* the measurement loop, never inside it.** `qsort` is not necessarily
+> quicksort and its worst case is **unspecified by the standard** — making it exactly the *unbounded
+> computation* Chapter 01 §3.2 warns about. Nothing is wrong with `qsort`; what matters is **where**
+> you call it. Real-time discipline is less about forbidden functions than about keeping unbounded
+> work off the deadline path.
+
+### How to look any function up yourself
+
+| Where | How |
+|-------|-----|
+| **The header** — authoritative for *your* version | `grep -n "nanosleep" $QNX_TARGET/usr/include/time.h` |
+| QNX C Library Reference | [qnx.com/developers/docs/8.0](https://www.qnx.com/developers/docs/8.0/) → *C Library Reference* |
+| On your host | `man 3 nanosleep` — Linux man-pages, but both calls are POSIX so the semantics match |
+| The POSIX standard | [pubs.opengroup.org/onlinepubs/9699919799](https://pubs.opengroup.org/onlinepubs/9699919799/) — free, and the final word |
+
+> 💡 **Read the header first.** It gives the exact signature for the version you are compiling
+> against, which no web page can promise.
+
+**Related.** [`labs/lab01_timing/README.md`](../../labs/lab01_timing/README.md) ·
+[Chapter 01 §3.2](../chapters/Chapter01_WhatIsARealTimeSystem.md) · Chapter 13 (`<sys/neutrino.h>`)
+
+**Action taken.** `labs/lab01_timing/README.md` → v1.1: a new **"The library functions this lab
+uses"** section covering all four with signatures, arguments, return values, headers, and where the
+code lives. Chapter 01 Lab 01.2 now points at it before the build step. Glossary +5 terms
+(`libc`, `errno`, header file, ISO C standard library, POSIX.1b). **A course rule was added to the
+author's checklist:** every library function a lab calls must be explained on first use, or linked to
+where it is.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.4 | 2026-08-26 | +D-014 (the four library functions in Lab 01.2 — a course-rule-#4 gap, now closed). |
 | 1.3 | 2026-08-26 | **D-009 corrected** — the image ships `PermitRootLogin no`, not `prohibit-password`; keys do not help root. +D-011 (reading `/etc/passwd` and `sshd_config`), D-012 (the apparent root SSH success), D-013 (why QNX PIDs are large). |
 | 1.2 | 2026-08-26 | +D-009 (SSH refuses root by design), D-010 (benign boot-log warnings). |
 | 1.1 | 2026-08-26 | +D-006 (the `mkqnximage` nested-directory trap), D-007 (`-listAvailablePackages` does not exist), D-008 (the 47 GB sparse disk image). `/btw` convention documented. |

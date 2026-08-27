@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.11
+version: 1.12
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1229,10 +1229,77 @@ worth a numbered block rather than a footnote.
 
 ---
 
+## 2026-08-26 — Session 013 (A rule gap, found by the learner)
+
+### VERIFIED — The writing rules did not cover library functions
+
+The learner asked what `clock_gettime`, `nanosleep`, `perror` and `qsort` are, whether they are C++
+or QNX, and which files they live in. All four appear in Chapter 01's lab with no explanation
+whatever.
+
+**This violated course rule #4 — "nothing is a black box" — and the rules permitted it.**
+`PLAN.md` section 2, rule 1 read: *"Never assume a term. First use of any **term** -> defined inline
+and added to Glossary.md."* A function is not a term, so four unexplained function calls passed every
+check the course had.
+
+**Fix, at the rule level rather than the instance level:**
+
+- Rule 1 extended: *"This includes library functions"* - purpose, arguments, return value, and the
+  header each lives in, or a link to where that is explained.
+- A matching checkbox added to the per-chapter Definition of Done (section 17), so it is verifiable
+  rather than merely intended.
+
+> The instance was worth fixing; the rule was worth fixing more. A gap that a reader has to find is a
+> gap the process should have found.
+
+---
+
+### VERIFIED — Auditing under the new rule found five more, in the same chapter
+
+A case-sensitive sweep for function references across both published chapters returned nine tokens.
+Two (`refine()`, `process()`) are invented placeholders in illustrative snippets. **Five were real,
+unexplained calls in Chapter 01 itself:**
+
+| Call | Where | Now |
+|------|-------|-----|
+| `InterruptDisable()` / `InterruptEnable()` | section 3.2 | Explained, and flagged as **QNX-specific** - unusual for this point in the course |
+| `qsort()` | section 3.2 | Explained, with a pointer to the full signature in the lab README |
+| `pthread_mutexattr_init`, `pthread_mutexattr_setprotocol`, `pthread_mutex_init` | section 5.3 | Explained in a table, plus the trap that the `pthread_*` family **returns an error number rather than setting `errno`** |
+| `ClockPeriod()` | lab notes | Named as a QNX call in `<sys/neutrino.h>`, with its chapter |
+
+Chapter 01 -> v1.2. **The audit is now the standing procedure before publishing any chapter**, and is
+recorded as hazard **H-12**.
+
+---
+
+### The substance of D-014, recorded because it recurs
+
+**None of the four functions is C++, and none is QNX-specific.** `qsort` and `perror` are **ISO C**;
+`nanosleep` and `clock_gettime` are **POSIX.1b**, the 1993 real-time extensions. Declarations in
+`<stdlib.h>`, `<stdio.h>` and `<time.h>`; machine code in **`libc.so.6`**, which the learner had
+already seen listed in `/proc/boot`.
+
+**That is the concrete meaning of "QNX is POSIX-compliant"** - the same claim made abstractly in the
+Glossary since planning, now attached to four functions the learner can read in a header on their own
+disk. QNX's own calls live in `<sys/neutrino.h>` and arrive in Chapter 13.
+
+Two traps documented alongside, because neither is a matter of style:
+
+- **`return (a > b) - (a < b);` rather than `return a - b;`** in a comparator. The obvious form
+  **overflows** for distant values and returns the wrong sign, mis-sorting silently with no error
+  anywhere.
+- **The lab sorts *after* the measurement loop.** `qsort`'s worst case is unspecified by the C
+  standard, making it precisely the *unbounded computation* of Chapter 01 section 3.2 - appearing, unremarked,
+  inside the lab that teaches it. Now remarked. The general lesson: real-time discipline is less about
+  forbidden functions than about keeping unbounded work off the deadline path.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | Session 013 appended: the writing rules did not cover library functions; the fix at rule level; five more instances found by auditing; the substance of D-014. |
 | 1.11 | 2026-08-26 | Session 012 appended: Path C served even where the TOC skips it; section 4 as adaptable reference material; the first lab as a measurement; Path A without binaries; the limits of a syntax check. |
 | 1.10 | 2026-08-26 | Session 011 appended: Chapter 00 as the template's reference implementation; its two meta-chapter adaptations; labs grounded in the verified VM. |
 | 1.9 | 2026-08-26 | Session 010 appended: Phase 1 complete; D-009 corrected (`PermitRootLogin no`); target accounts and the default-credential observation; QNX PID semantics; an evidence note. |
