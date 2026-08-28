@@ -17,6 +17,9 @@ The course itself. Chapters are published in order and appear here as they are w
 | 00 | [How To Use This Course](Chapter00_HowToUseThisCourse.md) | 🐣🚶🏃 | 25 m |
 | 01 | [What Is a Real-Time System?](Chapter01_WhatIsARealTimeSystem.md) | 🐣🚶🏃 | 60 m |
 | 02 | [What Is QNX?](Chapter02_WhatIsQNX.md) | 🐣🚶🏃 | 75 m |
+| 03 | [Why & Where QNX Is Used](Chapter03_WhyAndWhereQNXIsUsed.md) | 🐣🚶🏃 | 60 m |
+
+**🎉 Part 0 complete.**
 
 
 > 📑 Full chapter list with status, path tags and time estimates:

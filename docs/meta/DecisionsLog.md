@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.13
+version: 1.14
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1387,10 +1387,106 @@ Session 013 works.
 
 ---
 
+## 2026-08-26 — Session 015 (Chapter 03; Part 0 complete)
+
+### VERIFIED — Market and certification figures, from BlackBerry's own announcements
+
+Chapter 03's numbers will be quoted by learners in meetings, so they were checked rather than
+recalled:
+
+| Claim | Source |
+|-------|--------|
+| **255 million vehicles**, +20 million year on year, +80 million since 2020 | BlackBerry announcement, **15 October 2024** |
+| IEC 61508 **SIL 3** · ISO 26262 **ASIL D** · IEC 62304 **Class C** · EN 50128 / EN 50657 **SIL 3** | BlackBerry / QNX |
+| QNX Hypervisor was the **first hypervisor certified to ASIL D** | BlackBerry press release |
+| Diversification into **robotics and medical**, leveraging existing certifications | BlackBerry |
+
+**Chapter 02 already cited the 255 million figure** in its Fast-Track Summary; this pass confirmed it
+rather than leaving a published number unsourced.
+
+---
+
+### DECIDED — Chapter 03's thesis is that certification, not latency, usually decides
+
+The obvious way to write "why QNX" is a latency argument. The chapter instead makes the deciding
+question **"will an independent assessor examine this system?"**, and says so in the mental model:
+*latency is an engineering problem with many solutions; certification is a procurement and liability
+problem with very few.*
+
+**Why this framing.** An engineer who can only quote interrupt latencies is not useful in the meeting
+where the decision is actually made. The four questions people are really asking — can we ship
+without being sued, will the assessor accept it, can we afford it, will a supplier's bad driver kill
+our product — are three parts commercial to one part technical.
+
+Section 3 reinforces it by giving **each industry a different reason**: automotive chose QNX for
+consolidation and ASIL D, medical for schedule and evidence, rail for SIL 3 with *loose* deadlines,
+robotics for mixed criticality. Rail is the sharpest illustration — deadlines measured in seconds, and
+nobody chose QNX there for speed.
+
+---
+
+### DECIDED — One of the three worked examples answers "Linux", stated as strongly as the others
+
+Section 5.2's telemetry gateway reaches **Linux** and the reasoning is given at full length, not as a
+concession.
+
+**Why this matters more than it looks.** A course that cannot say when its subject is the wrong
+answer produces readers who over-apply it — and the telemetry gateway is precisely the project that
+gets over-engineered onto an RTOS in real life. The chapter also warns against the specific fallacy
+that does it: *"industrial" is a market; "real-time" is a timing property.*
+
+The competitive table extends the same discipline: it credits `PREEMPT_RT`, names Linux's ecosystem
+and hiring advantages as decisive in the right context, and points at the **ELISA project** rather
+than claiming Linux "cannot" be certified. The precise claim made is narrower and defensible: **no
+mainline Linux is certified to ASIL D today.**
+
+---
+
+### DECIDED — The break-it exercise for a judgement chapter is "argue the wrong side"
+
+Chapters 00–02 used deliberate failures with a command and an error message. Chapter 03 teaches
+judgement, which cannot be broken that way, so its 💥 exercise asks the reader to build the strongest
+possible case for QNX on the project where the answer was clearly Linux — then find where it breaks.
+
+**The instructive part is that one of the four counter-arguments survives.** *"We already have QNX
+licences and QNX engineers"* is a legitimate engineering input, and the exercise says so — while
+insisting it be stated as what it is rather than dressed as a technical requirement.
+
+> Most bad OS decisions are not made by fools. They are made by reasonable people generalising a real
+> requirement from a project where it applied. Teaching the reader to construct the opposing case is
+> the only defence that scales.
+
+---
+
+### DECIDED — Part 0's review is the one-page memo, and it is for every path
+
+`PLAN.md` designates a "Should we use QNX?" memo as the Part 0 review. It is placed as Chapter 03's
+🐣 Path A activity — with a note that all paths should do it — and given a structure (deadline,
+certification, isolation, recommendation, cost of being wrong **in both directions**, what would
+change my mind).
+
+**Section 6 carries the weight.** A worked table contrasts weak and strong versions, the difference
+being that a strong one names **a test that could be run and a threshold that would flip the
+answer**. That converts an opinion into a hypothesis, and it is the most transferable skill in Part 0
+— it works on every technology choice, not just this one.
+
+---
+
+### 🎉 MILESTONE M1 — "I get it"
+
+Part 0 is complete: Chapters 00–03. The learner can now define real-time precisely, explain QNX's
+architecture and its costs, and decide — in either direction — whether a project should use it.
+
+**Part 1 begins with Chapter 04 (licensing)** — which the learner has, unusually, already *done*
+before reading about it, since the environment was built first.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.14 | 2026-08-26 | Session 015 appended: market figures verified; certification as the deciding question; one worked example answering Linux; "argue the wrong side" as the break-it for a judgement chapter; **milestone M1**. |
 | 1.13 | 2026-08-26 | Session 014 appended: history verified from primary sources; the microkernel's costs stated honestly; evidence rather than reliability as the real argument; section 4 as documentation-dating; the library-function rule applied during authoring. |
 | 1.12 | 2026-08-26 | Session 013 appended: the writing rules did not cover library functions; the fix at rule level; five more instances found by auditing; the substance of D-014. |
 | 1.11 | 2026-08-26 | Session 012 appended: Path C served even where the TOC skips it; section 4 as adaptable reference material; the first lab as a measurement; Path A without binaries; the limits of a syntax check. |

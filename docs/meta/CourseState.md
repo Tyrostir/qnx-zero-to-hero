@@ -26,7 +26,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **3 / 34** |
+| **Chapters published** | **4 / 34** — 🎉 **Part 0 complete** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -38,7 +38,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 ### Progress bar
 
 ```text
-Part 0  Orientation        [███████████████     ]  75 %   (3/4 chapters)
+Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
 Part 1  Environment        [                    ]   0 %   (0/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
@@ -46,7 +46,7 @@ Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [██                  ]   9 %   (3/34)
+OVERALL                    [██                  ]  12 %   (4/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [██                  ]   9 %   (3/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 02](../chapters/Chapter02_WhatIsQNX.md)** (~75 min). Two verification blocks are open and independent: **V6** (build `labs/lab01_timing/`) and **V7** (Chapter 02's kill-and-restart labs — no compiler needed). |
-| 🤖 **Me — next turn** | **Chapter 03 — Why & Where QNX Is Used** (T-111) — the argument you have at work: automotive, medical, rail, robotics; QNX vs Linux, FreeRTOS, VxWorks, Zephyr; and when the honest answer is "use Linux". Closes Part 0. |
+| 👤 **You — do next** | 📕 **Read [Chapter 03](../chapters/Chapter03_WhyAndWhereQNXIsUsed.md)** (~60 min) and do the **Part 0 review** — the one-page memo in its 🐣 activity, which is worth doing on every path. Three verification blocks are open: **V6** (build the lab), **V7** and **V8** (both no-compiler, ~25 min together). |
+| 🤖 **Me — next turn** | **Part 1 begins: Chapter 04 — QNX Licensing & QNX Everywhere** (T-115). What you actually agreed to when you deployed that licence, and what would have to change to ship a product. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -114,7 +114,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | 00 | How To Use This Course | 📕 | — | v1.0. Sets the template for all 34 chapters. |
 | 01 | What Is a Real-Time System? | 📕 | — | v1.0. Ships `labs/lab01_timing/`. |
 | 02 | What Is QNX? | 📕 | — | v1.0. History verified against QNX's own account. |
-| 03 | Why & Where QNX Is Used | 📄 | — | |
+| 03 | Why & Where QNX Is Used | 📕 | — | v1.0. Market figures verified. Closes Part 0. |
 
 ### Part 1 — Environment
 
@@ -197,7 +197,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | Milestone | Definition | Status | Date reached |
 |-----------|-----------|--------|--------------|
 | **M0** Plan approved | `PLAN.md` status = Approved | ⬜ In progress | — |
-| **M1** "I get it" | Ch 00–03 read | 🔄 In progress — Ch 00 published | — |
+| **M1** "I get it" | Ch 00–03 read | 🎉 **All four published** — reached when the learner finishes Ch 03 | 2026-08-26 |
 | **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | ✅ 🎉 **COMPLETE** | 2026-08-26 |
 | **M3** "I speak QNX" | Ch 09–15 + labs done | ⬜ | — |
 | **M4** "I can extend the OS" | Resource manager written and working | ⬜ | — |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 015 — 2026-08-26 🎉 **Part 0 complete**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 03 and close Part 0. |
+| **Done** | 📕 **Chapter 03 — Why & Where QNX Is Used** published (946 lines). **Part 0 is complete: 4/4 chapters, milestone M1.**<br>• Built on one claim: **certification, not latency, is usually the deciding factor.** Latency has many solutions; evidence has few<br>• A **three-question test** and an **eight-step decision framework** designed to be taken into a meeting, with the cost columns nobody fills in — certification evidence, tool qualification, and **schedule risk**, the one that kills projects<br>• Deployment by industry with the **distinct reason in each**: automotive for consolidation + ASIL D, medical for schedule and evidence, rail for SIL 3 with *loose* deadlines, robotics for mixed criticality<br>• Competitive comparison across QNX, Linux + `PREEMPT_RT`, FreeRTOS, Zephyr, VxWorks and INTEGRITY — including that **FreeRTOS is a scheduler, not an OS**, and that "QNX or Linux" is often a false choice since the scaled answer is a hypervisor running both<br>• §5 decides three projects and **one answer is Linux**, stated as strongly as the others<br>• 💥 The break-it exercise asks the reader to **argue the wrong side** — the only way to test judgement rather than recall<br>• 🐣 The Path A memo is also the **Part 0 review**, with a worked example of what a falsifiable "what would change my mind" looks like<br>• **Figures verified** against BlackBerry's 15 October 2024 announcement: 255 million vehicles (+20M YoY, +80M since 2020) and the certification list (IEC 61508 SIL 3, ISO 26262 ASIL D, IEC 62304 Class C, EN 50128/50657 SIL 3)<br>• Glossary +15 terms with **ASIL** promoted from a stub; **block V8** added |
+| **Learner decisions** | "Completed Chapter 02, proceed to Chapter 03" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Part 1 — Chapter 04: QNX Licensing & QNX Everywhere** |
 
 ### Session 014 — 2026-08-26 📕 **Chapter 02**
 
@@ -387,6 +398,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.14 | 2026-08-26 | Session 015: **Chapter 03 published — Part 0 complete (4/34), milestone M1.** Block V8 added. |
 | 1.13 | 2026-08-26 | Session 014: **Chapter 02 published** — 3/34. Block V7 added. |
 | 1.12 | 2026-08-26 | Session 013: D-014 answered; the writing rules extended to library functions. |
 | 1.11 | 2026-08-26 | Session 012: **Chapter 01 published** — 2/34 — plus the course's first compiled lab and block V6. |

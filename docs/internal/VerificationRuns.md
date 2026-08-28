@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6 and V7 pending**
+status: Active — V1–V5 ✅ complete; **V6, V7 and V8 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -101,7 +101,8 @@ Worked / Failed. Notes: ...
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
 | **V5** — the QEMU VM | ✅ 🎉 **Complete 2026-08-26.** Boots, networked, and runs a cross-compiled binary |
 | **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all remaining chapters use |
-| **V7** — process isolation | ⬜ Chapter 02's labs. No compiler needed — can be done in any order with V6 |
+| **V7** — process isolation | ⬜ Chapter 02's labs. No compiler needed — any order with V6 |
+| **V8** — certification machinery | ⬜ Chapter 03, 5 minutes. Folds into a V7 session |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -627,6 +628,36 @@ without having tested it.
 
 ---
 
+## 7d. Block V8 — Chapter 03's certification-machinery lab
+
+> 🎯 **Goal:** confirm that the security-policy machinery Chapter 03 §2.2 relies on is actually
+> present in the QSTI image.
+> ⏱️ 5 minutes. **No compiler.** Can be folded into a V7 session.
+> 📖 [Chapter 03 Lab 03.2](../chapters/Chapter03_WhyAndWhereQNXIsUsed.md)
+
+### V8.1 — The security policy files
+
+```bash
+qnx# ls /proc/boot | grep -i -E 'secpol|ability'
+qnx# ls /proc/boot | grep -E 'procnto|slm'
+```
+
+📋 **Paste both.**
+🎯 **The claim being tested:** Chapter 02 argued QNX's advantage is being able to *point at* an
+enforced boundary, and Chapter 03 §2.2 turns that into a certification argument. Lab 03.2 shows the
+mechanisms as files — `libsecpol.so.1` (security policy) and `ability` (fine-grained privileges
+replacing all-or-nothing root).
+
+⚠️ **If either is missing**, the lab needs rewriting: it would mean the QSTI image ships without the
+security-policy machinery, which is worth knowing and is a legitimate finding rather than a failure.
+
+> 💡 **Evidence note.** Both filenames appear in the Chapter 00 `/proc/boot` listing already captured
+> in block V5.4, so this is close to confirmed. It gets a checkpoint because the lab asks the learner
+> to run a **different command** (`grep -i -E`) against it, and because Chapter 03 attaches a
+> substantive claim to their presence.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -661,6 +692,8 @@ without having tested it.
 | V7.2 | 💥 Try to `slay procnto` | 👤 | — | Ch 02 Break It | ⬜ |
 | V7.3 | Optional: `slay io-sock` from the console | 👤 | — | Ch 02 mastery Q4 | ⬜ |
 | — | Clear Chapter 02's lab markers | 🤖 | V7.2 | — | ⏸️ |
+| **V8.1** | Security-policy files present in the image | 👤 | — | Lab 03.2 | ⬜ |
+| — | Clear Chapter 03's lab marker | 🤖 | V8.1 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -780,6 +813,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | **Block V8 added** for Chapter 03 — 5 minutes, folds into V7. |
 | 1.9 | 2026-08-26 | **Block V7 added** for Chapter 02 — kill/restart a service, and try to kill the kernel. Needs no compiler, so it is independent of V6. |
 | 1.8 | 2026-08-26 | **Block V6 added** for Chapter 01's `lab01_timing` — 4 checkpoints. V6.3 tests the chapter's central claim directly. |
 | 1.7 | 2026-08-26 | **Block V5 complete — all verification done.** Setup Guide 03 → v2.0; D-009 corrected (`PermitRootLogin no`); target account facts recorded. |

@@ -66,6 +66,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#11](#prompt11) | 2026-08-26 | Claude (Opus 5) | Chapter 00 read; write Chapter 01 | 📕 **Chapter 01 published** (2/34) + **the first compiled lab** `lab01_timing` · block V6 · Glossary +13 |
 | [PROMPT#12](#prompt12) | 2026-08-26 | Claude (Opus 5) | What are `clock_gettime`, `nanosleep`, `perror`, `qsort` — C++ or QNX? Which files? | ✅ **D-014** · lab README → v1.1 · **`PLAN.md` rule 1 extended to library functions** · audit found 5 more in Ch 01 |
 | [PROMPT#13](#prompt13) | 2026-08-26 | Claude (Opus 5) | Chapter 01 done; write Chapter 02 | 📕 **Chapter 02 published** (3/34) · history verified from primary sources · block V7 · Glossary +10 |
+| [PROMPT#14](#prompt14) | 2026-08-26 | Claude (Opus 5) | Chapter 02 done; write Chapter 03 | 🎉 **Chapter 03 published — Part 0 complete (4/34), milestone M1** · decision framework · block V8 · Glossary +15 |
 
 ---
 
@@ -1712,10 +1713,139 @@ The `open`/`read`/`write` note carries the thesis restated at API level: they're
 
 ---
 
+## PROMPT#14
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 015 |
+| **Context** | The learner finished Chapter 02 and asked for the next chapter, which closes Part 0. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> completed chapter 02. Please proceed to chapter 03
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 🎉 Chapter 03 published — Part 0 complete (4/34)
+
+946 lines. **Milestone M1 — "I get it"** is reached.
+
+## The thesis: certification, not latency, is what decides
+
+The obvious way to write "why QNX" is a latency argument. I didn't. The deciding question in this chapter is **"will an independent assessor examine this system?"** —
+
+> Latency is an engineering problem with many solutions. Certification is a procurement and liability problem with very few.
+
+When someone asks *"should we use QNX?"*, they're almost never asking about latency. They're asking: can we ship without being sued, will the assessor accept it, can we afford it, will a supplier's bad driver kill our product. **Three of those four are commercial.** An engineer who can only quote interrupt latencies isn't useful in the meeting where the decision actually gets made.
+
+**The verified numbers** (BlackBerry, 15 Oct 2024 — I checked rather than recalled, since Chapter 02 had already published the vehicle figure):
+
+- **255 million vehicles**, +20 M year on year, +80 M since 2020
+- IEC 61508 **SIL 3** · ISO 26262 **ASIL D** · IEC 62304 **Class C** · EN 50128/50657 **SIL 3**
+
+## §4 — the framework, built to survive a meeting
+
+An **eight-step decision tree** you work in order, stopping at the first question that decides. Plus the part nobody fills in:
+
+| Cost | QNX | Linux |
+|---|---|---|
+| Licence | 💰 Real | Free |
+| **Certification evidence** | **Included** | 💰💰💰 Yours to produce |
+| Tool qualification | Available | 💰 Yours to arrange |
+| **Schedule risk on certification** | Low | 💰💰 **High — the one that kills projects** |
+
+> A licence fee is a known number in a spreadsheet. *"We think we can certify Linux for ASIL D, and we'll find out eighteen months in"* is an unbounded risk — and Chapter 01 taught you to distrust exactly that.
+
+Also four sentences that should trigger a follow-up question — including *"QNX is certified"* → **"To what level, in which configuration, and have we read the safety manual?"**
+
+## Each industry chose it for a *different* reason
+
+| | Why |
+|---|---|
+| 🚗 Automotive | Consolidation forcing mixed criticality, + ASIL D, + 15-year support |
+| 🏥 Medical | **Schedule.** A royalty is trivial against an $8 000 device; months off a regulatory submission is not |
+| 🚆 Rail | SIL 3 — with deadlines measured in **seconds**. Nobody chose QNX here for speed |
+| 🤖 Robotics | Cobots: a hard-deadline stop function beside an uncertifiable ROS 2 stack |
+
+Rail is the sharpest illustration of Chapter 01 §2.2: **hard real-time with loose deadlines.**
+
+## One of the three worked examples answers "Linux"
+
+§5.2's telemetry gateway reaches **Linux**, and I gave the reasoning at full length rather than as a concession — because that's the project most often over-engineered onto an RTOS in real life. It also names the fallacy that does it:
+
+> *"But it's industrial, so it must be real-time."* No. **Industrial is a market; real-time is a timing property.**
+
+The competitive table keeps the same discipline: credits `PREEMPT_RT`, names Linux's ecosystem and hiring as genuinely decisive in the right context, and points at the **ELISA project** rather than claiming Linux "can't" be certified. The precise claim I make is narrower and defensible: **no mainline Linux is certified to ASIL D today.**
+
+One more distinction worth having: **FreeRTOS is a scheduler, not an OS** — a few thousand lines, no MMU, one address space. Comparing it to QNX is comparing a bicycle to a train.
+
+## 💥 The break-it, for a chapter about judgement
+
+You can't break judgement with a wrong command, so the exercise asks you to **build the strongest possible case for QNX on the project where the answer was clearly Linux** — then find where it breaks.
+
+**The instructive part: one of the four counter-arguments survives.** *"We already have QNX licences and QNX engineers"* is a legitimate engineering input, and I say so — while insisting it be stated as what it is rather than dressed up as a technical requirement.
+
+> Most bad OS decisions aren't made by fools. They're made by reasonable people generalising a real requirement from a project where it applied.
+
+## 🏁 The Part 0 review
+
+Chapter 03's Path A activity **is** the Part 0 review, and it's worth doing on every path: a one-page memo with six headings — deadline, certification, isolation, recommendation, **cost of being wrong in both directions**, and what would change your mind.
+
+Section 6 carries the weight. There's a worked table contrasting weak and strong versions:
+
+| ❌ | ✅ |
+|---|---|
+| "Further investigation needed" | "If QNX royalties exceed $40/unit at 50 000/year, the certified-Linux route becomes worth a two-week feasibility study" |
+
+The difference is naming **a test that could be run and a threshold that would flip the answer**. That converts an opinion into a hypothesis — and it's the most transferable thing in Part 0. It works on every technology choice, not just this one.
+
+---
+
+### What changed on disk
+
+`Chapter03_WhyAndWhereQNXIsUsed.md` (new, 946 lines) · Glossary **+15 terms** with **ASIL** promoted from a planning stub · **block V8** added · `ReferenceLinks` records the verification · `DecisionsLog` Session 015 · TOC, README, indexes, `CourseState` (**M1 dated**), `CompactContext`, `ToDos`, `CLAUDE-MEMORY`.
+
+---
+
+## 👉 Where things stand
+
+```text
+Part 0  Orientation   [████████████████████] 100 %  (4/4) 🎉
+OVERALL               [██                  ]  12 %  (4/34)
+```
+
+**Three verification blocks are open**, and two are cheap:
+
+| | | |
+|---|---|---|
+| **V6** | Build `labs/lab01_timing/` with `qcc`, run it loaded and at priority 63 | Needs the toolchain |
+| **V7** | Kill and restart `vncserv`; try to `slay procnto` | No compiler, ~20 min |
+| **V8** | Confirm `libsecpol.so.1` and `ability` are in the image | No compiler, **5 min** |
+
+V7 and V8 fold into one session and between them demonstrate what Chapters 02 and 03 spend 1 900 lines arguing.
+
+**Next: Part 1 begins — Chapter 04, QNX Licensing & QNX Everywhere.** Slightly unusual, in that you've already *done* the licensing; Chapter 04 explains what you actually agreed to — what "non-commercial" permits and forbids, why writing training material is explicitly allowed (which is what makes this repository legitimate), and what would have to change to ship a product.
+
+Say the word.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.12 | 2026-08-26 | PROMPT#14 logged: Chapter 03 published, Part 0 complete. |
 | 2.11 | 2026-08-26 | PROMPT#13 logged: Chapter 02 published. |
 | 2.10 | 2026-08-26 | PROMPT#12 logged: a course rule gap found by the learner and fixed at rule level. |
 | 2.9 | 2026-08-26 | PROMPT#11 logged: Chapter 01 and the first compiled lab. |

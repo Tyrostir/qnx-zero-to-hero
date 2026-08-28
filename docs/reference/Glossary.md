@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.5
+version: 1.6
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -23,7 +23,7 @@ update_trigger: "Every time a chapter introduces a new term"
 |------|-----------|-----|
 | **Adaptive Partitioning** | A QNX scheduler feature that guarantees each *partition* (group of threads) a minimum percentage of CPU time over a window, while still allowing free use of idle CPU. Prevents one misbehaving subsystem from starving another, without the rigidity of fixed time slicing. | 27 🌱 |
 | **`aarch64le`** | QNX's name for the 64-bit ARM little-endian target architecture. Used for Raspberry Pi and most automotive SoCs. | 08 🌱 |
-| **ASIL** | *Automotive Safety Integrity Level* (A–D) from ISO 26262. ASIL D is the most stringent. QNX OS is certified to ASIL D. | 29 🌱 |
+| **ASIL** | *Automotive Safety Integrity Level* (A–D) from ISO 26262. **ASIL D** is the most stringent; QNX OS and the QNX Hypervisor are certified to it. Level is assigned per hazard from severity, exposure and controllability — it is a property of the *hazard*, not of the software. | 03, 29 |
 | **Attribute structure** | In a resource manager, the per-*resource* state (`iofunc_attr_t`) — permissions, size, timestamps — shared by all clients that open that resource. Contrast **OCB**. | 18 🌱 |
 
 ## B
@@ -38,6 +38,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Certification (functional safety)** | An independent assessor's judgement that a system meets a standard, reached by examining **evidence**: hazard analysis, requirements traceability, test coverage, tool qualification and freedom-from-interference arguments. Applies to a **specific version in a specific configuration** — it is inherited, never automatic. | 03, 29 |
 | **Core lab (⭐)** | One of the six labs every coding path must complete: L06 (boot), L08 (deploy/debug loop), L13 (message passing), L17 (resource manager), L21 (custom IFS), L25 (diagnose a hung system). | 00 |
 | **Critical path** | The six chapters that carry the course: 05 → 06 → 08 → 13 → 17 → 21. If you only ever do six chapters, do those. | 00 |
 | **Channel** | A server-side endpoint that receives messages. Created with `ChannelCreate()`. Clients create a **connection** to it. | 13 🌱 |
@@ -61,6 +62,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **EN 50128 / EN 50657** | European rail software standards (trackside / on-board). QNX holds **SIL 3**. Rail deadlines are often *seconds* — hard real-time with loose deadlines. | 03, 29 |
+| **Evidence package** | The artefacts a certified OS vendor supplies — safety manual, hazard analysis, test reports, tool-qualification data — that let your assessor examine *your application* against a certified baseline instead of a bare kernel. **This is what you buy when you buy a certified OS.** | 03, 29 |
 | **`errno`** | A per-thread integer that failing library calls set to say *why* they failed. Meaningful **only immediately after** a call that reported failure — a successful call may leave anything in it. Always test the return value first, then read `errno`. `perror()` and `strerror()` turn it into text. | 01 |
 | **ETFS** | *Embedded Transaction Filesystem* — a QNX filesystem designed for raw NAND flash with power-fail robustness. | 20 🌱 |
 
@@ -68,6 +71,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **FreeRTOS** | A free (MIT) real-time **scheduler**, not a full OS: a few thousand lines, typically no MMU, one address space. Right for kilobyte-scale microcontrollers; a different category from QNX despite the shared "RTOS" label. **SafeRTOS** is the certified commercial sibling. | 03 |
+| **Freedom from interference** | The safety requirement that non-critical code cannot affect critical code — in timing, memory or shared resources. QNX argues it **structurally**, from MMU-enforced process boundaries, partitioning and security policies, rather than from code review. The core of §1.3's argument for the microkernel. | 03, 27, 29 |
 | **FIFO scheduling (`SCHED_FIFO`)** | Run-to-completion scheduling within a priority: a thread runs until it blocks, yields, or is preempted by a higher priority. No time slicing. | 11 🌱 |
 | **Freedom from interference** | A functional-safety requirement that a lower-criticality component cannot affect a higher-criticality one (in time, memory or data). QNX's process isolation + adaptive partitioning is how this is argued. | 29 🌱 |
 
@@ -85,6 +90,9 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **IEC 61508** | The base international functional-safety standard for electrical/electronic systems; levels **SIL 1–4**. QNX holds **SIL 3**. Most domain standards (ISO 26262, EN 50128, IEC 62304) derive from it. | 03, 29 |
+| **IEC 62304** | Medical device software lifecycle standard; classes A/B/C. **Class C** covers software whose failure can cause death or serious injury. QNX holds Class C. | 03, 29 |
+| **INTEGRITY** | Green Hills' high-assurance separation kernel. QNX's closest competitor at the very top of the assurance range; smaller ecosystem, higher cost. | 03 |
 | **ISO C standard library** | The set of functions defined by the C language standard itself — `printf`, `malloc`, `qsort`, `perror` — available on every conforming C implementation. Distinct from **POSIX**, which adds operating-system services on top. | 01 |
 | **IFS** | *Image FileSystem* — the bootable image containing the kernel, essential drivers and startup files. Built by `mkifs`; mounted read-only at `/proc/boot` on a running system. | 21 🌱 |
 | **`io-pkt`** | The **legacy** QNX network stack (SDP 6.x/7.x). Largely replaced in QNX 8.0 by `io-sock`. Still widely referenced online — a common source of confusion. | 23 🌱 |
@@ -112,6 +120,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Mixed criticality** | One processor running software of different safety integrity levels — e.g. an ASIL D warning light beside an uncertified infotainment stack. Requires demonstrable isolation: process boundaries, adaptive partitioning, or a hypervisor. The main modern driver of QNX adoption. | 03, 27, 30 |
 | **Microkernel** | An OS design in which the kernel provides only what cannot live anywhere else — on QNX: scheduling, memory management, timers and message passing — and everything else, including **every driver, filesystem and the network stack**, runs as an ordinary user-space process. QNX has held this design since 1980. Contrast **monolithic kernel**. | 02 |
 | **Monolithic kernel** | An OS design in which drivers, filesystems and the network stack all run **inside** kernel space with full privilege. Faster in the common case; a fault anywhere can halt the machine. Linux and Windows. | 02 |
 | **Momentics** | QNX's Eclipse-based IDE, shipped with the SDP since 2002. VS Code with the QNX Toolkit is now a first-class alternative. | 02 |
@@ -141,6 +150,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`PREEMPT_RT`** | The Linux real-time preemption patch set, mainlined in 2024. Makes Linux genuinely usable for soft and many firm real-time systems. Does **not** provide a certified OS with an evidence package — the gap that keeps QNX in safety-critical products. | 03 |
 | **`procnto`** | The QNX kernel — *process manager* + *Neutrino*. Provides scheduling, memory management, timers and message passing, **and nothing else**. Always pid 1. Ships in variants: `-smp` (multi-core), `-instr` (kernel tracing compiled in, needed for Ch 26). | 02, 09 |
 | **`pthread_*`** | The POSIX threads API — `<pthread.h>`. Standard POSIX, not QNX-specific, and identical on Linux. ⚠️ Unlike most POSIX calls, these **return an error number directly** rather than returning `-1` and setting `errno`. | 01, 10, 12 |
 | **POSIX.1b** | The 1993 *real-time extensions* to POSIX. Source of `clock_gettime`, `nanosleep`, POSIX timers, real-time signals, message queues and priority scheduling. Where the standardised real-time vocabulary comes from. | 01 |
@@ -187,6 +197,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **SIL** | *Safety Integrity Level* (1–4) from IEC 61508 — the general scale from which ASIL and rail levels derive. QNX holds **SIL 3**. | 03, 29 |
+| **Safety manual** | The document defining the **certified envelope** of an OS: which version, which configuration, which features are prohibited, and what assumptions the certificate rests on. Read it **before** the architecture is fixed — discovering late that your design relies on an excluded feature is the classic expensive mistake. | 03, 29 |
 | **`slay`** | QNX command that terminates processes **by name** rather than by PID — roughly Linux's `pkill`. `slay -f` forces. Because QNX drivers are ordinary processes, `slay` can stop a network stack or a disk driver, which has no equivalent on a monolithic kernel. | 02, 25 |
 | **SDP** | *Software Development Platform* — the complete QNX package installed on your host: OS images, cross-compilers, IDE, tools, BSPs. | 05 🌱 |
 | **`sigevent`** | A QNX structure describing "what should happen when this event occurs" — deliver a pulse, send a signal, unblock a thread, create a thread. The glue between timers/interrupts and your code. | 14 🌱 |
@@ -212,12 +224,25 @@ update_trigger: "Every time a chapter introduces a new term"
 | **Utilisation (`U`)** | The fraction of CPU a task set demands: `Σ(Cᵢ/Tᵢ)`. `U > 1.0` is infeasible on one core; `U ≤ 1.0` is necessary but not sufficient — see **rate-monotonic**. | 01, 11 |
 | **`[UNVERIFIED]`** | A marker on a step that was written from documentation but **has not been executed on a real machine**. Removed only when someone runs it and pastes back the real output. There are currently none in this course. | 00 |
 
+## V
+
+| Term | Definition | Ch. |
+|------|-----------|-----|
+| **VxWorks** | Wind River's commercial RTOS — QNX's closest direct competitor, with particularly strong aerospace/defence heritage (DO-178C). Similar niche, similar cost profile. | 03 |
+
 ## W
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
 | **WCET** | *Worst-Case Execution Time* — the upper bound on one computation across all inputs and machine states, excluding preemption. Measurement gives a *lower* bound; static analysis gives an upper bound that is often uselessly loose. Caches and multi-core make both harder. | 01, 26 |
 | **WCET** | *Worst-Case Execution Time* — the provable upper bound on how long a piece of code can take. The unit of currency in real-time analysis. | 01 🌱 |
+
+
+## Z
+
+| Term | Definition | Ch. |
+|------|-----------|-----|
+| **Zephyr** | The Linux Foundation's Apache-2.0 RTOS for microcontrollers. Strong momentum and a modern toolchain; its functional-safety story is younger than QNX's or VxWorks'. | 03 |
 
 ---
 
@@ -226,6 +251,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | Chapter 03: +15 terms (certification, evidence package, freedom from interference, safety manual, mixed criticality, IEC 61508/62304, EN 50128/50657, SIL, `PREEMPT_RT`, FreeRTOS, Zephyr, VxWorks, INTEGRITY) and **ASIL** promoted from a planning stub. |
 | 1.5 | 2026-08-26 | Chapter 02: +10 terms (microkernel, monolithic kernel, Momentics, Neutrino, `procnto`, QNX OS, QNX SDP, QNX Everywhere, `slay`) and **POSIX** expanded from its planning stub. |
 | 1.4 | 2026-08-26 | +`pthread_*` from the Chapter 01 library-function audit. |
 | 1.3 | 2026-08-26 | Chapter 01 lab: +5 terms (`errno`, header file, ISO C standard library, `libc`, POSIX.1b) from [D-014](../meta/Doubts.md#d-014). |

@@ -31,6 +31,7 @@ update_trigger: "Continuously"
 
 
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
+| T-022 | 🟡 | **Run block V8** — 5 minutes, confirms the security-policy files are in the image | ⬜ | — | Folds into a V7 session. |
 | T-021 | 🟠 | **Run block V7** — Chapter 02's labs: kill and restart `vncserv`, then try to `slay procnto` | ⬜ | — | **No compiler needed**, so independent of V6. V7.2 tests a claim the chapter only predicts. |
 | T-020 | 🔴 | **Run block V6** — build `labs/lab01_timing/` with `qcc`, deploy, run, and do the loaded/priority comparison | ⬜ | — | Verifies the **lab mechanism** all 33 remaining chapters depend on. V6.3 tests Chapter 01's central claim; if it does not reproduce, the chapter is wrong. |
 | T-017 | 🔵 | *When convenient:* paste `cat ~/qnx800/images/qemu/README.md` | ⬜ | — | 394 bytes; may contain QNX's own notes on the image. |
@@ -52,7 +53,7 @@ update_trigger: "Continuously"
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
-| T-111 | 🔴 | Write `Chapter03_WhyAndWhereQNXIsUsed.md` | ⬜ | **Next.** Automotive, medical, rail, robotics; vs Linux/FreeRTOS/VxWorks/Zephyr; and when to say "use Linux". Closes Part 0. |
+| T-115 | 🔴 | Write `Chapter04_Licensing.md` | ⬜ | **Next — Part 1 begins.** What "non-commercial" permits and forbids, why writing training material is explicitly allowed, and what changes to ship a product. |
 
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -134,6 +135,7 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-111 | Write `Chapter03_WhyAndWhereQNXIsUsed.md` — **Part 0 complete** | 2026-08-26 | 015 |
 | T-110 | Write `Chapter02_WhatIsQNX.md` | 2026-08-26 | 014 |
 | T-149 | Audit published chapters for unexplained library calls (found 5 in Ch 01; all fixed) | 2026-08-26 | 013 |
 | T-103 | Write `Chapter01_WhatIsARealTimeSystem.md` + `labs/lab01_timing/` | 2026-08-26 | 012 |
@@ -169,6 +171,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.14 | 2026-08-26 | **Chapter 03 published — Part 0 complete.** T-111 closed; T-115 (Chapter 04) promoted; T-022 added (block V8). |
 | 1.13 | 2026-08-26 | **Chapter 02 published.** T-110 closed; T-111 (Chapter 03) promoted; T-021 added (run block V7). |
 | 1.12 | 2026-08-26 | D-014 answered; T-149 added and closed the same session (audit published chapters against the new library-function rule). |
 | 1.11 | 2026-08-26 | **Chapter 01 published** with the course's first compiled lab. T-103 and T-019 closed; T-110 (Chapter 02) promoted; T-020 (run block V6) and T-148 (clear the lab's markers) added. |
