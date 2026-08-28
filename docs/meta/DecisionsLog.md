@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.16
+version: 1.17
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1649,10 +1649,85 @@ intentional.
 
 ---
 
+## 2026-08-26 — Session 018 (Chapter 06; the first core chapter)
+
+### DECIDED — Chapter 06 identifies `Startup complete` as the line that matters
+
+The boot log has around twenty-five lines. Chapter 06 singles one out and says so plainly: **before
+`Startup complete` you are debugging the BSP; after it you are debugging the system.**
+
+**Why it deserves that emphasis.** It is the only line in the log that partitions the problem space.
+On a dead custom board (Chapter 32) it is the first question anyone competent will ask, and a learner
+who carries that one boundary can triage a boot failure on any QNX target without knowing anything
+else.
+
+Everything else in section 5 is placed relative to it: firmware before, kernel and services after.
+
+---
+
+### DECIDED — The syspage is introduced here rather than in Chapter 22
+
+`startup-*` builds a structure describing the hardware it found, and hands it to `procnto`. **The
+kernel contains no board-specific code** — it learns the machine from the syspage.
+
+**Why introduce it in Chapter 06.** It answers a question the chapter unavoidably raises: how does one
+`procnto` binary run on QEMU, a Raspberry Pi and an automotive SoC? Deferring the answer to Chapter 22
+would leave a visible hole in the boot chain. The full treatment stays in the BSP chapter; what
+Chapter 06 provides is the shape and why it exists.
+
+---
+
+### DECIDED — Section 3.3 makes the persistence rule explicit and testable
+
+Only `/data` survives a reboot. `/proc/boot` is read-only; `/tmp` is RAM; `/`, `/usr` and `/etc` come
+from the image's system partition.
+
+**Why it earns a section.** It is the single most likely thing to waste a learner's afternoon, and it
+contradicts the habit every desktop Unix user brings: *configuration lives in `/etc`*. Setup Guide 03
+section 9.4 had already hedged on this for `sshd_config` without explaining the underlying rule.
+
+**And it is tested rather than asserted.** The 💥 exercise writes to four locations and reboots. The
+`/etc` result is flagged as the one to watch, because the course **predicts** it does not persist and
+has never confirmed it — block **V11.3**. If `/etc` turns out to persist, section 3.3 and the Path A
+answers both need rewriting, and the chapter says so.
+
+---
+
+### DECIDED — The labs open `output/build/` fifteen chapters early
+
+Lab 06.2 has the learner read `ifs.build`, `disk.layout` and `build.date` — files whose syntax
+Chapter 21 teaches.
+
+**The reasoning.** Opening them now establishes three things cheaply: the image is **not magic**, it
+is a text file and a build step; everything observed on the target is **declared** somewhere in those
+files; and when Chapter 21 asks the learner to write one, they will have read one first. The lab says
+explicitly that it will not fully make sense yet, and that this is fine.
+
+`disk.layout` does double duty — it is the concrete, written-down answer to section 3.3's persistence
+question.
+
+---
+
+### OPEN — V11.2 is the highest-value outstanding request in the course
+
+`output/build/ifs.build` is **the complete recipe for the system the learner is running**: every file
+in `/proc/boot`, every service `slm` starts, every partition on the disk.
+
+**Why it outranks the other open blocks.** Chapter 21 is a `⭐ core` chapter and currently has no
+concrete material — it would have to be written from QNX's documentation. With `ifs.build` and
+`disk.layout` in hand it can instead be an annotated walkthrough of a system the learner has already
+booted, explored and debugged. That is a categorical difference in quality, and it costs the learner
+two `cat` commands.
+
+Recorded here so that no future author writes Chapter 21 before asking for it.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.17 | 2026-08-26 | Session 018 appended: `Startup complete` as the partitioning line; the syspage introduced early; persistence made testable; build files opened fifteen chapters early; V11.2 flagged as the highest-value outstanding request. |
 | 1.16 | 2026-08-26 | Session 017 appended: the organising question rather than a directory tour; the silent `gcc` failure; an explicit split between what Chapter 05 verifies and what it predicts; explaining-after-doing as a deliberate pattern. |
 | 1.15 | 2026-08-26 | Session 016 appended: a published licensing error corrected (customer demos are permitted); the production/distribution boundary; the two-licence structure; the course as its own worked example; filename alignment and a link check. |
 | 1.14 | 2026-08-26 | Session 015 appended: market figures verified; certification as the deciding question; one worked example answering Linux; "argue the wrong side" as the break-it for a judgement chapter; **milestone M1**. |

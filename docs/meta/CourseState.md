@@ -26,9 +26,9 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **6 / 34** — Part 0 complete; Part 1 in progress |
+| **Chapters published** | **7 / 34** — Part 0 complete; Part 1 in progress |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
-| **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
+| **Labs published** | **1 / 21** compiled (Lab 01.2, pending V6) · plus non-compiled labs in Ch 00, 02, 03, 04, 05, 06 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
@@ -39,14 +39,14 @@ update_trigger: "End of every working session, and after every chapter is publis
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
-Part 1  Environment        [████████            ]  40 %   (2/5 chapters)
+Part 1  Environment        [████████████        ]  60 %   (3/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [███                 ]  18 %   (6/34)
+OVERALL                    [████                ]  21 %   (7/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [███                 ]  18 %   (6/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 05](../chapters/Chapter05_InstallingQNXSDP.md)** (~90 min). Five blocks open — **V9 and V10 are host-only** (~40 min together) and V10.2 tests Chapter 05's central claim, which has never been confirmed. |
-| 🤖 **Me — next turn** | ⭐ **Chapter 06 — Your First QNX VM on QEMU** (T-115c) — the first `⭐ core` chapter. QSTI, what `mkqnximage --run` starts, and how `ifs.bin` plus a virtual disk become a running system. |
+| 👤 **You — do next** | 📕 **Read [Chapter 06](../chapters/Chapter06_FirstQNXVMOnQEMU.md)** ⭐ (~90 min) and do **core lab L06**. Six blocks open; **V11.2 is the highest-value one in the course** — it hands over `ifs.build`, the recipe for the system you are running. |
+| 🤖 **Me — next turn** | **Chapter 07 — First Contact: The QNX Shell** (T-115d). `ksh`, the filesystem layout, `pidin` in earnest, and the pathname space. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -122,7 +122,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |---|---------|-----------|----------------|-------|
 | 04 | QNX Licensing & QNX Everywhere | 📕 | — | v1.0. Terms verified; corrected a published error. |
 | 05 | Installing QNX SDP 8.0 | 📕 | — | v1.0. The host/target split as the organising idea. |
-| 06 | Your First QNX VM on QEMU ⭐ | 📄 | — | |
+| 06 | Your First QNX VM on QEMU ⭐ | 📕 | — | v1.0. Contains **core lab L06**. |
 | 07 | First Contact — The QNX Shell | 📄 | — | |
 | 08 | The Toolchain & Deployment ⭐ | 📄 | — | |
 
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 018 — 2026-08-26 ⭐ **Chapter 06 — the first core chapter**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 06, containing core lab **L06**. |
+| **Done** | 📕 **Chapter 06 — Your First QNX VM on QEMU** published (1087 lines)<br>• The **full boot chain** — SeaBIOS → iPXE → `startup-*` → `procnto` → `slm` → `login` — with **`Startup complete`** identified as the BSP/system boundary and *"the single most useful line in a QNX boot log"*<br>• The **syspage** explained as what makes `procnto` board-independent, and therefore what a BSP fundamentally provides<br>• **`ifs.bin` versus the disk**: 20 MB mounted in RAM, permanently, read-only, appearing as `/proc/boot` — and the observation that a QNX system can boot with **no disk at all**, which is how many embedded devices ship<br>• `slm`'s 22 components read as a **dependency argument** rather than a list: logger first, bus before disk, disk before mount, network before `ssh`<br>• §3.3 on **what persists** — only `/data` — and why permanent configuration belongs in the *image*<br>• §3.4 shows `option_files/` and `snippets/` as **CTI already on disk**, the middle stage of ADR-004's QSTI → CTI → `mkifs`<br>• §5 places **every line of the verified boot log**, including why the four benign warnings appear exactly where they do<br>• Labs open `output/build/` — Chapter 21's source material, fifteen chapters early — and the 💥 exercise tests what survives a reboot rather than asserting it<br>• Glossary +5 terms with **build file** promoted from a stub; **block V11** added, whose V11.2 is the highest-value outstanding request in the course |
+| **Learner decisions** | "Proceed to chapter 06" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 07 — First Contact: The QNX Shell** |
 
 ### Session 017 — 2026-08-26 📕 **Chapter 05**
 
@@ -420,6 +431,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.17 | 2026-08-26 | Session 018: ⭐ **Chapter 06 published** (7/34) with core lab L06. Block V11 added. |
 | 1.16 | 2026-08-26 | Session 017: **Chapter 05 published** (6/34). Block V10 added. |
 | 1.15 | 2026-08-26 | Session 016: **Chapter 04 published** (5/34, Part 1 begun) and a published licensing error corrected. Block V9 added. |
 | 1.14 | 2026-08-26 | Session 015: **Chapter 03 published — Part 0 complete (4/34), milestone M1.** Block V8 added. |

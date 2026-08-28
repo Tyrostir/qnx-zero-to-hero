@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.8
+version: 1.9
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -33,7 +33,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | **Baseline (QSC)** | QNX Software Center's term for a complete SDP release, installed with `-installBaseline`. Contrast a **package**, one component installed with `-installPackage`. | 05 |
 | **Blocking state** | The precise reason a thread is not running: `SEND`, `REPLY`, `RECEIVE`, `MUTEX`, `CONDVAR`, `SIGWAIT`, `NANOSLEEP`, `INTR`, etc. Shown by `pidin`. Reading blocking states is *the* core QNX debugging skill. | 13 🌱 |
 | **BSP** | *Board Support Package* — the hardware-specific software (IPL, `startup-*`, drivers, build files) that lets QNX boot on a particular board. | 22 🌱 |
-| **Build file** | The text file (`*.build`) that tells `mkifs` what goes into a boot image: which kernel, which drivers, which files, and what to run at startup. | 21 🌱 |
+| **Build file** | The text file (`*.build`) telling `mkifs` what goes into a boot image: which kernel, which drivers, which files, and what runs at startup. Your QSTI image ships the ones that built it, in `output/build/ifs.build` — readable now, taught in Ch 21. | 06, 21 |
 
 ## C
 
@@ -51,6 +51,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Data partition (`/data`)** | The writable partition on a QNX target image. **The only place changes survive a reboot** — `/proc/boot` is read-only, `/tmp` is RAM, and `/`, `/usr` and `/etc` come from the image's system partition. Permanent configuration therefore belongs in the *image* (Ch 21), not in the running filesystem. | 06, 21 |
 | **Development licence** | A QNX licence permitting you to *build* software. **It does not permit shipping** — *"distribution and production use is not permitted under a development license and requires a separate distribution license"*. Both the non-commercial and commercial development licences work this way. | 04 |
 | **Distribution licence** | The **separate** QNX licence required to give software containing QNX to anyone else. Needed in addition to a commercial development licence. Frequently discovered late, at launch planning. | 04 |
 | **Deadline** | The latest acceptable completion time for a response, measured from its release. Often equal to the period for a periodic task. Missing one is a *failure* (hard), makes the result *worthless* (firm), or *degrades quality* (soft). | 01 |
@@ -94,6 +95,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **IFS — Image File System** | QNX's bootable image: a single file (`ifs.bin`, 20 MB on the QSTI image) containing `procnto`, `startup-*`, drivers, `libc` and basic utilities. **Mounted in RAM, in place, permanently, read-only**, and visible as **`/proc/boot`**. A QNX system can boot and run entirely from it with no disk attached. | 06, 21 |
 | **IEC 61508** | The base international functional-safety standard for electrical/electronic systems; levels **SIL 1–4**. QNX holds **SIL 3**. Most domain standards (ISO 26262, EN 50128, IEC 62304) derive from it. | 03, 29 |
 | **IEC 62304** | Medical device software lifecycle standard; classes A/B/C. **Class C** covers software whose failure can cause death or serious injury. QNX holds Class C. | 03, 29 |
 | **INTEGRITY** | Green Hills' high-assurance separation kernel. QNX's closest competitor at the very top of the assurance range; smaller ecosystem, higher cost. | 03 |
@@ -206,6 +208,9 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`slm` — System Launch and Monitor** | QNX's service manager: starts components in dependency order, waits for readiness, and can restart one that dies. Its entire configuration is one readable file, `/proc/boot/slm.cfg`. Roughly Linux's `systemd`, but far smaller and with restart as its core purpose. 22 components on the QSTI image. | 06, 27 |
+| **Syspage** | The structure `startup-*` builds and hands to `procnto`, describing the hardware it found: memory map, CPU count and features, timer frequency, interrupt controller. **`procnto` contains no board-specific code** — it learns the machine from the syspage, which is why one kernel binary runs on QEMU, a Raspberry Pi and an automotive SoC. What a BSP fundamentally provides. | 06, 21, 22 |
+| **`startup-*`** | The QNX boot stage that runs before the kernel: initialises CPU, memory and interrupt controller, builds the **syspage**, and prints **`Startup complete`** — the boundary between debugging the *board* and debugging the *system*. Board-specific; part of a BSP. | 06, 22, 32 |
 | **Separated debug symbols (`.sym`)** | Debugging information — symbol names, line numbers, types — stripped from an executable and stored in a `.sym` file beside it. Keeps target binaries small while letting `gdb` on the host produce symbolic backtraces. Must match the binary exactly; a stale `.sym` yields confidently wrong function names. | 05, 25 |
 | **Sysroot** | The cross-compilation term for a directory tree standing in for the target's filesystem root, supplying headers and libraries at build time. `$QNX_TARGET` is QNX's equivalent — found via an environment variable rather than a `--sysroot=` flag. | 05 |
 | **SIL** | *Safety Integrity Level* (1–4) from IEC 61508 — the general scale from which ASIL and rail levels derive. QNX holds **SIL 3**. | 03, 29 |
@@ -262,6 +267,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-08-26 | Chapter 06: +5 terms (IFS, `slm`, syspage, `startup-*`, data partition) and **build file** promoted from a planning stub. |
 | 1.8 | 2026-08-26 | Chapter 05: +8 terms (`$QNX_HOST`, `$QNX_TARGET`, `qcc`, `qnxsdp-env.sh`, separated debug symbols, sysroot, cross-compilation, QSC baseline). |
 | 1.7 | 2026-08-26 | Chapter 04: +3 terms (development licence, distribution licence, production use) and **QNX Everywhere** corrected — customer demonstrations are permitted, and the boundary is production and distribution rather than money. |
 | 1.6 | 2026-08-26 | Chapter 03: +15 terms (certification, evidence package, freedom from interference, safety manual, mixed criticality, IEC 61508/62304, EN 50128/50657, SIL, `PREEMPT_RT`, FreeRTOS, Zephyr, VxWorks, INTEGRITY) and **ASIL** promoted from a planning stub. |

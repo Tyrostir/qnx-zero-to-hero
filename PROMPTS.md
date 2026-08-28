@@ -69,6 +69,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#14](#prompt14) | 2026-08-26 | Claude (Opus 5) | Chapter 02 done; write Chapter 03 | 🎉 **Chapter 03 published — Part 0 complete (4/34), milestone M1** · decision framework · block V8 · Glossary +15 |
 | [PROMPT#15](#prompt15) | 2026-08-26 | Claude (Opus 5) | Write Chapter 04 | 📕 **Chapter 04 published** (5/34, Part 1 begins) · ⚠️ **corrected a published licensing error** · Setup 02 → v2.2 · block V9 |
 | [PROMPT#16](#prompt16) | 2026-08-26 | Claude (Opus 5) | Write Chapter 05 | 📕 **Chapter 05 published** (6/34) · the host/target split · block V10 · Glossary +8 |
+| [PROMPT#17](#prompt17) | 2026-08-26 | Claude (Opus 5) | Write Chapter 06 | ⭐ **Chapter 06 published** (7/34) — first core chapter, lab L06 · block V11 · Glossary +5 |
 
 ---
 
@@ -2079,10 +2080,122 @@ Link check across all six published chapters: **zero broken links.**
 
 ---
 
+## PROMPT#17
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 018 |
+| **Context** | Chapter 05 published; the learner asked for the next chapter — the first `⭐ core` one. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> Please proceed to chapter 06
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# ⭐ Chapter 06 — Your First QNX VM on QEMU (7/34)
+
+1087 lines, and the **first `⭐ core` chapter** — it contains lab **L06**, which every coding path does, including Path C.
+
+## The line I built the chapter around
+
+Your boot log has about twenty-five lines. One of them partitions the entire problem space:
+
+```text
+Startup complete
+```
+
+**Before it, you are debugging the BSP** — board initialisation, memory map, clocks. **After it, the system** — drivers, services, configuration. On a dead custom board (Chapter 32) it's the first question anyone competent asks, and a learner who carries that one boundary can triage a boot failure on any QNX target.
+
+Everything in §5 is placed relative to it.
+
+## The full chain
+
+```text
+SeaBIOS → iPXE → startup-* → procnto → slm (22 components) → login
+```
+
+**The syspage** gets introduced here rather than waiting for Chapter 22, because the chapter unavoidably raises the question: how does one `procnto` binary run on QEMU, a Raspberry Pi *and* an automotive SoC? Answer — `startup-*` builds a structure describing the hardware it found and hands it over. **The kernel contains no board-specific code.** That's also what a BSP fundamentally *is*.
+
+## `ifs.bin` vs the disk
+
+| | `ifs.bin` | `disk-qemu` |
+|---|---|---|
+| 20 MB, mounted in **RAM**, read-only, permanently | 47 GB apparent |
+| Appears as **`/proc/boot`** | `/`, `/usr`, `/system`, `/data` |
+
+> **A QNX system can boot and run with no disk at all.** Your VM has one, so it looks like a conventional computer. A real embedded QNX device may have `ifs.bin` in flash, RAM, and nothing else.
+
+And `slm`'s 22 components are read as a **dependency argument** rather than a list: logger first (so everything after can log its startup), bus before disk, disk before mount, network before `ssh` and `qconn`.
+
+## §3.3 — the section that saves an afternoon
+
+**Only `/data` survives a reboot.** `/proc/boot` is read-only, `/tmp` is RAM, and `/etc` comes from the image's system partition.
+
+This contradicts the habit every desktop Unix user brings — *configuration lives in `/etc`* — and it's why Setup Guide 03 hedged about your `sshd_config` edit not sticking. The rule underneath: **permanent configuration belongs in the image**, which is Chapter 21.
+
+**And I made it testable rather than asserted.** The 💥 exercise writes to four locations and reboots. `/etc` is flagged as the one to watch, because I *predict* it doesn't persist and have never confirmed it. If it does, §3.3 and the Path A answers both need rewriting — and the chapter says so.
+
+## The labs open Chapter 21's source material, fifteen chapters early
+
+Lab 06.2 has you read `output/build/ifs.build`, `disk.layout` and `build.date` — files whose syntax Chapter 21 teaches. The lab says outright that they won't fully make sense yet, and that's fine. The point is cheap and worth it:
+
+- the image is **not magic** — it's a text file and a build step
+- everything you've observed on the target is **declared** somewhere in there
+- when Chapter 21 asks you to write one, you'll have read one first
+
+§3.4 also points out that `option_files/` and `local/snippets/` are **CTI already sitting on your disk** — the middle stage of ADR-004's QSTI → CTI → `mkifs` progression.
+
+## §5 places every line of your actual boot log
+
+Including *why* the four benign warnings appear exactly where they do: `uname` fails with `ENOENT` because the disk isn't mounted yet, and the logger isn't running because `slm` hasn't started it — with the very next line being `slm` doing so.
+
+There's a table at the end mapping each line back to a claim from an earlier chapter. The boot log turns out to be evidence for most of Chapter 02.
+
+---
+
+### What changed on disk
+
+`Chapter06_FirstQNXVMOnQEMU.md` (new, 1087 lines) · Glossary **+5 terms** (IFS, `slm`, syspage, `startup-*`, data partition) with **build file** promoted from a stub · **block V11** added · `DecisionsLog` Session 018 · TOC, README, indexes, `CourseState`, `CompactContext`, `ToDos`, `CLAUDE-MEMORY`. Link check across all seven chapters: **zero broken**.
+
+---
+
+## 👉 One request I'd single out
+
+Six blocks are open, but **V11.2 is the highest-value one in the course**, and it costs you two commands:
+
+```bash
+host$ cd ~/qnx800/images/qemu/qemu
+host$ head -60 output/build/ifs.build
+host$ cat output/build/disk.layout
+```
+
+**`ifs.build` is the complete recipe for the system you're running** — every file in `/proc/boot`, every service `slm` starts, every partition.
+
+**Why it matters more than the others:** Chapter 21 is a `⭐ core` chapter and currently has no concrete material. Written today it would be a walkthrough of QNX's documentation. With your `ifs.build` in hand it becomes an annotated walkthrough of **a system you have already booted, explored and debugged**. That's a categorical difference in quality for two `cat` commands, and I've recorded it in the decisions log so no future author writes Chapter 21 without asking first.
+
+Also wanted: **`slm.cfg`** from the target (V11.1) — §2.3 currently describes `slm`'s components from the boot log alone.
+
+**Next: Chapter 07 — First Contact: The QNX Shell.** You can boot the system and explain how; Chapter 07 has you *live* in it — `ksh`, the filesystem layout, `pidin` in earnest rather than as a demonstration, and the pathname space.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.15 | 2026-08-26 | PROMPT#17 logged: Chapter 06, the first core chapter. |
 | 2.14 | 2026-08-26 | PROMPT#16 logged: Chapter 05 published. |
 | 2.13 | 2026-08-26 | PROMPT#15 logged: Chapter 04 published; a published licensing error corrected. |
 | 2.12 | 2026-08-26 | PROMPT#14 logged: Chapter 03 published, Part 0 complete. |

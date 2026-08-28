@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6–V10 pending**
+status: Active — V1–V5 ✅ complete; **V6–V11 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -105,6 +105,7 @@ Worked / Failed. Notes: ...
 | **V8** — certification machinery | ⬜ Chapter 03, 5 minutes. Folds into a V7 session |
 | **V9** — licence inspection | ⬜ Chapter 04, 15 minutes. **Host only** |
 | **V10** — SDP exploration | ⬜ Chapter 05, 25 minutes. **Host only.** Confirms the chapter's central mechanism |
+| **V11** — image archaeology | ⬜ Chapter 06, 45 minutes. **V11.2 is the highest-value request outstanding** |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -775,6 +776,70 @@ the dangerous failure of §5.3. Confirm with `file`.
 
 ---
 
+## 7g. Block V11 — Chapter 06's image archaeology
+
+> 🎯 **Goal:** obtain the two artefacts the course most needs — `slm.cfg` and `ifs.build` — and settle
+> what survives a reboot.
+> ⏱️ 45 minutes. Mixed host and target.
+> 📖 [Chapter 06 Labs 06.1, 06.2 and 💥](../chapters/Chapter06_FirstQNXVMOnQEMU.md)
+
+### V11.1 — `slm.cfg` (target)
+
+```bash
+qnx# cat /proc/boot/slm.cfg
+qnx# ls /proc/boot | wc -l
+```
+
+📋 **Paste `slm.cfg` in full.**
+🎯 **Why:** Chapter 06 §2.3 describes `slm`'s 22 components **from the boot log alone**. `slm.cfg` is
+the actual declaration — command lines, dependencies, ordering — and it is the file Chapter 27 will
+build high availability on. The course has never seen it.
+
+### V11.2 — The build files (host) ⭐ *the most valuable request in the course so far*
+
+```bash
+host$ cd ~/qnx800/images/qemu/qemu
+host$ ls output/build/
+host$ cat output/build/build.date
+host$ head -60 output/build/ifs.build
+host$ cat output/build/disk.layout
+host$ cat output/options
+```
+
+📋 **Paste all of it**, especially `ifs.build` and `disk.layout`.
+🎯 **Why this matters more than any other outstanding request:** `ifs.build` is the **complete recipe
+for the system the learner is running**, and `disk.layout` is the concrete answer to *"what
+persists?"*. Together they turn **Chapter 21** from documentation into an annotated walkthrough of a
+system already booted and understood.
+
+### V11.3 — 💥 What survives a reboot
+
+```bash
+qnx# echo "tmp"  > /tmp/survive_tmp.txt
+qnx# echo "data" > /data/survive_data.txt
+qnx# echo "etc"  > /etc/survive_etc.txt
+qnx# echo "boot" > /proc/boot/survive_boot.txt      # expect: read-only, fails
+qnx# ls -l /tmp/survive_tmp.txt /data/survive_data.txt /etc/survive_etc.txt
+qnx# shutdown
+```
+
+Then `mkqnximage --run` again, and:
+
+```bash
+qnx# ls -l /tmp/survive_tmp.txt /data/survive_data.txt /etc/survive_etc.txt
+```
+
+📋 **Report all four outcomes.**
+🎯 **The claim being tested:** §3.3 predicts only `/data` survives, and that `/proc/boot` refuses the
+write outright. **`/etc` is the one that matters** — the course predicts it does not persist, has
+never tested it, and Setup Guide 03 §9.4 already hedged on exactly this point. **If `/etc` does
+persist, §3.3 and the Path A answers need rewriting.**
+
+⚠️ **`shutdown` is unverified** as the command. If it is wrong, `Ctrl+A` `X` on the host works, and
+please paste whatever the target says.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -819,6 +884,10 @@ the dangerous failure of §5.3. Confirm with `file`.
 | V10.2 | `qcc -v` — prove the host/target crossing | 👤 | — | **Ch 05 §5.1's central claim** | ⬜ |
 | V10.3 | 💥 The three deliberate failures | 👤 | — | Ch 05 §4.3 | ⬜ |
 | — | Clear Chapter 05's lab markers | 🤖 | V10.2 | — | ⏸️ |
+| **V11.1** | `slm.cfg` from the target | 👤 | — | Ch 06 §2.3 · Ch 27 | ⬜ |
+| **V11.2** | ⭐ `ifs.build` + `disk.layout` from the host | 👤 | — | **Ch 21's source material** | ⬜ |
+| V11.3 | 💥 What survives a reboot | 👤 | — | **Ch 06 §3.3's central claim** | ⬜ |
+| — | Clear Chapter 06's lab markers | 🤖 | V11.3 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -938,6 +1007,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | **Block V11 added** for Chapter 06 — `slm.cfg`, the `ifs.build`/`disk.layout` recipe, and the what-survives-a-reboot test. V11.2 is the most valuable outstanding request: it turns Chapter 21 into a walkthrough of a system already booted. |
 | 1.12 | 2026-08-26 | **Block V10 added** for Chapter 05 — layout, disk breakdown, `$MAKEFLAGS`, the `qcc -v` crossing, and three deliberate failures. Host-only; folds into a V9 session. |
 | 1.11 | 2026-08-26 | **Block V9 added** for Chapter 04 — licence file contents, whether `qcc` is licence-gated, and reading the binding agreement. Host-only. |
 | 1.10 | 2026-08-26 | **Block V8 added** for Chapter 03 — 5 minutes, folds into V7. |
