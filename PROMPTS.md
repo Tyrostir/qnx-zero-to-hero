@@ -68,6 +68,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#13](#prompt13) | 2026-08-26 | Claude (Opus 5) | Chapter 01 done; write Chapter 02 | 📕 **Chapter 02 published** (3/34) · history verified from primary sources · block V7 · Glossary +10 |
 | [PROMPT#14](#prompt14) | 2026-08-26 | Claude (Opus 5) | Chapter 02 done; write Chapter 03 | 🎉 **Chapter 03 published — Part 0 complete (4/34), milestone M1** · decision framework · block V8 · Glossary +15 |
 | [PROMPT#15](#prompt15) | 2026-08-26 | Claude (Opus 5) | Write Chapter 04 | 📕 **Chapter 04 published** (5/34, Part 1 begins) · ⚠️ **corrected a published licensing error** · Setup 02 → v2.2 · block V9 |
+| [PROMPT#16](#prompt16) | 2026-08-26 | Claude (Opus 5) | Write Chapter 05 | 📕 **Chapter 05 published** (6/34) · the host/target split · block V10 · Glossary +8 |
 
 ---
 
@@ -1962,10 +1963,127 @@ I'd drafted the file as `Chapter04_Licensing.md`; the TOC had specified `Chapter
 
 ---
 
+## PROMPT#16
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 017 |
+| **Context** | Chapter 04 published; the learner asked for the next chapter. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> Please proceed to chapter 05
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 05 — Installing QNX SDP 8.0 (6/34)
+
+1026 lines. Like Chapter 04, it explains something you already did.
+
+## One idea, and everything follows from it
+
+`~/qnx800` holds **two operating systems' worth of files**. The test for which tree anything belongs to:
+
+> **"Which CPU and OS actually executes this file?"** Linux → host. QNX → target.
+
+```text
+~/qnx800/
+├── host/linux/x86_64/     $QNX_HOST    ← runs on YOUR machine
+│   └── usr/bin/           qcc, ntox86_64-gdb, mkifs, mkqnximage
+├── target/qnx/            $QNX_TARGET  ← for the QNX target
+│   ├── usr/include/       sys/neutrino.h
+│   └── x86_64/ aarch64le/ libc.so.6, ldqnx-64.so.2, pidin, awk…
+└── qnxsdp-env.sh
+```
+
+**`qcc` runs from the host tree and reads the target tree.** That crossing is where build errors live — and §4.3 shows the four common failures are *one bug seen from four angles*:
+
+| Symptom | Actually means |
+|---|---|
+| `qcc: command not found` | Environment not sourced |
+| `sys/neutrino.h: No such file` | `$QNX_TARGET` unset, or you used `gcc` |
+| Odd link errors | Wrong or missing `-V<target>` |
+| Builds but won't run | Wrong tree entirely |
+
+> `echo $QNX_HOST; echo $QNX_TARGET` answers more build questions than any amount of reading compiler output.
+
+## The section I'd point at
+
+**§5.3 — the silent failure.** Every other error in the chapter announces itself. This one doesn't:
+
+```bash
+host$ gcc -o hello hello.c    # builds fine. Wrong operating system.
+```
+
+No error, no warning, a perfectly good **Linux** binary — discovered at deployment. The remedy is a habit rather than a rule: run `file` as part of *building*, not just debugging, and look for `interpreter /usr/lib/ldqnx-64.so.2`.
+
+## Also covered
+
+- **`source` vs `./`** — the most common Unix "I followed the instructions and nothing happened". `./` starts a child shell that sets the variables and exits with them.
+- **QSC's four nouns** — installation, profile, baseline, package — with the CLT options **verified** from the `-help` output your V5.1 run captured, and a repeated warning that `-listAvailablePackages` doesn't exist.
+- **`.sym` files** as separated debug symbols: small binaries on the target, full symbols for `gdb` on the host. That's what makes Chapter 25 work.
+- 🔬 **Where the ~43 GB goes:** two complete architectures plus debug symbols for everything.
+- 🐧 The **sysroot** comparison, including why QNX puts the target in a *flag* (`-Vgcc_ntox86_64`) rather than in the program name — which is why switching to ARM in Part 6 changes a flag, not a toolchain.
+
+§2.2 has a line I like: **you can browse a QNX system on your Linux disk right now, without a VM.** `ls $QNX_TARGET/x86_64/usr/bin` is what `/usr/bin` looks like on a QNX box — and it's why Chapter 21 can assemble a boot image without a package manager.
+
+## ⚠️ Being straight about what's verified
+
+Facts carried from your verification runs and stated plainly: both variable values, GCC **12.2.0** and the six targets, the `ldqnx-64.so.2` interpreter, ~43 GB, and the QSC option list.
+
+**Still only predicted** — and marked as such in the chapter:
+
+| Prediction | Where |
+|---|---|
+| That `-I`/`-L` paths point into `$QNX_TARGET` | **§5.1 — the chapter's central mechanism** |
+| That `qcc -v` is the verbose flag | §5.2 |
+| `$MAKEFLAGS`'s actual value | §3.2 — from Setup Guide 02's docs, never observed |
+| The `du -sh` breakdown | §3 deep dive |
+
+Worth saying plainly: **the chapter's most important claim is currently its least evidenced.** §5.1 is reasoned from how cross-compilation must work, not observed. Block **V10.2** exists to close exactly that.
+
+---
+
+### What changed on disk
+
+`Chapter05_InstallingQNXSDP.md` (new, 1026 lines) · Glossary **+8 terms** (`$QNX_HOST`, `$QNX_TARGET`, `qcc`, `qnxsdp-env.sh`, separated debug symbols, sysroot, cross-compilation, QSC baseline) · **block V10** added · `DecisionsLog` Session 017 · TOC, README, indexes, `CourseState`, `CompactContext`, `ToDos`, `CLAUDE-MEMORY`.
+
+Link check across all six published chapters: **zero broken links.**
+
+---
+
+## 👉 Five blocks open — and two are host-only
+
+| | | |
+|---|---|---|
+| **V6** | Build `labs/lab01_timing/`, run loaded and at priority 63 | Toolchain |
+| **V7** | Kill and restart `vncserv`; try to `slay procnto` | Target, ~20 min |
+| **V8** | Confirm `libsecpol.so.1` and `ability` are in the image | Target, 5 min |
+| **V9** | Read your licence file; is `qcc` licence-gated?; read the agreement | **Host**, ~15 min |
+| **V10** | SDP layout, disk breakdown, **`qcc -v` paths**, three deliberate failures | **Host**, ~25 min |
+
+**V9 + V10 fold into one 40-minute host session, no VM needed.** V10.2 is the one I'd most like back — it's the only thing that turns §5.1 from reasoning into evidence.
+
+**Next: ⭐ Chapter 06 — Your First QNX VM on QEMU.** The first `⭐ core` chapter: what QSTI actually is, what `mkqnximage --run` starts, and how `ifs.bin` plus a virtual disk become a running system. You've done it once in Setup Guide 03 — Chapter 06 explains it, then takes it apart.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.14 | 2026-08-26 | PROMPT#16 logged: Chapter 05 published. |
 | 2.13 | 2026-08-26 | PROMPT#15 logged: Chapter 04 published; a published licensing error corrected. |
 | 2.12 | 2026-08-26 | PROMPT#14 logged: Chapter 03 published, Part 0 complete. |
 | 2.11 | 2026-08-26 | PROMPT#13 logged: Chapter 02 published. |

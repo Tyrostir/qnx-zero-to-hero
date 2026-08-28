@@ -40,15 +40,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **5 / 34** — Part 0 complete (00–03) · Part 1 begun (04) |
+| Chapters published | **6 / 34** — Part 0 complete (00–03) · Part 1: 04, 05 |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | **Chapter 05 — Installing QNX SDP 8.0** (T-115b) |
-| Next (learner) | 📕 Read Ch 04 (⭐ Lab 04.1: read your licence agreement) · blocks **V6–V9** open |
+| Next (me) | ⭐ **Chapter 06 — Your First QNX VM on QEMU** (T-115c) — first core chapter |
+| Next (learner) | 📕 Read Ch 05 · blocks **V6–V10** open; **V9 + V10 are host-only**, ~40 min together |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -205,6 +205,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-08-26 | Regenerated after Session 017: Chapter 05 published. |
 | 1.15 | 2026-08-26 | Regenerated after Session 016: Chapter 04 published; licence facts corrected. |
 | 1.14 | 2026-08-26 | Regenerated after Session 015: **Part 0 complete**; Part 1 next. |
 | 1.13 | 2026-08-26 | Regenerated after Session 014: Chapter 02 published; block V7 open. |

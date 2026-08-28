@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.15
+version: 1.16
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1575,10 +1575,85 @@ references pointing only at planned filenames taken from the TOC (`Chapter05_Ins
 
 ---
 
+## 2026-08-26 — Session 017 (Chapter 05)
+
+### DECIDED — Chapter 05 is organised around one question, not around the directory tree
+
+The obvious structure for "installing the SDP" is a directory-by-directory tour. Chapter 05 instead
+puts a single test at the centre — **"which CPU and OS actually executes this file?"** — and derives
+the layout from it.
+
+**Why.** A tour produces a reader who can recite the tree; the question produces one who can place a
+file they have never seen. It also unifies the four common build failures, which section 4.3 presents as
+**one bug seen from four angles**: `qcc: command not found`, `sys/neutrino.h: No such file`, odd link
+errors, and "builds but will not run" all mean *something reached into the wrong tree*.
+
+The Path A activity is that test applied to eight items, and the one people miss — `mkifs` — is
+instructive precisely because it *feels* like it belongs with the target files it assembles. It runs
+on Linux.
+
+---
+
+### DECIDED — The chapter names the silent failure explicitly
+
+Section 5.3 states that plain `gcc` on portable source produces a **working binary for the wrong
+operating system**, with no error and no warning, discovered at deployment.
+
+**Why this earns its own section.** Every other failure in the chapter announces itself. This one does
+not, and it is the one that costs a day. The remedy offered is a habit rather than a rule: run `file`
+as part of building, not only when debugging, and look for
+`interpreter /usr/lib/ldqnx-64.so.2`. Chapter 08 puts it in a Makefile so it stops depending on memory.
+
+---
+
+### VERIFIED — What the chapter states as fact, and what it only predicts
+
+Facts carried over from earlier verification blocks and stated plainly:
+
+| Fact | Source |
+|------|--------|
+| `$QNX_HOST` = `~/qnx800/host/linux/x86_64` · `$QNX_TARGET` = `~/qnx800/target/qnx` | Block V4.1 |
+| Cross-compiler is **GCC 12.2.0**, six targets across x86_64 and aarch64le | Block V4.1 |
+| `interpreter /usr/lib/ldqnx-64.so.2` | Block V4.2 |
+| Install cost ~**43 GB** | Block V3 `df` delta (D-008) |
+| QSC CLT option list, and that `-listAvailablePackages` does not exist | Block V5.1 (D-007) |
+| `$QNX_TARGET/x86_64/usr/bin` contents | Block V2 |
+
+**Still only predicted**, and marked as such:
+
+| Prediction | Where |
+|------------|-------|
+| That `-I` and `-L` paths point into `$QNX_TARGET` | §5.1 — **the chapter's central mechanism** |
+| That `qcc -v` is the verbose flag | §5.2 |
+| `$MAKEFLAGS`'s actual value | §3.2 — carried from Setup Guide 02's documentation, never observed |
+| The `du -sh` per-directory breakdown | §3 deep dive |
+
+Block **V10** exists to close exactly these. It is worth noting that the chapter's *most important*
+claim is currently its least evidenced — reasoned from how cross-compilation must work rather than
+observed — and the chapter says so where it matters.
+
+---
+
+### DECIDED — Chapters 04 and 05 both explain something the learner already did
+
+This is now a deliberate pattern rather than an accident of sequencing. The setup guides came first
+because the course needed a working environment; Chapters 04 and 05 explain the licence and the
+installation **afterwards**, with the artefacts on disk.
+
+**Why it works better than the conventional order.** A reader with `~/qnx800` in front of them can
+run every command as they read, and the abstractions have referents. Chapter 05 §2.2 exploits this
+directly: *"you can browse a QNX system on your Linux disk right now, without a VM."*
+
+Both chapters say plainly that they run backwards from the usual order, so the reader knows it is
+intentional.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-08-26 | Session 017 appended: the organising question rather than a directory tour; the silent `gcc` failure; an explicit split between what Chapter 05 verifies and what it predicts; explaining-after-doing as a deliberate pattern. |
 | 1.15 | 2026-08-26 | Session 016 appended: a published licensing error corrected (customer demos are permitted); the production/distribution boundary; the two-licence structure; the course as its own worked example; filename alignment and a link check. |
 | 1.14 | 2026-08-26 | Session 015 appended: market figures verified; certification as the deciding question; one worked example answering Linux; "argue the wrong side" as the break-it for a judgement chapter; **milestone M1**. |
 | 1.13 | 2026-08-26 | Session 014 appended: history verified from primary sources; the microkernel's costs stated honestly; evidence rather than reliability as the real argument; section 4 as documentation-dating; the library-function rule applied during authoring. |

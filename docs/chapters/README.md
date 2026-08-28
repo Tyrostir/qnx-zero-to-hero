@@ -24,6 +24,7 @@ The course itself. Chapters are published in order and appear here as they are w
 | # | Chapter | Paths | Time |
 |---|---------|-------|------|
 | 04 | [QNX Licensing & QNX Everywhere](Chapter04_LicensingAndQNXEverywhere.md) | 🐣🚶🏃 | 45 m |
+| 05 | [Installing QNX SDP 8.0](Chapter05_InstallingQNXSDP.md) | 🐣🚶🏃 | 90 m |
 
 
 > 📑 Full chapter list with status, path tags and time estimates:

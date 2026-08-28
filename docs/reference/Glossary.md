@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.7
+version: 1.8
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -30,6 +30,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Baseline (QSC)** | QNX Software Center's term for a complete SDP release, installed with `-installBaseline`. Contrast a **package**, one component installed with `-installPackage`. | 05 |
 | **Blocking state** | The precise reason a thread is not running: `SEND`, `REPLY`, `RECEIVE`, `MUTEX`, `CONDVAR`, `SIGWAIT`, `NANOSLEEP`, `INTR`, etc. Shown by `pidin`. Reading blocking states is *the* core QNX debugging skill. | 13 🌱 |
 | **BSP** | *Board Support Package* — the hardware-specific software (IPL, `startup-*`, drivers, build files) that lets QNX boot on a particular board. | 22 🌱 |
 | **Build file** | The text file (`*.build`) that tells `mkifs` what goes into a boot image: which kernel, which drivers, which files, and what to run at startup. | 21 🌱 |
@@ -38,6 +39,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Cross-compilation** | Building on one machine (the **host**) for a different one (the **target**). Removes every assumption a native compiler makes: headers, libraries, dynamic-linker path and CPU must all be supplied explicitly. On QNX this is the host/target split of `$QNX_HOST` and `$QNX_TARGET`. | 05 |
 | **Certification (functional safety)** | An independent assessor's judgement that a system meets a standard, reached by examining **evidence**: hazard analysis, requirements traceability, test coverage, tool qualification and freedom-from-interference arguments. Applies to a **specific version in a specific configuration** — it is inherited, never automatic. | 03, 29 |
 | **Core lab (⭐)** | One of the six labs every coding path must complete: L06 (boot), L08 (deploy/debug loop), L13 (message passing), L17 (resource manager), L21 (custom IFS), L25 (diagnose a hung system). | 00 |
 | **Critical path** | The six chapters that carry the course: 05 → 06 → 08 → 13 → 17 → 21. If you only ever do six chapters, do those. | 00 |
@@ -174,6 +176,10 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`$QNX_HOST`** | Environment variable naming the SDP directory of programs that **execute on your development machine** — `qcc`, `q++`, `ntox86_64-gdb`, `mkifs`, `mkqnximage`. Set by `qnxsdp-env.sh`. Verified value: `~/qnx800/host/linux/x86_64`. | 05 |
+| **`$QNX_TARGET`** | Environment variable naming the SDP directory of files **for the QNX target** — headers, libraries and target binaries, organised by architecture (`x86_64/`, `aarch64le/`). Verified value: `~/qnx800/target/qnx`. Also serves as `mkifs` source material (Ch 21). | 05, 21 |
+| **`qcc`** | QNX's compiler **driver** — not itself a compiler. Reads `-V<target>`, looks it up in `$QNX_HOST/etc/qcc/`, and assembles the real `ntox86_64-gcc` (GCC **12.2.0**) command with the right `-I` and `-L` paths into `$QNX_TARGET`. `qcc -v` shows what it ran. | 05, 08 |
+| **`qnxsdp-env.sh`** | The SDP script that sets `$QNX_HOST`, `$QNX_TARGET` and `MAKEFLAGS`, and prepends `$QNX_HOST/usr/bin` to `PATH`. Must be run with **`source`** — `./` starts a child shell that exits with the variables. Affects one terminal only. | 05 |
 | **QNX OS** | The operating system itself. Formerly *QNX Neutrino RTOS*; current version **8.0**, GA 21 March 2024. Distinct from **QNX SDP**, which is the OS plus the toolchain. | 02 |
 | **QNX SDP** | *QNX Software Development Platform* — the OS **plus** the cross-toolchain, headers, libraries, target images and IDE. What you install on your Linux host (`~/qnx800`). | 02 |
 | **QNX Everywhere** | The **free, non-commercial licence tier** for SDP 8.0, announced January 2024. Permits learning, academic work, **hobby/maker products**, public free OSS, **training material and books even commercially**, and **customer demonstrations**. Prohibits production use, distribution, commercial product development, and paid activity outside those exceptions. **The boundary is production and distribution, not money.** | 02, 04 |
@@ -200,6 +206,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Separated debug symbols (`.sym`)** | Debugging information — symbol names, line numbers, types — stripped from an executable and stored in a `.sym` file beside it. Keeps target binaries small while letting `gdb` on the host produce symbolic backtraces. Must match the binary exactly; a stale `.sym` yields confidently wrong function names. | 05, 25 |
+| **Sysroot** | The cross-compilation term for a directory tree standing in for the target's filesystem root, supplying headers and libraries at build time. `$QNX_TARGET` is QNX's equivalent — found via an environment variable rather than a `--sysroot=` flag. | 05 |
 | **SIL** | *Safety Integrity Level* (1–4) from IEC 61508 — the general scale from which ASIL and rail levels derive. QNX holds **SIL 3**. | 03, 29 |
 | **Safety manual** | The document defining the **certified envelope** of an OS: which version, which configuration, which features are prohibited, and what assumptions the certificate rests on. Read it **before** the architecture is fixed — discovering late that your design relies on an excluded feature is the classic expensive mistake. | 03, 29 |
 | **`slay`** | QNX command that terminates processes **by name** rather than by PID — roughly Linux's `pkill`. `slay -f` forces. Because QNX drivers are ordinary processes, `slay` can stop a network stack or a disk driver, which has no equivalent on a monolithic kernel. | 02, 25 |
@@ -254,6 +262,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | Chapter 05: +8 terms (`$QNX_HOST`, `$QNX_TARGET`, `qcc`, `qnxsdp-env.sh`, separated debug symbols, sysroot, cross-compilation, QSC baseline). |
 | 1.7 | 2026-08-26 | Chapter 04: +3 terms (development licence, distribution licence, production use) and **QNX Everywhere** corrected — customer demonstrations are permitted, and the boundary is production and distribution rather than money. |
 | 1.6 | 2026-08-26 | Chapter 03: +15 terms (certification, evidence package, freedom from interference, safety manual, mixed criticality, IEC 61508/62304, EN 50128/50657, SIL, `PREEMPT_RT`, FreeRTOS, Zephyr, VxWorks, INTEGRITY) and **ASIL** promoted from a planning stub. |
 | 1.5 | 2026-08-26 | Chapter 02: +10 terms (microkernel, monolithic kernel, Momentics, Neutrino, `procnto`, QNX OS, QNX SDP, QNX Everywhere, `slay`) and **POSIX** expanded from its planning stub. |

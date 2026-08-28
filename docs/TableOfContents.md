@@ -65,7 +65,7 @@ all of Part 0 while your QNX licence request is being processed.*
 | # | Chapter | Paths | Est. | Status |
 |---|---------|-------|------|--------|
 | 04 | [QNX Licensing & QNX Everywhere](chapters/Chapter04_LicensingAndQNXEverywhere.md) | 🐣🚶🏃 | 45 m | 📕 |
-| 05 | [Installing QNX SDP 8.0](chapters/Chapter05_InstallingQNXSDP.md) | 🐣🚶🏃 | 90 m | 📄 |
+| 05 | [Installing QNX SDP 8.0](chapters/Chapter05_InstallingQNXSDP.md) | 🐣🚶🏃 | 90 m | 📕 |
 | 06 | [Your First QNX VM on QEMU](chapters/Chapter06_FirstQNXVMOnQEMU.md) ⭐ | 🐣🚶🏃 | 90 m | 📄 |
 | 07 | [First Contact — The QNX Shell](chapters/Chapter07_FirstContactTheQNXShell.md) | 🐣🚶🏃 | 75 m | 📄 |
 | 08 | [The Toolchain: qcc, q++ and Deployment](chapters/Chapter08_ToolchainAndDeployment.md) ⭐ | 🚶🏃 | 120 m | 📄 |
@@ -261,6 +261,7 @@ documented**; you are not locked in.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-08-26 | **Chapter 05 published.** |
 | 1.7 | 2026-08-26 | **Chapter 04 published — Part 1 begins.** |
 | 1.6 | 2026-08-26 | **Chapter 03 published — Part 0 complete (4/4).** |
 | 1.5 | 2026-08-26 | **Chapter 02 published.** |

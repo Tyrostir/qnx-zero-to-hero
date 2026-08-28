@@ -26,7 +26,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **5 / 34** — Part 0 complete; Part 1 begun |
+| **Chapters published** | **6 / 34** — Part 0 complete; Part 1 in progress |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -39,14 +39,14 @@ update_trigger: "End of every working session, and after every chapter is publis
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
-Part 1  Environment        [████                ]  20 %   (1/5 chapters)
+Part 1  Environment        [████████            ]  40 %   (2/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [███                 ]  15 %   (5/34)
+OVERALL                    [███                 ]  18 %   (6/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [███                 ]  15 %   (5/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 04](../chapters/Chapter04_LicensingAndQNXEverywhere.md)** (~45 min). ⭐ **Lab 04.1 is the one to do** — read the licence agreement you actually accepted. Four blocks open: **V6** (toolchain), **V7**+**V8** (target, ~25 min), **V9** (host only, ~15 min). |
-| 🤖 **Me — next turn** | **Chapter 05 — Installing QNX SDP 8.0** (T-115b). What QNX Software Center actually did, the `~/qnx800` layout, and how `$QNX_HOST` and `$QNX_TARGET` divide the world in two. |
+| 👤 **You — do next** | 📕 **Read [Chapter 05](../chapters/Chapter05_InstallingQNXSDP.md)** (~90 min). Five blocks open — **V9 and V10 are host-only** (~40 min together) and V10.2 tests Chapter 05's central claim, which has never been confirmed. |
+| 🤖 **Me — next turn** | ⭐ **Chapter 06 — Your First QNX VM on QEMU** (T-115c) — the first `⭐ core` chapter. QSTI, what `mkqnximage --run` starts, and how `ifs.bin` plus a virtual disk become a running system. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -121,7 +121,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
 | 04 | QNX Licensing & QNX Everywhere | 📕 | — | v1.0. Terms verified; corrected a published error. |
-| 05 | Installing QNX SDP 8.0 | 📄 | — | |
+| 05 | Installing QNX SDP 8.0 | 📕 | — | v1.0. The host/target split as the organising idea. |
 | 06 | Your First QNX VM on QEMU ⭐ | 📄 | — | |
 | 07 | First Contact — The QNX Shell | 📄 | — | |
 | 08 | The Toolchain & Deployment ⭐ | 📄 | — | |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 017 — 2026-08-26 📕 **Chapter 05**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 05 — the SDP installation, explained after the fact. |
+| **Done** | 📕 **Chapter 05 — Installing QNX SDP 8.0** published (1026 lines)<br>• Organised around **one idea**: `~/qnx800` holds two operating systems' worth of files, and the test for which tree anything belongs to is *"which CPU and OS actually executes this file?"*<br>• `qcc` **runs from the host tree and reads the target tree** — that crossing is where build errors live, and §4.3 shows all four common failures are the same bug seen from four angles<br>• Explains `source` vs `./` (the most common Unix "I followed the instructions and nothing happened"), and why the environment affects one terminal only<br>• **QSC's four nouns** — installation, profile, baseline, package — with **verified** CLT options from the `-help` output captured in [D-007](Doubts.md#d-007), and a repeated warning that `-listAvailablePackages` does not exist<br>• `.sym` files explained as separated debug symbols, and why Chapter 25's debugging depends on them<br>• 🔬 Deep dive on where **~43 GB** goes: two complete architectures plus debug symbols<br>• §5 traces one `qcc` invocation to the exact tree each piece came from, ending at `interpreter /usr/lib/ldqnx-64.so.2` — and names **the silent failure**: plain `gcc` produces a *working binary for the wrong OS*, with no error at all<br>• 💥 Break It produces §4.3's three failures deliberately, so they are recognised at speed<br>• Glossary +8 terms; **block V10** added — V10.2 tests the chapter's central mechanism, which has only ever been reasoned about |
+| **Learner decisions** | "Proceed to chapter 05" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | ⭐ **Chapter 06 — Your First QNX VM on QEMU** (first core chapter) |
 
 ### Session 016 — 2026-08-26 📕 **Chapter 04 — and a published error corrected**
 
@@ -409,6 +420,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-08-26 | Session 017: **Chapter 05 published** (6/34). Block V10 added. |
 | 1.15 | 2026-08-26 | Session 016: **Chapter 04 published** (5/34, Part 1 begun) and a published licensing error corrected. Block V9 added. |
 | 1.14 | 2026-08-26 | Session 015: **Chapter 03 published — Part 0 complete (4/34), milestone M1.** Block V8 added. |
 | 1.13 | 2026-08-26 | Session 014: **Chapter 02 published** — 3/34. Block V7 added. |

@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6–V9 pending**
+status: Active — V1–V5 ✅ complete; **V6–V10 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -103,7 +103,8 @@ Worked / Failed. Notes: ...
 | **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all remaining chapters use |
 | **V7** — process isolation | ⬜ Chapter 02's labs. No compiler needed — any order with V6 |
 | **V8** — certification machinery | ⬜ Chapter 03, 5 minutes. Folds into a V7 session |
-| **V9** — licence inspection | ⬜ Chapter 04, 15 minutes. **Host only**, no VM needed |
+| **V9** — licence inspection | ⬜ Chapter 04, 15 minutes. **Host only** |
+| **V10** — SDP exploration | ⬜ Chapter 05, 25 minutes. **Host only.** Confirms the chapter's central mechanism |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -710,6 +711,70 @@ was the only one.
 
 ---
 
+## 7f. Block V10 — Chapter 05's SDP exploration
+
+> 🎯 **Goal:** confirm the SDP layout the chapter describes, and capture the disk breakdown and the
+> `qcc -v` paths the course has only ever predicted.
+> ⏱️ 25 minutes. **Host only — no VM.**
+> 📖 [Chapter 05 Labs 05.1, 05.2 and 💥](../chapters/Chapter05_InstallingQNXSDP.md)
+
+### V10.1 — The layout and the disk breakdown
+
+```bash
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ echo $QNX_HOST; echo $QNX_TARGET; echo $MAKEFLAGS
+host$ du -sh ~/qnx800
+host$ du -sh ~/qnx800/*
+host$ ls $QNX_HOST/usr/bin | wc -l
+host$ ls $QNX_TARGET/usr/include/sys/ | head -20
+```
+
+📋 **Paste all of it.**
+🎯 **Why:** the course knows the **total** (~43 GB, from block V3's `df` delta) but has never seen the
+**breakdown**, and has never confirmed `$MAKEFLAGS` at all — Setup Guide 02 §10.3 lists it from
+documentation, not observation.
+
+### V10.2 — Watch `qcc` cross the trees
+
+```bash
+host$ cd /tmp
+host$ printf '#include <stdio.h>\n#include <unistd.h>\nint main(void){printf("pid %%d\\n",getpid());return 0;}\n' > sdp_demo.c
+host$ qcc -Vgcc_ntox86_64 -v -o sdp_demo sdp_demo.c 2>&1 | tee /tmp/qcc_verbose.txt
+host$ grep -o '\-I[^ ]*' /tmp/qcc_verbose.txt | sort -u
+host$ grep -o '\-L[^ ]*' /tmp/qcc_verbose.txt | sort -u
+host$ file sdp_demo
+host$ rm -f /tmp/sdp_demo /tmp/sdp_demo.c /tmp/qcc_verbose.txt
+```
+
+📋 **Paste the `-I` and `-L` lists**, and the `ntox86_64-gcc` line if you can find it.
+🎯 **The claim being tested:** Chapter 05 §5.1 asserts headers come from `$QNX_TARGET/usr/include` and
+libraries from `$QNX_TARGET/x86_64`. **This has never been confirmed** — it is the chapter's central
+mechanism, stated from reasoning.
+
+⚠️ **`qcc -v` is itself unverified.** If `-v` is not the verbose flag, `qcc --help` will give the real
+one; please paste that instead.
+
+### V10.3 — 💥 The three deliberate failures
+
+```bash
+host$ cd /tmp && printf '#include <sys/neutrino.h>\nint main(void){return 0;}\n' > brk.c
+host$ unset QNX_TARGET && qcc -Vgcc_ntox86_64 -o brk brk.c          # expect: header not found
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ gcc -o brk_host brk.c                                          # expect: fails on the include
+host$ env -i HOME="$HOME" PATH=/usr/bin:/bin bash -c 'qcc --version' # expect: command not found
+host$ source ~/qnx800/qnxsdp-env.sh && rm -f /tmp/brk /tmp/brk.c /tmp/brk_host
+```
+
+📋 **Report all three messages verbatim.**
+🎯 **Why:** these three account for much of the time beginners lose on QNX, and Chapter 05 §4.3 lists
+them as the diagnostic table. Real message text makes that table far more useful than paraphrase.
+
+💡 **Also worth trying:** the same `gcc` experiment on a program using **only POSIX headers**
+(no `sys/neutrino.h`). The chapter predicts it builds cleanly and silently produces a *Linux* binary —
+the dangerous failure of §5.3. Confirm with `file`.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -750,6 +815,10 @@ was the only one.
 | V9.2 | 💥 Is `qcc` licence-gated? | 👤 | — | Ch 04 §3.2 | ⬜ |
 | V9.3 | Read the agreement; report discrepancies | 👤 | — | Ch 04 §2 | ⬜ |
 | — | Clear Chapter 04's lab markers | 🤖 | V9.2 | — | ⏸️ |
+| **V10.1** | SDP layout + disk breakdown + `$MAKEFLAGS` | 👤 | — | Lab 05.1 | ⬜ |
+| V10.2 | `qcc -v` — prove the host/target crossing | 👤 | — | **Ch 05 §5.1's central claim** | ⬜ |
+| V10.3 | 💥 The three deliberate failures | 👤 | — | Ch 05 §4.3 | ⬜ |
+| — | Clear Chapter 05's lab markers | 🤖 | V10.2 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -869,6 +938,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | **Block V10 added** for Chapter 05 — layout, disk breakdown, `$MAKEFLAGS`, the `qcc -v` crossing, and three deliberate failures. Host-only; folds into a V9 session. |
 | 1.11 | 2026-08-26 | **Block V9 added** for Chapter 04 — licence file contents, whether `qcc` is licence-gated, and reading the binding agreement. Host-only. |
 | 1.10 | 2026-08-26 | **Block V8 added** for Chapter 03 — 5 minutes, folds into V7. |
 | 1.9 | 2026-08-26 | **Block V7 added** for Chapter 02 — kill/restart a service, and try to kill the kernel. Needs no compiler, so it is independent of V6. |

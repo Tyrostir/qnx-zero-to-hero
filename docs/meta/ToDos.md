@@ -31,6 +31,7 @@ update_trigger: "Continuously"
 
 
 | T-016 | 🟡 | Report `du -sh ~/qnx800/images/qemu/qemu/output/disk-qemu` and `df -h ~` | ⬜ | — | Settles whether the 47 GB image is sparse, and lets `PLAN.md`'s disk budget be corrected a second time ([D-008](Doubts.md#d-008)). |
+| T-024 | 🟠 | **Run block V10** — SDP layout, disk breakdown, `qcc -v` paths, and three deliberate failures | ⬜ | — | **Host only**, ~25 min; folds into a V9 session. V10.2 tests Chapter 05 §5.1's central claim. |
 | T-023 | 🟠 | **Run block V9** — read your licence file, test whether `qcc` is licence-gated, and **read the agreement** | ⬜ | — | **Host only, no VM.** V9.3 is the valuable one: the course already had one licensing fact backwards. |
 | T-022 | 🟡 | **Run block V8** — 5 minutes, confirms the security-policy files are in the image | ⬜ | — | Folds into a V7 session. |
 | T-021 | 🟠 | **Run block V7** — Chapter 02's labs: kill and restart `vncserv`, then try to `slay procnto` | ⬜ | — | **No compiler needed**, so independent of V6. V7.2 tests a claim the chapter only predicts. |
@@ -54,7 +55,7 @@ update_trigger: "Continuously"
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
-| T-115b | 🔴 | Write `Chapter05_InstallingQNXSDP.md` | ⬜ | **Next.** What QSC actually did, the `~/qnx800` layout, `qnxsdp-env.sh`, and the `$QNX_HOST`/`$QNX_TARGET` split. |
+| T-115c | 🔴 | Write `Chapter06_FirstQNXVMOnQEMU.md` ⭐ | ⬜ | **Next — the first `⭐ core` chapter.** QSTI, `mkqnximage --run`, `ifs.bin` + virtual disk. |
 
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -136,6 +137,7 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-115b | Write `Chapter05_InstallingQNXSDP.md` | 2026-08-26 | 017 |
 | T-115 | Write `Chapter04_LicensingAndQNXEverywhere.md` | 2026-08-26 | 016 |
 | T-150 | Correct the licensing error in Setup Guide 02 §2 (customer demos are permitted) | 2026-08-26 | 016 |
 | T-111 | Write `Chapter03_WhyAndWhereQNXIsUsed.md` — **Part 0 complete** | 2026-08-26 | 015 |
@@ -174,6 +176,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-08-26 | **Chapter 05 published.** T-115b closed; T-115c (Chapter 06 ⭐) promoted; T-024 added (block V10). |
 | 1.15 | 2026-08-26 | **Chapter 04 published**, and a licensing error in Setup Guide 02 corrected (T-150). T-115 closed; T-115b (Chapter 05) promoted; T-023 added (block V9). |
 | 1.14 | 2026-08-26 | **Chapter 03 published — Part 0 complete.** T-111 closed; T-115 (Chapter 04) promoted; T-022 added (block V8). |
 | 1.13 | 2026-08-26 | **Chapter 02 published.** T-110 closed; T-111 (Chapter 03) promoted; T-021 added (run block V7). |
