@@ -23,7 +23,7 @@ target_verified_on: "QNX 8.0.0, kernel build 2026/02/27-11:02:56EST, x86_64 unde
 
 ## 🏃 Fast-Track Summary
 
-> **🏃 Path C reads only this box**, then goes to [Chapter 04](Chapter04_Licensing.md) — Chapter 03
+> **🏃 Path C reads only this box**, then goes to [Chapter 04](Chapter04_LicensingAndQNXEverywhere.md) — Chapter 03
 > is the "why choose it" argument, which you may not need.
 
 **What QNX is.** A commercial, **hard real-time**, **POSIX-compliant**, **microkernel** operating
@@ -61,7 +61,7 @@ certified variant) · **QNX Everywhere** (the free non-commercial tier you are u
 **SMP** (multi-core) build, **instr**umented (kernel tracing enabled — Ch 26). Non-instrumented
 variants exist for production.
 
-**🏃 Skip to:** [Chapter 04 — QNX Licensing](Chapter04_Licensing.md). §4 of this chapter is a 5-minute
+**🏃 Skip to:** [Chapter 04 — QNX Licensing](Chapter04_LicensingAndQNXEverywhere.md). §4 of this chapter is a 5-minute
 reference for decoding version numbers and stale documentation; §3.4 is the history, and is optional.
 
 ---
@@ -940,7 +940,7 @@ It closes Part 0. After it, Part 1 begins the hands-on work.
 
 > 🐣 **Path A:** Chapter 03 is written for you — it is the business and architecture case.
 > 🚶 **Path B:** Chapter 03, then Part 1.
-> 🏃 **Path C:** skip to [Chapter 04](Chapter04_Licensing.md) unless you need to justify the choice to
+> 🏃 **Path C:** skip to [Chapter 04](Chapter04_LicensingAndQNXEverywhere.md) unless you need to justify the choice to
 > someone.
 
 ---

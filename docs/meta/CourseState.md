@@ -26,7 +26,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **4 / 34** — 🎉 **Part 0 complete** |
+| **Chapters published** | **5 / 34** — Part 0 complete; Part 1 begun |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs published** | **1 / 21** — Lab 01.2 `[UNVERIFIED]`, pending block V6 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -39,14 +39,14 @@ update_trigger: "End of every working session, and after every chapter is publis
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
-Part 1  Environment        [                    ]   0 %   (0/5 chapters)
+Part 1  Environment        [████                ]  20 %   (1/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [██                  ]  12 %   (4/34)
+OVERALL                    [███                 ]  15 %   (5/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [██                  ]  12 %   (4/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 03](../chapters/Chapter03_WhyAndWhereQNXIsUsed.md)** (~60 min) and do the **Part 0 review** — the one-page memo in its 🐣 activity, which is worth doing on every path. Three verification blocks are open: **V6** (build the lab), **V7** and **V8** (both no-compiler, ~25 min together). |
-| 🤖 **Me — next turn** | **Part 1 begins: Chapter 04 — QNX Licensing & QNX Everywhere** (T-115). What you actually agreed to when you deployed that licence, and what would have to change to ship a product. |
+| 👤 **You — do next** | 📕 **Read [Chapter 04](../chapters/Chapter04_LicensingAndQNXEverywhere.md)** (~45 min). ⭐ **Lab 04.1 is the one to do** — read the licence agreement you actually accepted. Four blocks open: **V6** (toolchain), **V7**+**V8** (target, ~25 min), **V9** (host only, ~15 min). |
+| 🤖 **Me — next turn** | **Chapter 05 — Installing QNX SDP 8.0** (T-115b). What QNX Software Center actually did, the `~/qnx800` layout, and how `$QNX_HOST` and `$QNX_TARGET` divide the world in two. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -120,7 +120,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
-| 04 | QNX Licensing & QNX Everywhere | 📄 | — | |
+| 04 | QNX Licensing & QNX Everywhere | 📕 | — | v1.0. Terms verified; corrected a published error. |
 | 05 | Installing QNX SDP 8.0 | 📄 | — | |
 | 06 | Your First QNX VM on QEMU ⭐ | 📄 | — | |
 | 07 | First Contact — The QNX Shell | 📄 | — | |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 016 — 2026-08-26 📕 **Chapter 04 — and a published error corrected**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 04 and open Part 1. |
+| **Done** | 📕 **Chapter 04 — QNX Licensing & QNX Everywhere** published (835 lines)<br>• ⚠️ **Found and corrected a licensing error already published in the course.** [Setup Guide 02 §2](../guides/Setup_02_QNX_Account_And_License.md) listed *"demo to existing or potential customers"* as **forbidden**; QNX's licensing page lists it as **explicitly permitted** (*"e.g. as part of a product roadmap"*). Setup Guide 02 → **v2.2**; `CompactContext` and `CLAUDE-MEMORY` corrected; hazard **H-13** recorded<br>• Terms **verified verbatim** against `qnx.software/…/qnx-everywhere/licensing` rather than restated from the course's earlier notes<br>• The chapter's thesis: **the boundary is production and distribution, not whether money is involved** — which is wrong in *both* directions, since hobby/maker *products*, paid training material and customer demos are all permitted, while a free internal test rig is plausibly production use<br>• The **two-licence structure**: a commercial development licence does not permit shipping; distribution is separate<br>• 🐧 The GPL contrast — open-source experience trains you to think the licence matters only at release, which is precisely wrong for a *development* licence<br>• §5 decides four scenarios including **this course itself**, and notes that never shipping QNX binaries was an architectural decision made for licensing reasons<br>• 💥 Break It removes the licence file and finds the toolchain still builds — *"the tool let me" is not "the licence allows it"*<br>• **Filename aligned to the TOC** (`Chapter04_LicensingAndQNXEverywhere.md`) and all cross-chapter links verified; forward references now match the planned filenames for 05 and 06<br>• Glossary +3 terms, **QNX Everywhere** corrected; **block V9** added |
+| **Learner decisions** | "Proceed to chapter 04" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 05 — Installing QNX SDP 8.0** |
 
 ### Session 015 — 2026-08-26 🎉 **Part 0 complete**
 
@@ -398,6 +409,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.15 | 2026-08-26 | Session 016: **Chapter 04 published** (5/34, Part 1 begun) and a published licensing error corrected. Block V9 added. |
 | 1.14 | 2026-08-26 | Session 015: **Chapter 03 published — Part 0 complete (4/34), milestone M1.** Block V8 added. |
 | 1.13 | 2026-08-26 | Session 014: **Chapter 02 published** — 3/34. Block V7 added. |
 | 1.12 | 2026-08-26 | Session 013: D-014 answered; the writing rules extended to library functions. |

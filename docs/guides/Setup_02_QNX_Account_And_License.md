@@ -1,7 +1,7 @@
 ---
 title: "Setup Guide 02 — QNX Account, Licence & SDP 8.0 Install"
 document_id: SETUP-02
-version: 2.1
+version: 2.2
 status: ✅ Published & verified — executed end to end
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -102,20 +102,28 @@ Read this section. It is short, and getting it wrong has real consequences.
 |-----------|-------|
 | Learn QNX, for your own development | This course |
 | Academic coursework, teaching and research | Including paid academic research/instruction |
-| Hobbyist and maker projects | On Raspberry Pi or **any** QNX-provided BSP |
+| **Hobbyist and maker projects — including *building a product or system*** | On Raspberry Pi or **any** QNX-provided BSP. *"provided you do not make a commercial product or put the resulting software or system into production use"* |
 | **Write training material or books about QNX — even commercially** | This is why this public course repository is legitimate |
-| Develop open-source software interoperable with QNX | Provided you publish it free of charge |
+| Develop open-source software interoperable with QNX | ⚠️ *"provided you make the resulting OSS publicly available **at no charge**"* |
+| **Demonstrate a product or system to existing or potential customers** | *"e.g. as part of a product roadmap"* — **explicitly permitted** |
 | Certain research prototypes, even inside a company | ⚠️ Conditional — confirm eligibility with `licensing@qnx.com` first |
 
 ### ❌ You are NOT allowed to
 
 | Forbidden | Why it matters |
 |-----------|----------------|
-| Build or develop a **commercial product** | Even internally. Even a prototype for a roadmap. |
-| Put software into **production use** | "It works, let's ship it" — no. |
-| **Distribute** the resulting software | Distribution needs a *separate* distribution licence, even for commercial licence holders |
-| Demo to existing or potential **customers** | Explicitly listed as commercial activity |
-| Any activity in exchange for a fee | Beyond the narrow exceptions listed above |
+| Build or develop a **commercial product** | The thing you intend to sell |
+| Put software into **production use** | "It works, let's ship it" — no. ⚠️ **Including internal, unpaid deployments** |
+| **Distribute** the resulting software | Distribution needs a *separate* distribution licence, even for commercial licence holders. **Even one pilot unit** |
+| Any activity in exchange for a fee | Or *"consideration of any kind"* — beyond the exceptions listed above |
+
+> ✏️ **Corrected 2026-08-26.** An earlier version of this guide listed *"demo to existing or potential
+> customers"* as **forbidden**. It is **explicitly permitted** — see the row added above. The error
+> was found while writing [Chapter 04](../chapters/Chapter04_LicensingAndQNXEverywhere.md) by checking QNX's licensing
+> page directly.
+>
+> 💡 **The boundary is `production` and `distribution`, not whether money is involved.** Chapter 04
+> §1.2 explains why that trips people in both directions.
 
 ### ⚠️ Do not mix licence types
 
@@ -1026,6 +1034,7 @@ But you have **nowhere to run it**. That's next.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.2 | 2026-08-26 | **Licence correction.** §2 listed *"demo to existing or potential customers"* as forbidden; QNX's licensing page lists it as **permitted** (*"e.g. as part of a product roadmap"*). Corrected, and the permitted list expanded with the exact conditions QNX attaches to hobby/maker use and to OSS (*"publicly available at no charge"*). The forbidden list now stresses that production use includes **internal, unpaid** deployments and that distribution includes **a single pilot unit**. Full treatment in [Chapter 04](../chapters/Chapter04_LicensingAndQNXEverywhere.md). |
 | 2.1 | 2026-08-26 | **Correction:** §9.2 used `-listAvailablePackages`, which does not exist — replaced with `-listAccessible` and the real option list, verified against CLT `2.0.4:v202501021438`. |
 | 2.0 | 2026-08-26 | **Verified end to end.** All `[UNVERIFIED]` markers cleared. Real output throughout: `qcc -V` target list (GCC **12.2.0**, `x86_64` + `aarch64le`, C/`_gpp`/`_cxx`), `$QNX_HOST`/`$QNX_TARGET`, `file` output, and the `24 · 3 · 0` environment report. **Two corrections:** §11.2's sample program was missing `#include <unistd.h>` and emitted an implicit-declaration warning for `getpid()` — fixed, and turned into a lesson on POSIX vs. QNX-specific headers; §11.3 claimed `file` would print "QNX", which it never does — the real tell is the `ldqnx-64.so.2` interpreter. **New §12.1:** the install costs ~43 GB, not the 8–12 GB previously stated. |
 | 1.1 | 2026-08-26 | **Part A confirmed by a real run** — the account → request → accept → deploy flow works as documented; `[UNVERIFIED]` cleared from §§3–5 and now scoped to Part B only. Repo path corrected to `~/exercises/qnx-zero-to-hero`. |

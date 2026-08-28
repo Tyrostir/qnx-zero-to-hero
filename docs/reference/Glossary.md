@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.6
+version: 1.7
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -49,6 +49,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Development licence** | A QNX licence permitting you to *build* software. **It does not permit shipping** — *"distribution and production use is not permitted under a development license and requires a separate distribution license"*. Both the non-commercial and commercial development licences work this way. | 04 |
+| **Distribution licence** | The **separate** QNX licence required to give software containing QNX to anyone else. Needed in addition to a commercial development licence. Frequently discovered late, at launch planning. | 04 |
 | **Deadline** | The latest acceptable completion time for a response, measured from its release. Often equal to the period for a periodic task. Missing one is a *failure* (hard), makes the result *worthless* (firm), or *degrades quality* (soft). | 01 |
 | **Determinism** | The property that timing is **bounded and the bound is knowable** — *not* that it is small. A slower system with a tight bound is more deterministic than a faster one with a long tail. | 01 |
 | **Doubt (`D-NNN`)** | A permanent, numbered record of a question and its full answer, in [`Doubts.md`](../meta/Doubts.md). Prefix an aside with `/btw` to guarantee one is created. | 00 |
@@ -150,6 +152,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Production use** | Running software for real, as something people rely on — **including internally and without payment**. One of the two boundaries of the non-commercial licence (the other being distribution). A permanent internal test rig is plausibly production use. | 04 |
 | **`PREEMPT_RT`** | The Linux real-time preemption patch set, mainlined in 2024. Makes Linux genuinely usable for soft and many firm real-time systems. Does **not** provide a certified OS with an evidence package — the gap that keeps QNX in safety-critical products. | 03 |
 | **`procnto`** | The QNX kernel — *process manager* + *Neutrino*. Provides scheduling, memory management, timers and message passing, **and nothing else**. Always pid 1. Ships in variants: `-smp` (multi-core), `-instr` (kernel tracing compiled in, needed for Ch 26). | 02, 09 |
 | **`pthread_*`** | The POSIX threads API — `<pthread.h>`. Standard POSIX, not QNX-specific, and identical on Linux. ⚠️ Unlike most POSIX calls, these **return an error number directly** rather than returning `-1` and setting `errno`. | 01, 10, 12 |
@@ -173,7 +176,7 @@ update_trigger: "Every time a chapter introduces a new term"
 |------|-----------|-----|
 | **QNX OS** | The operating system itself. Formerly *QNX Neutrino RTOS*; current version **8.0**, GA 21 March 2024. Distinct from **QNX SDP**, which is the OS plus the toolchain. | 02 |
 | **QNX SDP** | *QNX Software Development Platform* — the OS **plus** the cross-toolchain, headers, libraries, target images and IDE. What you install on your Linux host (`~/qnx800`). | 02 |
-| **QNX Everywhere** | The **free, non-commercial licence tier**, announced January 2024. Covers learning, academia, hobby projects and writing training material. Not for production or distribution. | 02, 04 |
+| **QNX Everywhere** | The **free, non-commercial licence tier** for SDP 8.0, announced January 2024. Permits learning, academic work, **hobby/maker products**, public free OSS, **training material and books even commercially**, and **customer demonstrations**. Prohibits production use, distribution, commercial product development, and paid activity outside those exceptions. **The boundary is production and distribution, not money.** | 02, 04 |
 | **`qnxuser`** | The unprivileged account (UID 1000) on the QSTI QEMU image, password `qnxuser`, holding full `sudo`. **The account you must use for SSH** — the image ships `PermitRootLogin no`, so `root` is refused by password *and* key. | 00 |
 | **QSTI** | *Quick Start Target Image* — QNX's official **pre-built** system image for QEMU and Raspberry Pi. Installed as a QNX Software Center package and launched with `mkqnximage --run`. The course's day-one target. | 00 |
 | **`qcc` / `q++`** | The QNX C and C++ compiler drivers — wrappers around GCC that select the right target, headers and libraries. | 08 🌱 |
@@ -251,6 +254,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | Chapter 04: +3 terms (development licence, distribution licence, production use) and **QNX Everywhere** corrected — customer demonstrations are permitted, and the boundary is production and distribution rather than money. |
 | 1.6 | 2026-08-26 | Chapter 03: +15 terms (certification, evidence package, freedom from interference, safety manual, mixed criticality, IEC 61508/62304, EN 50128/50657, SIL, `PREEMPT_RT`, FreeRTOS, Zephyr, VxWorks, INTEGRITY) and **ASIL** promoted from a planning stub. |
 | 1.5 | 2026-08-26 | Chapter 02: +10 terms (microkernel, monolithic kernel, Momentics, Neutrino, `procnto`, QNX OS, QNX SDP, QNX Everywhere, `slay`) and **POSIX** expanded from its planning stub. |
 | 1.4 | 2026-08-26 | +`pthread_*` from the Chapter 01 library-function audit. |

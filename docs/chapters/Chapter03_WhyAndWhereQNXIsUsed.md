@@ -22,7 +22,7 @@ target_verified_on: "QNX 8.0.0, kernel build 2026/02/27-11:02:56EST, x86_64 unde
 
 ## 🏃 Fast-Track Summary
 
-> **🏃 Path C reads only this box**, then goes to [Chapter 04](Chapter04_Licensing.md). This is the
+> **🏃 Path C reads only this box**, then goes to [Chapter 04](Chapter04_LicensingAndQNXEverywhere.md). This is the
 > chapter you need only if you have to *justify* the choice to somebody.
 
 **Where QNX actually is.** **255 million vehicles** on the road (BlackBerry, 15 October 2024 — up
@@ -58,7 +58,7 @@ OS with an evidence package — you inherit the argument rather than constructin
 box — none of these needs a bounded worst case, and paying for one costs you drivers, developers and
 budget. **Knowing when not to use QNX is the judgement that gets you taken seriously.**
 
-**🏃 Skip to:** [Chapter 04 — QNX Licensing](Chapter04_Licensing.md). §4 is a decision checklist worth
+**🏃 Skip to:** [Chapter 04 — QNX Licensing](Chapter04_LicensingAndQNXEverywhere.md). §4 is a decision checklist worth
 five minutes if you will ever be in that meeting.
 
 ---
@@ -924,7 +924,7 @@ is **both, with a certified boundary between them**.
 **🎉 That completes Part 0.** You can now say what real-time means, what QNX is, and when to use it —
 which is the entire conceptual foundation. Everything from here is hands-on.
 
-**[Chapter 04 — QNX Licensing & QNX Everywhere](Chapter04_Licensing.md)**
+**[Chapter 04 — QNX Licensing & QNX Everywhere](Chapter04_LicensingAndQNXEverywhere.md)**
 
 Part 1 begins with the thing you have already done: the licence. Chapter 04 explains *what you
 actually agreed to* — what "non-commercial" permits and forbids, why writing training material is

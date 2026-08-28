@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.14
+version: 1.15
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1482,10 +1482,104 @@ before reading about it, since the environment was built first.
 
 ---
 
+## 2026-08-26 — Session 016 (Chapter 04; a published licensing error corrected)
+
+### CORRECTED — Setup Guide 02 listed a permitted use as forbidden
+
+Writing Chapter 04 required the licence terms, so they were read from QNX's licensing page rather
+than restated from this project's earlier notes. That turned up an error in already-published
+material.
+
+| | |
+|---|---|
+| **Setup Guide 02 §2 said** | "Demo to existing or potential **customers** — Explicitly listed as commercial activity" ❌ |
+| **QNX's licensing page says, under *permitted*** | *"Build or develop a product or system (e.g. as part of a product roadmap) to demonstrate to existing or potential customers."* ✅ |
+
+The same section also over-stated the prohibition on building things, implying that even a roadmap
+prototype was forbidden. QNX permits hobby/maker use to *"build a product or system"*, with the
+condition attaching to **commercialisation and production**, not to construction.
+
+**Why this error is worse than a wrong command.** A wrong command fails visibly and gets reported. A
+wrong licence claim fails **silently and in both directions** — it can make a reader refuse work they
+are entitled to do, or reason by analogy into something they are not. Nobody's build breaks, so
+nobody finds it.
+
+**Fixed:** Setup Guide 02 → **v2.2** with the permitted list expanded and the exact QNX conditions
+quoted; `CompactContext.md` and `CLAUDE-MEMORY.md` corrected; the Glossary's **QNX Everywhere** entry
+rewritten. Recorded as hazard **H-13**.
+
+> ⚠️ **Note on this file.** `DecisionsLog.md` is append-only, so the incorrect line in the Session 001
+> entry ("Explicitly *not* permitted … customer demos") **stays**. This entry supersedes it. That is
+> the point of an append-only log: the record shows what was believed and when it was corrected.
+
+**The rule this generalises to:** licensing claims must be checked against QNX's licensing page or
+the EULA, never restated from an earlier course document. The same discipline already applies to
+commands (ADR-024) and now to library functions (`PLAN.md` §2); licence facts are the third category
+where restating beats checking, and should not.
+
+---
+
+### DECIDED — Chapter 04's thesis is that the boundary is production and distribution, not money
+
+The intuitive framing is *"non-commercial means no money"*. The chapter argues that is wrong in both
+directions, and organises everything around it:
+
+- **Permitted despite money:** training material and books *"including if you intend to offer that
+  material commercially"*; academic salaries and RA stipends.
+- **Permitted despite looking commercial:** building a product or system as a hobbyist/maker;
+  demonstrating a product to existing or potential customers.
+- **Forbidden despite no money:** a permanent internal test rig is plausibly **production use**;
+  sending one pilot unit is **distribution**.
+
+The mental model diagram asks the questions **in that order** — production, then distribution, then
+payment — because most people carry it money-first.
+
+---
+
+### DECIDED — The chapter teaches the two-licence structure explicitly
+
+*"Distribution and production use is not permitted under a development license and requires a separate
+distribution license."* This applies to commercial licence holders too, and is routinely discovered
+during launch planning.
+
+Chapter 04 states it three times — Fast-Track, §2.3, and the mastery check — and suggests asking
+*"do we have a distribution licence, or only development?"* in month one of a project.
+
+---
+
+### DECIDED — §5 uses this course as a worked example
+
+The clearest illustration of the licence's shape is the artefact the reader is holding: a public
+repository teaching QNX, permitted under *"training material or books"*, which **never ships QNX
+binaries** — Setup Guides 01–03 walk the reader through obtaining their own licence so that
+distribution never arises.
+
+**That was an architectural decision about the course, made for licensing reasons**, and saying so
+demonstrates the chapter's point better than a hypothetical. It also explains why `prebuilt/` is
+empty in `labs/lab01_timing/` — a decision taken in Session 012 for verification reasons, which turns
+out to be the licensing-correct answer as well.
+
+---
+
+### VERIFIED — Filename alignment and a full cross-chapter link check
+
+Chapter 04 was drafted as `Chapter04_Licensing.md`; the Table of Contents had long specified
+`Chapter04_LicensingAndQNXEverywhere.md`. Renamed to match the TOC, and all references updated.
+
+A link check across all five published chapters now reports **zero broken links**, with forward
+references pointing only at planned filenames taken from the TOC (`Chapter05_InstallingQNXSDP.md`,
+`Chapter06_FirstQNXVMOnQEMU.md`).
+
+> This check is cheap and should run before every chapter is committed. Two chapters had already
+> accumulated forward links to a filename that would never have existed.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.15 | 2026-08-26 | Session 016 appended: a published licensing error corrected (customer demos are permitted); the production/distribution boundary; the two-licence structure; the course as its own worked example; filename alignment and a link check. |
 | 1.14 | 2026-08-26 | Session 015 appended: market figures verified; certification as the deciding question; one worked example answering Linux; "argue the wrong side" as the break-it for a judgement chapter; **milestone M1**. |
 | 1.13 | 2026-08-26 | Session 014 appended: history verified from primary sources; the microkernel's costs stated honestly; evidence rather than reliability as the real argument; section 4 as documentation-dating; the library-function rule applied during authoring. |
 | 1.12 | 2026-08-26 | Session 013 appended: the writing rules did not cover library functions; the fix at rule level; five more instances found by auditing; the substance of D-014. |

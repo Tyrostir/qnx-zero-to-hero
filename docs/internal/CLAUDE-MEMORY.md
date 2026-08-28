@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.12
+version: 1.13
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -46,7 +46,7 @@ hands-on work. You write Markdown; you do not run software. The course is
 **6 parts, 34 chapters, ~21 labs, 1 capstone**, published as Markdown *and* PDF, teaching QNX SDP 8.0
 on a QEMU/KVM virtual machine at zero cost.
 
-**Progress: Phase 2. 4/34 chapters — Part 0 complete, milestone M1. 1 lab. 3/5 setup guides, all verified.**
+**Progress: Phase 2. 5/34 chapters — Part 0 complete (M1), Part 1 begun. 1 lab. 3/5 setup guides, all verified.**
 
 **Cadence: one chapter per turn**, committed and pushed, with `docs/meta/` updated each time.
 
@@ -170,7 +170,7 @@ filesystem costume.
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ Approved 2026-08-25 |
-| Chapters published | **4 / 34** — 🎉 **Part 0 complete.** Ch 00 (template) · Ch 01 (first compiled lab) · Ch 02 (history verified) · Ch 03 (decision framework) |
+| Chapters published | **5 / 34** — Part 0 complete (00–03) · Part 1 begun. Ch 04 (licensing; corrected a published error) |
 | Setup guides published | **3 / 5** — **all three ✅ verified end to end**; zero `[UNVERIFIED]` markers in the course |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
@@ -181,7 +181,7 @@ filesystem costume.
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
-| Blocker | **None.** **Part 1 begins: Chapter 04 (T-115).** Blocks V6, V7 and V8 are with the learner. |
+| Blocker | **None.** **Chapter 05 (T-115b) is the next action.** Blocks V6–V9 are with the learner. |
 
 **Always confirm against [`docs/meta/CourseState.md`](../meta/CourseState.md) — it is authoritative.**
 
@@ -281,7 +281,13 @@ Much of what is online about QNX is stale. These were checked against live QNX s
 - QSTI-for-QEMU is documented for **Ubuntu 22.04 / 24.04**; the execution box runs **26.04** → risk **R9**.
 - Non-commercial **allows**: learning, academia, hobby/maker, **writing training material or books
   — even commercially** (this is what makes the public repo legitimate), interoperable OSS.
-- Non-commercial **forbids**: production use, distribution, commercial products, customer demos.
+- Non-commercial **forbids**: **production use** (including internal, unpaid), **distribution**
+  (including a single pilot unit), commercial products, activities for a fee.
+  ⚠️ **Customer demos ARE permitted** (*"e.g. as part of a product roadmap"*) — this file previously
+  said the opposite; corrected 2026-08-26. **The boundary is production + distribution, not money.**
+  Hobby/maker *products*, paid training material and customer demos are all permitted. OSS is
+  permitted only if *"publicly available at no charge"*. Verified against
+  `qnx.software/en/developers/get-started/qnx-everywhere/licensing`.
 - Also exists: **QNX Developer Desktop** (self-hosted QNX 8.0 XFCE desktop).
 - OSS ports: `github.com/qnx-ports` and `gitlab.com/qnx/ports` · dashboard `oss.qnx.com`.
 - ✅ **VERIFIED TARGET (2026-08-26):** `QNX qnxqemu 8.0.0 2026/02/27-11:02:56EST x86pc x86_64`;
@@ -342,6 +348,7 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **016** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 04 published** (835 lines) — Part 1 begins. **Found and corrected a licensing error already published in the course**: Setup Guide 02 listed customer demonstrations as forbidden; QNX permits them explicitly. Terms verified verbatim from QNX's licensing page. Thesis: **the boundary is production and distribution, not money** — wrong in both directions. Two-licence structure (development ≠ distribution); GPL contrast; §5 decides four scenarios including this course itself. Filename aligned to the TOC and all cross-chapter links verified. Hazard **H-13**; Glossary +3; **block V9** added. |
 | **015** | 2026-08-26 | Claude (Opus 5) | 🎉 **Chapter 03 published — PART 0 COMPLETE (4/34), milestone M1.** Built on the claim that **certification, not latency, usually decides**. Three-question test + eight-step framework; industry-by-industry with the *distinct* reason in each; full competitive comparison; §5 decides three projects and **one answer is Linux**. 💥 exercise asks the reader to argue the wrong side. Figures verified against BlackBerry's 15 Oct 2024 announcement. Glossary +15; **block V8** added. |
 | **014** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 02 published** (935 lines). The microkernel bet with its costs stated honestly ("QNX is not a better Linux"); §1.3 argues the real payoff is **evidence, not reliability**. §4 becomes The Product & Version Map with **four signals for spotting stale QNX material**; §5 decodes the learner's own `procnto-smp-instr` and `/proc/boot`. **History verified from primary sources** — QNX's own history page and BlackBerry's SDP 8.0 GA announcement (21 Mar 2024) — rather than from memory. Glossary +10; **block V7** added. |
 | **013** | 2026-08-26 | Claude (Opus 5) | 🔧 **D-014 and a rule gap.** The learner found four unexplained library functions in Chapter 01's lab. Fixed at rule level: `PLAN.md` §2 rule 1 now covers library functions, with a §17 checkbox. An audit found five more in Chapter 01. Hazard **H-12**. |
@@ -373,6 +380,7 @@ that is precisely why the onboarding documents exist.
 | ~~H-3~~ | Setup Guides 01 and 02 are both verified end to end. Three real bugs were found in Setup Guide 02 by running it. | ✅ Closed 2026-08-26 |
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
+| **H-13** | **Licence facts in this course came from a summary, and one was backwards.** Setup Guide 02 listed customer demonstrations as forbidden; they are explicitly permitted. Any licensing claim must be checked against QNX's licensing page or the EULA — never restated from an earlier course document. | ✅ Fixed 2026-08-26 (Ch 04) |
 | **H-12** | **Lab code is easy to under-explain.** Chapter 01's lab called `clock_gettime`, `nanosleep`, `perror` and `qsort` with no explanation of any — a course-rule-#4 violation that the writing rules missed because they spoke only of *terms*, not functions. Before publishing a lab, list every library call in it and confirm each is explained or linked. | ⚠️ Rule added to `PLAN.md` §2 and §17 |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
 | ~~H-9~~ | Predicted that `bridge,br=virbr0` would fail on WSL2 without systemd. **It did not** — the bridge worked first try, `192.168.122.46`. Installing `libvirt-daemon-system` in Setup Guide 01 was sufficient. §12.1 keeps the fallbacks but is downgraded to a contingency. | ✅ Closed 2026-08-26 |
@@ -387,6 +395,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | Session 016: Chapter 04; licence facts corrected; H-13. |
 | 1.12 | 2026-08-26 | Session 015: Part 0 complete; Part 1 next. |
 | 1.11 | 2026-08-26 | Session 014: Chapter 02 published; history verified from primary sources. |
 | 1.10 | 2026-08-26 | Session 013: D-014 closed a rule-#4 gap; H-12 added; the writing rules now cover library functions. |

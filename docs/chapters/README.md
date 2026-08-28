@@ -21,6 +21,10 @@ The course itself. Chapters are published in order and appear here as they are w
 
 **🎉 Part 0 complete.**
 
+| # | Chapter | Paths | Time |
+|---|---------|-------|------|
+| 04 | [QNX Licensing & QNX Everywhere](Chapter04_LicensingAndQNXEverywhere.md) | 🐣🚶🏃 | 45 m |
+
 
 > 📑 Full chapter list with status, path tags and time estimates:
 > **[../TableOfContents.md](../TableOfContents.md)**

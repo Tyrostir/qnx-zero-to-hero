@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6, V7 and V8 pending**
+status: Active — V1–V5 ✅ complete; **V6–V9 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -103,6 +103,7 @@ Worked / Failed. Notes: ...
 | **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all remaining chapters use |
 | **V7** — process isolation | ⬜ Chapter 02's labs. No compiler needed — any order with V6 |
 | **V8** — certification machinery | ⬜ Chapter 03, 5 minutes. Folds into a V7 session |
+| **V9** — licence inspection | ⬜ Chapter 04, 15 minutes. **Host only**, no VM needed |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -658,6 +659,57 @@ security-policy machinery, which is worth knowing and is a legitimate finding ra
 
 ---
 
+## 7e. Block V9 — Chapter 04's licence inspection
+
+> 🎯 **Goal:** see what the licence file actually contains, and find out whether the toolchain is
+> licence-gated.
+> ⏱️ 15 minutes. **Host only — no VM.**
+> 📖 [Chapter 04 Lab 04.1 and 💥 Break It](../chapters/Chapter04_LicensingAndQNXEverywhere.md)
+
+### V9.1 — What is in the licence file
+
+```bash
+host$ ls -la ~/.qnx/license/
+host$ cat ~/.qnx/license/licenses
+host$ cd ~/qnx/qnxsoftwarecenter && ./qnxsoftwarecenter_clt -listLicenseKeys
+```
+
+📋 **Paste all three** — *redacting anything resembling a personal identifier or serial.*
+🎯 **Why:** the course knows this file exists (`check-environment.sh` looks for it) but has never seen
+its contents. `-listLicenseKeys` should also confirm the licence **type** is non-commercial.
+
+### V9.2 — 💥 Is the toolchain licence-gated?
+
+```bash
+host$ mv ~/.qnx/license/licenses ~/.qnx/license/licenses.bak
+host$ cd /tmp && printf '#include <stdio.h>\nint main(void){printf("hi\\n");return 0;}\n' > lic_test.c
+host$ qcc -Vgcc_ntox86_64 -o lic_test lic_test.c
+host$ file lic_test
+host$ mv ~/.qnx/license/licenses.bak ~/.qnx/license/licenses     # ← RESTORE
+host$ ls -la ~/.qnx/license/
+host$ rm -f /tmp/lic_test /tmp/lic_test.c
+```
+
+⚠️ **The restore step is not optional.** Nothing is deleted — the file is renamed and renamed back —
+but do not stop halfway.
+
+📋 **Report:** did `qcc` still build? Any message?
+🎯 **The claim being tested:** Chapter 04 §3.2 asserts the licence file is a **record, not DRM**, and
+predicts the build succeeds. If it fails instead, that is a genuine finding and §3.2 needs rewriting.
+
+### V9.3 — Optional but valuable: read the agreement
+
+Open the licence agreement attached to your deployed licence at
+[qnx.com/account/dashboard](https://www.qnx.com/account/dashboard).
+
+📋 **Report any discrepancy** between the agreement and Chapter 04 §2.
+🎯 **Why this matters more than the other two.** Chapter 04 quotes QNX's *summary* page. The agreement
+binds. **The course already had one licensing fact backwards** — Setup Guide 02 listed customer
+demonstrations as forbidden when they are explicitly permitted — so there is no reason to assume it
+was the only one.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -694,6 +746,10 @@ security-policy machinery, which is worth knowing and is a legitimate finding ra
 | — | Clear Chapter 02's lab markers | 🤖 | V7.2 | — | ⏸️ |
 | **V8.1** | Security-policy files present in the image | 👤 | — | Lab 03.2 | ⬜ |
 | — | Clear Chapter 03's lab marker | 🤖 | V8.1 | — | ⏸️ |
+| **V9.1** | Licence file contents + `-listLicenseKeys` | 👤 | — | Lab 04.1 | ⬜ |
+| V9.2 | 💥 Is `qcc` licence-gated? | 👤 | — | Ch 04 §3.2 | ⬜ |
+| V9.3 | Read the agreement; report discrepancies | 👤 | — | Ch 04 §2 | ⬜ |
+| — | Clear Chapter 04's lab markers | 🤖 | V9.2 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -813,6 +869,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | **Block V9 added** for Chapter 04 — licence file contents, whether `qcc` is licence-gated, and reading the binding agreement. Host-only. |
 | 1.10 | 2026-08-26 | **Block V8 added** for Chapter 03 — 5 minutes, folds into V7. |
 | 1.9 | 2026-08-26 | **Block V7 added** for Chapter 02 — kill/restart a service, and try to kill the kernel. Needs no compiler, so it is independent of V6. |
 | 1.8 | 2026-08-26 | **Block V6 added** for Chapter 01's `lab01_timing` — 4 checkpoints. V6.3 tests the chapter's central claim directly. |

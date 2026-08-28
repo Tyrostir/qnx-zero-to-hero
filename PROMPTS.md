@@ -67,6 +67,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#12](#prompt12) | 2026-08-26 | Claude (Opus 5) | What are `clock_gettime`, `nanosleep`, `perror`, `qsort` — C++ or QNX? Which files? | ✅ **D-014** · lab README → v1.1 · **`PLAN.md` rule 1 extended to library functions** · audit found 5 more in Ch 01 |
 | [PROMPT#13](#prompt13) | 2026-08-26 | Claude (Opus 5) | Chapter 01 done; write Chapter 02 | 📕 **Chapter 02 published** (3/34) · history verified from primary sources · block V7 · Glossary +10 |
 | [PROMPT#14](#prompt14) | 2026-08-26 | Claude (Opus 5) | Chapter 02 done; write Chapter 03 | 🎉 **Chapter 03 published — Part 0 complete (4/34), milestone M1** · decision framework · block V8 · Glossary +15 |
+| [PROMPT#15](#prompt15) | 2026-08-26 | Claude (Opus 5) | Write Chapter 04 | 📕 **Chapter 04 published** (5/34, Part 1 begins) · ⚠️ **corrected a published licensing error** · Setup 02 → v2.2 · block V9 |
 
 ---
 
@@ -1841,10 +1842,131 @@ Say the word.
 
 ---
 
+## PROMPT#15
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 016 |
+| **Context** | Part 0 complete; the learner asked for the first chapter of Part 1. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> Please proceed to chapter 04
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 04 — QNX Licensing & QNX Everywhere (5/34)
+
+835 lines. **Part 1 begins.** And writing it turned up an error in material the course had already published.
+
+## ⚠️ First, the correction
+
+I read QNX's licensing page rather than restating the project's earlier notes. Good thing:
+
+| | |
+|---|---|
+| **Setup Guide 02 §2 said** | "Demo to existing or potential **customers** — Explicitly listed as commercial activity" ❌ |
+| **QNX's licensing page says, under *permitted*** | *"Build or develop a product or system (e.g. as part of a product roadmap) to demonstrate to existing or potential customers."* ✅ |
+
+**Exactly backwards.** The same section also implied that building anything real was forbidden; QNX permits hobby/maker use to *"build a product or system"* — the condition attaches to commercialisation and production, not to construction.
+
+**Why this error is worse than a wrong command.** A wrong command fails visibly and gets reported. A wrong licence claim fails **silently, in both directions** — it can make you refuse work you're entitled to do, or reason by analogy into something you're not. Nobody's build breaks, so nobody finds it.
+
+Fixed: Setup Guide 02 → **v2.2**, `CompactContext`, `CLAUDE-MEMORY`, and the Glossary. Recorded as hazard **H-13**, with the rule generalised: **licence claims get checked against QNX's page or the EULA, never restated from an earlier course document.**
+
+> One deliberate non-fix: `DecisionsLog.md` is append-only, so the incorrect line in the Session 001 entry **stays**, superseded by the new entry. That's the point of an append-only log — it shows what was believed and when it was corrected.
+
+## The chapter's thesis
+
+**The boundary is `production` and `distribution` — not whether money is involved.** That's wrong in *both* directions, which is what makes it worth a chapter:
+
+| Permitted **despite** money | Forbidden **despite** no money |
+|---|---|
+| Training material and books — *"including if you intend to offer that material commercially"* | A permanent internal test rig — plausibly **production use** |
+| Academic salaries, RA stipends | Sending **one** pilot unit — that's **distribution** |
+| Building a product as a hobbyist/maker | |
+| Demonstrating to existing or potential customers | |
+
+The mental model asks the questions in that order — production, then distribution, then payment — because most people carry it money-first.
+
+## The thing with budget implications
+
+> *"Distribution and production use is not permitted under a development license and requires a separate distribution license."*
+
+**A commercial development licence does not permit shipping.** Two licences. This applies to commercial holders too, and it's routinely discovered during launch planning. I state it three times and suggest asking *"do we have a distribution licence, or only development?"* in **month one**, not month twenty.
+
+## 🐧 The contrast that explains most accidental non-compliance
+
+| | GPL | QNX Everywhere |
+|---|---|---|
+| Restricts **use**? | ❌ No | ✅ **Yes** |
+| Obligation lands when… | You **distribute** | You **use it beyond permitted purposes** |
+
+Open-source experience trains you to think *"the licence only matters when I ship."* Under a **development licence** the restriction is on **use** — so compliance is a question you answer continuously, not once at release. That single difference explains most accidental violations by engineers who've only worked with open source.
+
+## §5 uses this course as a worked example
+
+A public repo teaching QNX, permitted under *"training material or books"* — and it **never ships QNX binaries**. Setup Guides 01–03 walk you through getting your own licence precisely so distribution never arises. That was an architectural decision about the *course*, made for licensing reasons.
+
+It also retroactively explains why `prebuilt/` is empty in `lab01_timing` — a call I made in Session 012 for verification reasons, which turns out to be the licensing-correct answer too.
+
+The sharpest pair in the chapter: **writing a paid course about porting to QNX is permitted; doing the port for a paying client is not.** Same money, different side of the line.
+
+## 🧪 Labs
+
+⭐ **Lab 04.1 is the one to do**, and its point is slightly subversive: everything in §2 is quoted from QNX's *summary* page. **The agreement you accepted is what binds.** So the lab has you find your licence file, run `-listLicenseKeys`, and then **open and read the actual agreement** — reporting any discrepancy with my chapter.
+
+Given §1.2, that's not a rhetorical invitation.
+
+**💥 Break It** renames your licence file aside, rebuilds with `qcc`, and renames it back. Prediction: it still compiles. The lesson isn't the result —
+
+> **"The tool let me" is not "the licence allows it."** Most licence violations in industry aren't committed by people who decided to violate a licence. They're committed by people who did the thing the tool allowed, and never asked.
+
+**🐣 Path A** classifies eight activities. The two that catch people — publishing a bootable image, and a permanent internal test rig — both involve no money at all.
+
+## 🔧 Housekeeping worth mentioning
+
+I'd drafted the file as `Chapter04_Licensing.md`; the TOC had specified `Chapter04_LicensingAndQNXEverywhere.md` all along. Renamed, references fixed — and I then ran a **link check across all five published chapters**: **zero broken links**, with forward references now pointing only at planned TOC filenames. Two chapters had already accumulated links to a filename that would never have existed. That check is now cheap and should run before every commit.
+
+---
+
+### What changed on disk
+
+`Chapter04_LicensingAndQNXEverywhere.md` (new, 835 lines) · **Setup Guide 02 → v2.2** (correction) · `CompactContext`, `CLAUDE-MEMORY`, Glossary corrected · Glossary +3 terms · **block V9** added · `DecisionsLog` Session 016 · `ReferenceLinks` · TOC, README, indexes, `CourseState`, `ToDos`.
+
+---
+
+## 👉 Four blocks are open — V9 is new and cheap
+
+| | | |
+|---|---|---|
+| **V6** | Build `labs/lab01_timing/`, run loaded and at priority 63 | Toolchain |
+| **V7** | Kill and restart `vncserv`; try to `slay procnto` | Target, ~20 min |
+| **V8** | Confirm `libsecpol.so.1` and `ability` are in the image | Target, 5 min |
+| **V9** | **Read your licence file; test whether `qcc` is licence-gated; read the agreement** | **Host only**, ~15 min |
+
+**V9.3 is the valuable one.** The course has now had one licensing fact backwards; there's no reason to assume it was the only one, and you're the only person who can check the binding document.
+
+**Next: Chapter 05 — Installing QNX SDP 8.0.** What QNX Software Center actually did, the `~/qnx800` layout, what `qnxsdp-env.sh` sets, and how `$QNX_HOST` and `$QNX_TARGET` divide the world in two. Another chapter explaining something you've already done — which, as with licensing, is a better way to learn it.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.13 | 2026-08-26 | PROMPT#15 logged: Chapter 04 published; a published licensing error corrected. |
 | 2.12 | 2026-08-26 | PROMPT#14 logged: Chapter 03 published, Part 0 complete. |
 | 2.11 | 2026-08-26 | PROMPT#13 logged: Chapter 02 published. |
 | 2.10 | 2026-08-26 | PROMPT#12 logged: a course rule gap found by the learner and fixed at rule level. |
