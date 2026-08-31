@@ -1,7 +1,7 @@
 ---
 title: "Setup Guide 03 — Your First QNX VM on QEMU"
 document_id: SETUP-03
-version: 2.0
+version: 2.1
 status: ✅ Published & verified — executed end to end
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -311,9 +311,11 @@ drwxr-xr-x 2 user user 4.0K Jun  6 20:29 option_files
 > host$ df -h ~
 > ```
 >
-> It is a raw disk image and may be **sparse** — apparent size far larger than the blocks actually
-> used. `du -sh qemu/output/disk-qemu` tells you the truth. Either way, do not be alarmed by the
-> number, and do not copy this file around casually.
+> ✅ **Measured 2026-08-26: it is *not* sparse.** `du -sh ~/qnx800/*` reports **53 GB** for `images/`,
+> which is essentially the full apparent size. **Plan for the space.**
+>
+> The whole SDP directory measures **79 GB**, of which this image is the largest single item
+> ([D-008](../meta/Doubts.md#d-008)). Do not copy this file around casually.
 
 ✅ **The files that matter:**
 
@@ -1273,6 +1275,7 @@ that runs them, and a network between them.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.1 | 2026-08-26 | Disk figures corrected: the virtual disk is **not sparse** — `images/` occupies **53 GB**, and `~/qnx800` totals **79 GB** ([D-008](../meta/Doubts.md#d-008)). |
 | 2.0 | 2026-08-26 | **✅ Verified end to end.** All `[UNVERIFIED]` markers cleared. §10 shows the real `Hello from QNX!` with an explanation of why QNX process IDs are large and non-sequential (they are message-passing endpoints — D-011). **Correction:** §9.3 attributed the SSH refusal to `PermitRootLogin prohibit-password`; the image actually ships **`PermitRootLogin no`**, which blocks root by *every* method including keys — §9.5's claim that a key would let root in was wrong and is fixed. New §9.3.1 reads the real `/etc/passwd`: `/data/home` as the writable partition, `sshd`'s privilege separation, and a warning that every password on the image is a published default while `qnxuser` holds full `sudo`. Added a note on the benign OpenSSH post-quantum warning. |
 | 1.2 | 2026-08-26 | **§§7–9 verified — the VM boots.** Real boot log added with the four benign startup warnings explained and `slm`'s 22 components listed. §7.1 shows the real login banner (`apk`, the VNC server, and the `sudo` hint). §8 rewritten around real `uname`/`pidin`/`pidin info`/`ls /proc/boot` output — including live message passing visible in the `REPLY` column, and `ldqnx-64.so.2` sitting in `/proc/boot`. §9 rewritten: real `ifconfig`, and **the one real failure — `sshd` refuses password login for root** (`PermitRootLogin prohibit-password`); use `qnxuser`, or enable root login, or use a key (**D-009**). §12.1 downgraded: the `virbr0` bridge **worked** on WSL2. |
 | 1.1 | 2026-08-26 | **§§4–5 verified; three corrections.** (a) `unpack_qemu_image.sh` extracts into a nested **`qemu/`** subdirectory, so the image is at `~/qnx800/images/qemu/qemu` — §5 now shows the tree and §7 `cd`s into it, with the `mkqnximage` error quoted and an explicit warning **not** to use the `--force` it suggests (**D-006**). (b) `-listAvailablePackages` does not exist; replaced with `-listAccessible` and the real option table (**D-007**). (c) Real file listings added, including the 47 GB `disk-qemu` and what `procnto-smp-instr.sym`, `build/` and `option_files/` are for (**D-008**). Also: the QSTI package may already be installed with SDP — check before downloading. |

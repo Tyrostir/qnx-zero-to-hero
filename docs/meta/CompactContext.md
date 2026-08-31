@@ -40,15 +40,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **7 / 34** — Part 0 complete (00–03) · Part 1: 04, 05, 06 ⭐ |
+| Chapters published | **8 / 34** — Part 0 complete (00–03) · Part 1: 04, 05, 06 ⭐, 07 |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | **Chapter 07 — First Contact: The QNX Shell** (T-115d) |
-| Next (learner) | 📕 Read Ch 06 ⭐ + core lab L06 · blocks **V6–V11** open · **V11.2 is the highest-value request** (`ifs.build`) |
+| Next (me) | ⭐ **Chapter 08 — Toolchain & Deployment** (T-115e) — closes Part 1 |
+| Next (learner) | 📕 Read Ch 07 · blocks **V6–V12** open · **V11.2** (`ifs.build`) still highest-value |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -56,11 +56,12 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 ```text
 Ubuntu 26.04 LTS on WSL2 · kernel 6.18.33.2-microsoft-standard-WSL2
 Intel i7-11850H · 16 logical CPUs · VT-x · /dev/kvm PRESENT AND ACCESSIBLE ✅
-23 GiB RAM · 908 GB disk free  (SDP cost ~43 GB; budget ~50 GB)
+23 GiB RAM · 908 GB disk free  (~/qnx800 = 79 GB MEASURED; budget ~85 GB)
 Repo: ~/exercises/qnx-zero-to-hero
 installed ✅: gcc 15.2.0 · make 4.4.1 · git 2.53.0 · curl 8.18.0 · tar 1.35
               ssh 10.2p1 · openjdk 25.0.4 · qemu 10.2.1 · qemu-img 10.2.1
-licence ✅ deployed  ·  QNX SDP 8.0 ✅ ~/qnx800 (~43 GB)
+licence ✅ deployed  ·  QNX SDP 8.0 ✅ ~/qnx800 = 79 GB
+  images/ 53G (VM image, NOT sparse) · target/ 23G · host/ 2.7G · bsp/ 1.1G (Ch 22 material)
   $QNX_HOST=~/qnx800/host/linux/x86_64  ·  $QNX_TARGET=~/qnx800/target/qnx
   cross-compiler GCC 12.2.0 · targets gcc_ntox86_64 (default) + gcc_ntoaarch64le (+_gpp/_cxx)
   dynamic linker /usr/lib/ldqnx-64.so.2  ·  licence ~/.qnx/license/licenses
@@ -194,7 +195,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 - **Pending learner input:** P-06 — weekly time budget (default assumed: ~5 h/week).
 - **Learner's open actions:** none blocking. Optional: T-017 image README · T-014 QSC install route ·
-  T-016 sparse-file measurement · T-202 exact SDP package version.
+  T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
 - **Labs:** 1 published (`lab01_timing`, `[UNVERIFIED]` pending V6 — the first compiled lab, so V6 verifies the lab mechanism itself).
 - **Doubts logged:** 14 (D-001…D-014, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
@@ -205,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.18 | 2026-08-26 | Regenerated after Session 019: real disk figures (79 GB; image not sparse); budget ~85 GB. |
 | 1.17 | 2026-08-26 | Regenerated after Session 018: Chapter 06 (core lab L06); block V11. |
 | 1.16 | 2026-08-26 | Regenerated after Session 017: Chapter 05 published. |
 | 1.15 | 2026-08-26 | Regenerated after Session 016: Chapter 04 published; licence facts corrected. |

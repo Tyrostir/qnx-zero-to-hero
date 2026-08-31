@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.17
+version: 1.18
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1723,10 +1723,121 @@ Recorded here so that no future author writes Chapter 21 before asking for it.
 
 ---
 
+## 2026-08-26 — Session 019 (Disk figures corrected from measurement; Chapter 07)
+
+### VERIFIED — `du -sh ~/qnx800` settles D-008, and corrects six documents
+
+```text
+79G  ~/qnx800
+53G  images/    23G  target/    2.7G  host/    1.1G  bsp/
+315M custom/    24M  source/    4.6M  sources/  2.9M docs/   1.5M gfx-source/
+```
+
+**Three findings.**
+
+**1. The virtual disk is *not* sparse.** D-008 speculated it might be, since `ls -lh` reported 47 GB
+apparent. `images/` occupies **53 GB of allocated disk** — essentially the full apparent size plus the
+1.9 GB archives. **Plan for the space; do not hope for a hole.** The speculation is retracted rather
+than quietly dropped.
+
+**2. The total is 79 GB, not ~43 GB.** And the two numbers do not contradict each other:
+
+| Measurement | What it actually measured |
+|-------------|---------------------------|
+| **43 GB** (block V3) | A **`df` delta** — everything written *anywhere* during the SDP install, including QNX Software Center and its download cache, which live **outside** `~/qnx800`. Taken **before** the VM image was unpacked |
+| **79 GB** (this drop) | **`du` on one directory**, taken after unpacking |
+
+> 💡 **The generalisable lesson, worth more than the QNX numbers:** `df` measures *the filesystem over
+> time*; `du` measures *a directory now*. Quoting one as though it were the other is how disk
+> estimates go wrong. Both figures are now stated together, with the reconciliation, rather than one
+> silently replacing the other.
+
+**3. `bsp/` is 1.1 GB — Board Support Packages, already on disk.** Chapter 22's entire subject. This
+is the third time material for a much later chapter has turned out to be present from the start, after
+`output/build/` (Ch 21) and the `option_files/` CTI machinery (Ch 21). Added to Chapter 05's layout
+with a pointer.
+
+**Corrected:** `PLAN.md` §7.1 (~50 GB → **~85 GB** budget, third revision), Setup Guide 01 (~25 GB →
+~85 GB, plus the completion checklist), Setup Guide 02 §12.1, Setup Guide 03 §5, Chapter 05
+(Fast-Track, §1.2, §3.1 layout, deep dive, Lab 05.1 answers, recap), Chapter 06, and
+**`tools/check-environment.sh`'s thresholds**, which would otherwise have passed a machine with 30 GB
+free.
+
+**T-016 closed.**
+
+---
+
+### DECIDED — Chapter 07 is built around one column of `pidin` output
+
+The chapter could have been a tour of the shell. Instead it puts **blocking states** at the centre and
+treats everything else as supporting material.
+
+**Why.** When a QNX system misbehaves the question is almost never *"which process is using the
+CPU?"* — the tools for that are the same everywhere. It is *"what is everything waiting for, and is
+anyone waiting on someone who will never answer?"* One column answers that, and no `ps` has an
+equivalent.
+
+Three techniques carry the chapter, and all three are reusable:
+
+| Technique | What it does |
+|-----------|--------------|
+| `pidin \| grep -v RECEIVE \| grep -v SIGWAITINFO` | Hides the healthy idle majority so the exceptions are immediately visible |
+| Following the **`REPLY` chain** | Each `REPLY` names a PID; look it up and repeat, until you reach real work or a stuck thread |
+| Looking for **cycles, dead servers and queues** | The three shapes a hang actually takes |
+
+The Path A activity gives six lines of output containing a **three-process deadlock cycle** plus one
+innocent victim, and asks the reader to identify both. Restarting the victim — the visible symptom —
+would achieve nothing, which is the mistake the technique exists to prevent.
+
+---
+
+### DECIDED — `RECEIVE` is taught as the *normal* state, emphatically
+
+A newcomer reading a `pidin` listing full of `RECEIVE` will reasonably conclude the system is stalled.
+It is the opposite: servers block waiting for work and consume **no CPU**, so a healthy idle QNX
+system is overwhelmingly `RECEIVE`.
+
+Stated in the Fast-Track box, §3.2, the recap, the cheat sheet and a mastery-check question — five
+times, deliberately, because the misreading is both natural and expensive.
+
+---
+
+### OPEN — V12.1 exists to give Chapter 25 a baseline
+
+Chapter 25's `⭐ L25` is *"diagnose a hung system with `pidin`"*. Teaching someone to recognise an
+**abnormal** listing requires a documented **normal** one, and the course does not have it: §3.2's
+claim that `RECEIVE` dominates is reasoning, not measurement.
+
+Block **V12.1** captures a state census of the healthy VM. It is cheap — four commands — and Chapter
+25 is materially better with it.
+
+> This is now the second time a block has been created to serve a much later chapter, after V11.2 for
+> Chapter 21. Both are recorded so the dependency is visible when those chapters are written.
+
+---
+
+### The pattern this is the third instance of
+
+| # | Claim | How it was wrong | Found by |
+|---|-------|------------------|----------|
+| 1 | `-listAvailablePackages` | The option does not exist | Running it (D-007) |
+| 2 | Customer demos are forbidden | Exactly backwards | Reading the licensing page (Ch 04) |
+| 3 | The disk image is probably sparse | It is not; and the total was ~40 GB low | Running `du` (D-008) |
+
+All three were **plausible, well-sourced and wrong**, and none would have been caught by re-reading
+the course's own documents — which is precisely why `[UNVERIFIED]` and the verification blocks exist.
+
+> ⚠️ **The one that would have hurt most is #3**, because `check-environment.sh` was actively telling
+> readers that 30 GB of free disk was "just enough". A wrong number in a *check script* is worse than a
+> wrong number in prose: it carries the authority of a test.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.18 | 2026-08-26 | Session 019 appended: disk figures corrected from `du` measurement across six documents and the check script; D-008 answered; `df`-versus-`du` reconciled; the third instance of a plausible-but-wrong published claim. |
 | 1.17 | 2026-08-26 | Session 018 appended: `Startup complete` as the partitioning line; the syspage introduced early; persistence made testable; build files opened fifteen chapters early; V11.2 flagged as the highest-value outstanding request. |
 | 1.16 | 2026-08-26 | Session 017 appended: the organising question rather than a directory tour; the silent `gcc` failure; an explicit split between what Chapter 05 verifies and what it predicts; explaining-after-doing as a deliberate pattern. |
 | 1.15 | 2026-08-26 | Session 016 appended: a published licensing error corrected (customer demos are permitted); the production/distribution boundary; the two-licence structure; the course as its own worked example; filename alignment and a link check. |

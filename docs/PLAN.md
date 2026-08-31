@@ -1,7 +1,7 @@
 ---
 title: "QNX Zero to Hero — Master Course Plan"
 document_id: PLAN
-version: 1.3
+version: 1.4
 status: "✅ Approved by the learner, 2026-08-25"
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -417,14 +417,16 @@ labs/lab13_message_passing/
 | 1 | Build essentials, `qemu-system-x86`, `bridge-utils` | ~500 MB | Setup Guide 01 |
 | 2 | myQNX account + QNX Everywhere licence | — | Setup Guide 02 |
 | 3 | QNX Software Center | ~300 MB | Setup Guide 02 |
-| 4 | QNX SDP 8.0 (host tools + target images) | **~43 GB** ⚠️ *(measured; QNX's own figure of 8–12 GB is optimistic)* | Setup Guide 02 |
-| 5 | QSTI — QNX Quick Start Target Image for QEMU | ~2–4 GB | Setup Guide 03 |
+| 4 | QNX SDP 8.0 (host tools, target trees, BSPs) | **~26 GB** ⚠️ *(QNX's own figure of 8–12 GB is optimistic)* | Setup Guide 02 |
+| 5 | QSTI — QNX Quick Start Target Image for QEMU | **~53 GB unpacked** ⚠️ *(1.9 GB compressed; the virtual disk is **not** sparse)* | Setup Guide 03 |
 | 6 | VS Code QNX Toolkit extension | ~50 MB | Setup Guide 04 |
 | 7 | Pandoc + TeX Live + Node/mermaid-cli (PDF only) | ~2–4 GB | PDF_Export.md |
 
-**Total disk budget: ~50 GB** — revised upward from ~25 GB after measuring a real install
-(Setup Guide 02 §12.1). A full SDP pulls both `x86_64` and `aarch64le` targets plus debug symbols
-for everything. ✅ Verified against the host: 951 GB free before, 908 GB after.
+**Total disk budget: ~85 GB** — revised twice, and now from direct measurement rather than a `df`
+delta. `du -sh ~/qnx800` reports **79 GB**: `images/` **53 GB** (the unpacked VM image, which is *not*
+sparse), `target/` 23 GB (both architectures plus debug symbols), `host/` 2.7 GB, `bsp/` 1.1 GB.
+Add headroom for the PDF toolchain and working space. Full breakdown and the reconciliation of the
+earlier 43 GB figure: [D-008](meta/Doubts.md#d-008).
 
 ---
 
@@ -724,6 +726,7 @@ The course is **done** when every box below is ticked.
 
 | Version | Date | Change | Author |
 |---------|------|--------|--------|
+| 1.4 | 2026-08-26 | **Disk budget corrected a third time, from measurement**: ~50 GB → **~85 GB**. `du` shows `~/qnx800` at 79 GB, dominated by the 53 GB unpacked VM image (§7.1). The earlier 43 GB figure was a `df` delta covering more than one directory and predating the image; both are now reconciled in [D-008](meta/Doubts.md#d-008). |
 | 1.3 | 2026-08-26 | Rule 1 (§2) extended to library functions, and a matching checkbox added to the per-chapter Definition of Done (§17). Prompted by [D-014](meta/Doubts.md#d-014): Chapter 01's lab used four library functions without explaining any of them — a rule-#4 violation the rules did not catch because they spoke only of *terms*. |
 | 1.2 | 2026-08-26 | Disk budget corrected from ~25 GB to ~50 GB after measuring a real SDP install (§7.1). |
 | 1.1 | 2026-08-25 | **Approved by the learner.** Amendments: all three paths authored in full (§3, §17); capstone ships in three domain flavours (§4.0.1); VM strategy revised to QSTI → CTI → `mkifs` (§7); risks R9 (host newer than documented) and R10 (three-path authoring cost) added. | AI Author |

@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.4
+version: 1.5
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -539,7 +539,7 @@ against.
 | **Date** | 2026-08-26 |
 | **Context** | Setup Guide 03, verification block V5.2 — after unpacking the image |
 | **Category** | Setup/Install |
-| **Status** | ✅ Answered |
+| **Status** | ✅ Answered · **measurement completed 2026-08-26** |
 
 **Question (verbatim).** *(Implicit, from the reported output.)*
 
@@ -549,9 +549,12 @@ against.
 ```
 
 **Short answer.**
-That is the VM's virtual hard disk, and 47 GB is its **apparent** size — the size the guest believes
-it has. It is very likely **sparse**, meaning it occupies far fewer real blocks. `du -sh` tells you
-the truth; `ls -lh` does not.
+That is the VM's virtual hard disk. **Yes, you really need that much** — measurement shows it is
+**not meaningfully sparse**. And the total is larger than the question assumes: `~/qnx800` occupies
+**79 GB**, of which `images/` alone is **53 GB**.
+
+> ✅ **Answered definitively 2026-08-26** by `du -sh ~/qnx800/*`. This entry originally guessed the
+> file was sparse. It is not.
 
 **Full answer.**
 
@@ -560,33 +563,61 @@ naming the real data file. `disk-qemu` is that data. QEMU reads the descriptor a
 image behind it.
 
 **Apparent size versus allocated size.** A sparse file has holes: regions never written consume no
-blocks on disk, yet still count toward the reported length.
+blocks on disk, yet still count toward the reported length. `ls -lh` shows the apparent size; `du`
+shows what the disk actually lost.
 
-```bash
-host$ ls -lh  qemu/output/disk-qemu     # apparent size — what the guest sees
-host$ du -sh  qemu/output/disk-qemu     # allocated size — what your disk actually lost
-host$ df -h ~                           # the honest bottom line
+✅ **Measured 2026-08-26:**
+
+```text
+$ du -sh ~/qnx800
+79G     /home/tyrostir/qnx800
+
+$ du -sh ~/qnx800/*
+53G     images/        ← the VM image, and by far the largest item
+23G     target/        ← two architectures + debug symbols
+2.7G    host/          ← the toolchains
+1.1G    bsp/           ← Board Support Packages (Ch 22)
+315M    custom/
+24M     source/
+4.6M    sources/
+2.9M    docs/
+1.5M    gfx-source/
 ```
 
-If `du` reports far less than 47 GB, the file is sparse and all is well.
+**`images/` is 53 GB of *allocated* disk**, and the apparent size of `disk-qemu` alone is 47 GB. The
+two numbers are close enough that the file is **essentially fully allocated — it is not sparse in any
+useful sense.** Plan for the space; do not hope for a hole.
 
 > ⚠️ **Sparseness is fragile.** Copying a sparse file with a naive tool expands every hole into real
 > zeros — a 47 GB copy from a 3 GB original. If you ever need to move it, use `cp --sparse=always`,
 > `rsync -S`, or `tar -S`. This is a genuine way to fill a disk by accident.
 
-**The wider picture — this course's disk budget has grown twice.**
+**The wider picture — this course's disk budget has now been corrected three times.**
 
 | Stage | Documented | Measured |
 |-------|-----------|----------|
 | Original estimate | ~25 GB total | — |
-| After SDP 8.0 | 8–12 GB | **~43 GB** (951 GB free → 908 GB) |
-| After the QEMU image | not estimated | archives ~1.9 GB + `disk-qemu` up to 47 GB apparent |
+| After SDP 8.0 | QNX's own figure: 8–12 GB | **~43 GB** `df` delta (951 → 908 GB free) |
+| **After the QEMU image** | ~50 GB total | ✅ **79 GB** in `~/qnx800` alone |
 
-`PLAN.md` §7.1 was revised from ~25 GB to ~50 GB after the SDP measurement, and needs revising again
-once `du` and `df` give the real figure here.
+**Budget ~85 GB** for a full install with the QEMU image.
+
+> ⚠️ **Reconciling the two measurements, because they disagree and both are right.** The earlier
+> **43 GB** was a `df` delta — *everything written anywhere in the filesystem* during the SDP install,
+> including QNX Software Center itself and its download cache, which live **outside** `~/qnx800`. The
+> **79 GB** is `du` on one directory, and now includes the unpacked VM image, which did not exist when
+> the `df` measurement was taken.
+>
+> 💡 **The lesson generalises well beyond QNX:** `df` measures *the filesystem over time*; `du`
+> measures *a directory now*. Neither is wrong; they answer different questions, and quoting one as
+> though it were the other is how disk-space estimates go astray.
 
 > 💡 **Once the VM boots successfully**, the `.tar.gz.0` and `.tar.gz.1` archives (~1.9 GB) can be
 > deleted — you can always reinstall the package from QNX Software Center. **Not before**, though.
+>
+> 💡 **A more interesting find in that listing: `bsp/` is 1.1 GB.** Those are **Board Support
+> Packages** — the hardware-specific sources that let QNX boot on a particular board. Chapter 22's
+> subject, already on your disk. Whatever else you delete, that is the directory worth keeping.
 
 **Bonus: what else that listing tells you.** `procnto-smp-instr.sym` is 12 MB of debug symbols for
 the kernel, and its name identifies the kernel variant: **SMP** (multi-core) and **instrumented** —
@@ -598,8 +629,10 @@ your disk.
 **Related.** [Setup Guide 03 §5](../guides/Setup_03_QEMU_VM.md#5-step-2--unpack-the-image-) ·
 [Setup Guide 02 §12.1](../guides/Setup_02_QNX_Account_And_License.md) · Chapters 21 and 26
 
-**Action taken.** Setup Guide 03 §5 now shows the real listing, explains all five artefacts, and
-asks for `df -h` before and after. `PLAN.md`'s disk budget flagged for another revision (T-016).
+**Action taken.** Setup Guide 03 §5 shows the real listing and explains all five artefacts. After the
+`du` measurement (T-016, closed 2026-08-26): the *sparse* speculation is retracted, the real breakdown
+is recorded above, and `PLAN.md` §7.1, Setup Guides 01 and 02, and Chapters 05 and 06 are all
+corrected to **~79 GB measured / ~85 GB budget**.
 
 ---
 
@@ -1177,6 +1210,7 @@ where it is.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | **D-008 answered definitively** — `disk-qemu` is *not* sparse, and `~/qnx800` is **79 GB**, not ~43 GB. The `df`-versus-`du` discrepancy explained. |
 | 1.4 | 2026-08-26 | +D-014 (the four library functions in Lab 01.2 — a course-rule-#4 gap, now closed). |
 | 1.3 | 2026-08-26 | **D-009 corrected** — the image ships `PermitRootLogin no`, not `prohibit-password`; keys do not help root. +D-011 (reading `/etc/passwd` and `sshd_config`), D-012 (the apparent root SSH success), D-013 (why QNX PIDs are large). |
 | 1.2 | 2026-08-26 | +D-009 (SSH refuses root by design), D-010 (benign boot-log warnings). |

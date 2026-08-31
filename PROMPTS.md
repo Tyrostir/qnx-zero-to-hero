@@ -70,6 +70,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#15](#prompt15) | 2026-08-26 | Claude (Opus 5) | Write Chapter 04 | 📕 **Chapter 04 published** (5/34, Part 1 begins) · ⚠️ **corrected a published licensing error** · Setup 02 → v2.2 · block V9 |
 | [PROMPT#16](#prompt16) | 2026-08-26 | Claude (Opus 5) | Write Chapter 05 | 📕 **Chapter 05 published** (6/34) · the host/target split · block V10 · Glossary +8 |
 | [PROMPT#17](#prompt17) | 2026-08-26 | Claude (Opus 5) | Write Chapter 06 | ⭐ **Chapter 06 published** (7/34) — first core chapter, lab L06 · block V11 · Glossary +5 |
+| [PROMPT#18](#prompt18) | 2026-08-26 | Claude (Opus 5) | `du` measurement supplied; write Chapter 07 | ⚠️ **Disk figures corrected across 6 docs + the check script** (79 GB; not sparse) · 📕 **Chapter 07 published** (8/34) · block V12 |
 
 ---
 
@@ -2191,10 +2192,131 @@ Also wanted: **`slm.cfg`** from the target (V11.1) — §2.3 currently describes
 
 ---
 
+## PROMPT#18
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 019 |
+| **Context** | The learner supplied the outstanding `du` measurement and asked for the next chapter. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> You asked me to give the "du" of ~/qnx800 folder to analyze and update the documents appropriately. Please find it in toAgent/6.sizeInfo.md document. And please proceed to Chapter 07.
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# Two things: a correction, and Chapter 07
+
+## ⚠️ Your `du` corrected six documents and a script
+
+```text
+79G  ~/qnx800
+53G  images/    23G  target/    2.7G  host/    1.1G  bsp/
+315M custom/    24M  source/    4.6M sources/   2.9M docs/
+```
+
+**Three findings, and one of them mattered more than the numbers.**
+
+**1. The virtual disk is *not* sparse.** D-008 speculated it might be, since `ls -lh` showed 47 GB apparent. `images/` occupies **53 GB of allocated disk** — essentially the full apparent size. Speculation retracted, not quietly dropped.
+
+**2. The total is 79 GB, not ~43 GB — and both figures were right.** That's the part worth understanding:
+
+| Measurement | What it actually measured |
+|---|---|
+| **43 GB** (block V3) | A **`df` delta** — everything written *anywhere* during the install, including QSC's download cache outside `~/qnx800`. Taken **before** the image was unpacked |
+| **79 GB** (your drop) | **`du` on one directory**, after unpacking |
+
+> **`df` measures the filesystem over time; `du` measures a directory now.** Quoting one as though it were the other is how disk estimates go wrong. Both are now stated together with the reconciliation.
+
+**3. `bsp/` is 1.1 GB — Board Support Packages, already on your disk.** Chapter 22's entire subject. That's the *third* time later-chapter material has turned out to be present from the start, after `output/build/` and the CTI `option_files/`.
+
+**Corrected:** `PLAN.md` (~50 GB → **~85 GB** budget, third revision), Setup Guides 01/02/03, Chapters 05 and 06 — and **`tools/check-environment.sh`**, whose thresholds would have told a reader that 30 GB free was "just enough".
+
+> A wrong number in a *check script* is worse than a wrong number in prose: it carries the authority of a test. That's the third plausible-but-wrong published claim this course has caught, after `-listAvailablePackages` and the customer-demo licensing error — and none would have been found by re-reading our own documents.
+
+**T-016 closed. D-008 answered.**
+
+---
+
+# 📕 Chapter 07 — First Contact: The QNX Shell (8/34)
+
+992 lines. Part 1 is now 4/5 done.
+
+## Built around one column
+
+The chapter could have been a shell tour. Instead **blocking states** are the centre, because when a QNX system misbehaves the question is never *"which process is using the CPU?"* — it's:
+
+> **"What is everything waiting for, and is anyone waiting on someone who will never answer?"**
+
+Three reusable techniques carry it:
+
+| | |
+|---|---|
+| `pidin \| grep -v RECEIVE \| grep -v SIGWAITINFO` | Hides the healthy idle majority — exceptions become visible instantly |
+| **Follow the `REPLY` chain** | Each `REPLY` names a PID. Look it up, repeat, until you reach real work or a stuck thread |
+| Look for **cycles, dead servers, queues** | The three shapes a hang actually takes |
+
+## `RECEIVE` is normal — said five times, deliberately
+
+A newcomer seeing a listing full of `RECEIVE` will reasonably conclude the system is stalled. It's the opposite: servers block waiting for work at **zero CPU cost**, so a healthy idle QNX system is overwhelmingly `RECEIVE`. I say so in the Fast-Track, §3.2, the recap, the cheat sheet and a mastery question — because the misreading is both natural and expensive.
+
+## `/dev` is not what it looks like
+
+| | Linux | QNX |
+|---|---|---|
+| `/dev/ser1` is | A node with major/minor numbers | A **path a process registered** |
+| `open()` | Enters the kernel, dispatches by number | **Asks `procnto` who owns the path** |
+| `read()` after | A kernel call | **A message to that process** |
+
+You can verify it from the shell: for every interesting `/dev` entry there's a process in `pidin`. `devc-ser8250` owns the serial paths. **The filesystem is a directory of running services.**
+
+There's also a deep dive on why QNX's `/proc` is small — *most of what Linux exposes there isn't in the QNX kernel to expose*. Network stats belong to `io-sock`, a process. That's a genuine cost of the microkernel, honestly stated.
+
+## The Path A activity I'm happiest with
+
+Six lines of `pidin` output containing a **three-process deadlock cycle** plus one innocent victim. The reader has to find both — and notice that restarting the victim (`display_app`, the visible symptom) would achieve nothing.
+
+**You diagnose a deadlock from six lines of text, with no debugger and no source code.** That's why `pidin` is worth learning properly rather than treating as `ps` with a different name.
+
+---
+
+### What changed on disk
+
+`Chapter07_FirstContactTheQNXShell.md` (new, 992 lines) · Glossary **+6** with a new **K** section and **blocking state** de-seeded · **block V12** added · disk corrections across `PLAN.md`, Setup Guides 01–03, Chapters 05–06, `check-environment.sh`, D-008 · `DecisionsLog` Session 019 · TOC, README, indexes, trackers. Link check across all eight chapters: **zero broken**.
+
+---
+
+## 👉 Seven blocks open — two I'd single out
+
+| | | |
+|---|---|---|
+| ⭐ **V11.2** | `head -60 output/build/ifs.build` and `cat output/build/disk.layout` | **Still the highest-value request** — it turns Chapter 21 into a walkthrough of *your* system |
+| **V12.1** | `pidin \| awk '{print $5}' \| sort \| uniq -c \| sort -rn` | Four commands. Becomes the course's documented **healthy-system baseline**, which Chapter 25's `⭐ L25` needs to teach recognising an unhealthy one |
+
+Both are cheap, and both serve chapters far ahead. I've recorded the dependency in the decisions log so it's visible when those chapters get written.
+
+**Next: ⭐ Chapter 08 — The Toolchain & Deployment**, which closes Part 1 and is a `⭐ core` lab: cross-compiling in earnest, QNX's recursive Makefiles, and **remote debugging** — `gdb` on your host attached over the network to a process on the target via `qconn`, which has been sitting in `slm`'s component list since Chapter 06.
+
+After that, **Part 2 begins the microkernel itself.**
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.16 | 2026-08-26 | PROMPT#18 logged: disk corrections and Chapter 07. |
 | 2.15 | 2026-08-26 | PROMPT#17 logged: Chapter 06, the first core chapter. |
 | 2.14 | 2026-08-26 | PROMPT#16 logged: Chapter 05 published. |
 | 2.13 | 2026-08-26 | PROMPT#15 logged: Chapter 04 published; a published licensing error corrected. |

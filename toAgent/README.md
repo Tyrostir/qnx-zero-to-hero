@@ -56,6 +56,7 @@ toAgent/<n>.<WhatItIs>.md
 | # | File | Block | Date | Outcome |
 |---|------|-------|------|---------|
 | 1 | `1.BlockV1Output.md` | **V1** — host preparation | 2026-08-25 | ✅ `19 passed · 6 warnings · 0 failed`. T-008 and T-009 cleared; Setup Guide 01 → v2.0; Risks R3 and R9 closed. |
+| 6 | `6.sizeInfo.md` | **V10.1 (part)** — `du -sh ~/qnx800` | 2026-08-26 | ✅ **79 GB measured.** images/ 53G · target/ 23G · host/ 2.7G · bsp/ 1.1G. **Settles D-008 — the virtual disk is not sparse.** Corrected the disk budget in `PLAN.md`, both setup guides, Chapters 05 and 06, and `check-environment.sh`. |
 | 5 | `5.BlockV5.5V5.7-NoteOnPasswordAtV5.5.md` | **V5.5–V5.7** — SSH, run the binary, shut down | 2026-08-26 | ✅ 🎉 **BLOCK V5 COMPLETE.** `Hello from QNX!` ran on the target (PID 14032920). SSH = `qnxuser`/`qnxuser`. **D-009 corrected** — the image ships `PermitRootLogin no`. Setup Guide 03 → v2.0. +D-011, D-012, D-013. |
 | 4 | `5.BlockV5.3V5.5-StuckAtV5.5.md` | **V5.3–V5.5** — boot, first contact, networking | 2026-08-26 | 🎉 **M2 — the VM boots.** QNX 8.0.0, `192.168.122.46`. H-9 (the `virbr0` prediction) closed — bridging worked. **Blocked at SSH:** root refused by `sshd` → **D-009**. Boot warnings explained → **D-010**. Setup Guide 03 → v1.2. |
 | 3 | `3.BlockV5.1V5.3-StuckAtV5.3.md` | **V5.1–V5.3** — QSTI install, unpack, boot attempt | 2026-08-26 | 🔄 V5.1–V5.2 ✅; **V5.3 blocked** by the nested `qemu/` directory. Three bugs found → **D-006**, **D-007**, **D-008**. Setup Guide 03 → v1.1. |
@@ -67,6 +68,7 @@ toAgent/<n>.<WhatItIs>.md
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.5 | 2026-08-26 | Drop 6 indexed (`du` breakdown) — corrected published disk figures. |
 | 1.4 | 2026-08-26 | Drop 5 indexed (V5.5–V5.7) — **all verification complete**. |
 | 1.3 | 2026-08-26 | Drop 4 indexed (V5.3–V5.5) — filename is `5.` as supplied; the numbering is the learner's. |
 | 1.2 | 2026-08-26 | Drop 3 indexed (V5.1–V5.3). `/btw` convention documented. |

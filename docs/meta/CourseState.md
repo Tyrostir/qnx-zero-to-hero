@@ -26,7 +26,7 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **7 / 34** — Part 0 complete; Part 1 in progress |
+| **Chapters published** | **8 / 34** — Part 0 complete; Part 1 nearly complete |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
 | **Labs published** | **1 / 21** compiled (Lab 01.2, pending V6) · plus non-compiled labs in Ch 00, 02, 03, 04, 05, 06 |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
@@ -39,14 +39,14 @@ update_trigger: "End of every working session, and after every chapter is publis
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
-Part 1  Environment        [████████████        ]  60 %   (3/5 chapters)
+Part 1  Environment        [████████████████    ]  80 %   (4/5 chapters)
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [████                ]  21 %   (7/34)
+OVERALL                    [████                ]  24 %   (8/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [████                ]  21 %   (7/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 06](../chapters/Chapter06_FirstQNXVMOnQEMU.md)** ⭐ (~90 min) and do **core lab L06**. Six blocks open; **V11.2 is the highest-value one in the course** — it hands over `ifs.build`, the recipe for the system you are running. |
-| 🤖 **Me — next turn** | **Chapter 07 — First Contact: The QNX Shell** (T-115d). `ksh`, the filesystem layout, `pidin` in earnest, and the pathname space. |
+| 👤 **You — do next** | 📕 **Read [Chapter 07](../chapters/Chapter07_FirstContactTheQNXShell.md)** (~75 min). Seven blocks open; **V11.2** (`ifs.build`) remains the highest-value, and **V12.1** captures the healthy-system baseline Chapter 25 will need. |
+| 🤖 **Me — next turn** | ⭐ **Chapter 08 — The Toolchain & Deployment** (T-115e) — the last chapter of Part 1 and a `⭐ core` lab: cross-compiling in earnest, QNX recursive Makefiles, and **remote debugging over `qconn`**. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -79,7 +79,7 @@ OVERALL                    [████                ]  21 %   (7/34)
 | Nested virtualization | `/dev/kvm` **present** | ✅ |
 | KVM group membership | ✅ **Fixed 2026-08-25** — `/dev/kvm` present and accessible | ✅ |
 | RAM | 23 GiB total, ~21 GiB free | ✅ |
-| Disk | 1007 GB volume, **952 GB free** (need ~25 GB) | ✅ |
+| Disk | 1007 GB volume, **908 GB free**. `~/qnx800` measures **79 GB**; budget **~85 GB** | ✅ |
 | Git | `git 2.53.0` | ✅ |
 | curl | `curl 8.18.0` | ✅ |
 | tar / ssh | GNU tar 1.35 / OpenSSH 10.2p1 | ✅ |
@@ -123,7 +123,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | 04 | QNX Licensing & QNX Everywhere | 📕 | — | v1.0. Terms verified; corrected a published error. |
 | 05 | Installing QNX SDP 8.0 | 📕 | — | v1.0. The host/target split as the organising idea. |
 | 06 | Your First QNX VM on QEMU ⭐ | 📕 | — | v1.0. Contains **core lab L06**. |
-| 07 | First Contact — The QNX Shell | 📄 | — | |
+| 07 | First Contact — The QNX Shell | 📕 | — | v1.0. `pidin` and blocking states, properly. |
 | 08 | The Toolchain & Deployment ⭐ | 📄 | — | |
 
 ### Part 2 — Microkernel Core
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 019 — 2026-08-26 📕 **Chapter 07 · disk figures corrected**
+
+| | |
+|---|---|
+| **Goal** | Apply the learner's `du` measurement, then write Chapter 07. |
+| **Done** | ⚠️ **Corrected published disk figures across six documents and the check script.** `du -sh ~/qnx800` = **79 GB** (`images/` 53 GB · `target/` 23 GB · `host/` 2.7 GB · `bsp/` 1.1 GB), not the ~43 GB previously published<br>• **D-008 answered definitively: the virtual disk is *not* sparse.** The earlier speculation is retracted<br>• The 43 GB and 79 GB figures **reconciled rather than one replacing the other** — the first was a `df` delta covering more than one directory and predating the image; the second is `du` on one directory. *`df` measures the filesystem over time; `du` measures a directory now*<br>• **`bsp/` (1.1 GB) discovered** — Chapter 22's subject, already on disk; the third time later-chapter material has turned out to be present from the start<br>• `check-environment.sh` thresholds corrected — it would have passed a machine with 30 GB free<br>• 📕 **Chapter 07 — First Contact: The QNX Shell** published (992 lines): `pidin` taught properly, with **blocking states** as the centre; the `REPLY`-chain technique; the `grep -v RECEIVE` filter; `/dev` entries as **processes that registered paths**; and why QNX's `/proc` is small<br>• §5 diagnoses an unfamiliar system in six steps; the 🐣 activity has the reader find a **three-process deadlock cycle** from six lines<br>• Glossary +6 with a new **K** section and **blocking state** de-seeded; **block V12** added |
+| **Learner decisions** | Supplied the `du` measurement; asked for Chapter 07 |
+| **Questions logged** | None new *(D-008 answered)* |
+| **Blockers** | None |
+| **Next session** | ⭐ **Chapter 08 — The Toolchain & Deployment** (closes Part 1) |
 
 ### Session 018 — 2026-08-26 ⭐ **Chapter 06 — the first core chapter**
 
@@ -431,6 +442,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.18 | 2026-08-26 | Session 019: disk figures corrected from measurement; **Chapter 07 published** (8/34). Block V12 added. |
 | 1.17 | 2026-08-26 | Session 018: ⭐ **Chapter 06 published** (7/34) with core lab L06. Block V11 added. |
 | 1.16 | 2026-08-26 | Session 017: **Chapter 05 published** (6/34). Block V10 added. |
 | 1.15 | 2026-08-26 | Session 016: **Chapter 04 published** (5/34, Part 1 begun) and a published licensing error corrected. Block V9 added. |

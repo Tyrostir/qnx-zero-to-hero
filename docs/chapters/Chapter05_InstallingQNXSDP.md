@@ -6,7 +6,7 @@ paths: ["🐣 A", "🚶 B", "🏃 C"]
 est_time: "90 minutes reading · 30 minutes labs"
 prereqs: "Chapters 02 and 04. Setup Guide 02 (you already installed the SDP)."
 status: Published
-version: 1.0
+version: 1.1
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -68,7 +68,7 @@ is a whole SDP; **packages** are the pieces. Useful CLT commands:
 
 ⚠️ **There is no `-listAvailablePackages`.** It does not exist ([D-007](../meta/Doubts.md#d-007)).
 
-**Gotchas:** the install is **~43 GB**, not the 8–12 GB commonly quoted · `.sym` files beside every
+**Gotchas:** `~/qnx800` measures **79 GB** — `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB — not the 8–12 GB commonly quoted · `.sym` files beside every
 binary are separated debug symbols, not clutter · `$QNX_TARGET/usr/include` is on **no default
 include path** — `qcc` supplies it, plain `gcc` will not.
 
@@ -157,8 +157,8 @@ binary for a **different operating system**, so it needs:
 | QNX's dynamic linker path | Linux's `/lib64/ld-linux-x86-64.so.2` |
 | A code generator for the target CPU | Necessarily, but not sufficiently, your own |
 
-**So the SDP ships a complete second world**, and that is why `~/qnx800` is ~43 GB rather than a few
-hundred megabytes: it contains the C library, headers and utilities for **two architectures**, plus
+**So the SDP ships a complete second world**, and that is why `~/qnx800` measures **79 GB** rather
+than a few hundred megabytes: it contains the C library, headers and utilities for **two architectures**, plus
 debug symbols for all of it.
 
 ### 1.2 Why this is worth a chapter rather than a paragraph
@@ -299,9 +299,19 @@ useful, and different enough to matter.
 │   │   └── boot/                      procnto and boot pieces   (Ch 21)
 │   └── aarch64le/                     the same, for ARM64       (Part 6)
 │
-├── images/qemu/                       QSTI — the VM image       (Setup 03)
-└── qnxsdp-env.sh                      sets the environment
+├── images/qemu/                       QSTI — the VM image       (Setup 03)   53 GB
+├── bsp/                               ⭐ Board Support Packages  (Ch 22)     1.1 GB
+├── custom/                            customisation material                315 MB
+├── docs/                              local documentation                   2.9 MB
+├── source/, sources/, gfx-source/     selected sources                      ~30 MB
+├── qnxsdp-env.sh                      sets the environment
+└── qnxsdp-env.bat                     the same, for Windows hosts
 ```
+
+> 💡 **`bsp/` is worth knowing about now, and it is easy to miss.** 1.1 GB of **Board Support
+> Packages** — the hardware-specific sources (IPL, `startup-*`, drivers, build files) that let QNX
+> boot on a particular board. That is Chapter 22's entire subject, and, like `output/build/` in
+> Chapter 06, it is already on your disk fifteen chapters early.
 
 **Three observations worth making:**
 
@@ -398,13 +408,35 @@ procnto-smp-instr    procnto-smp-instr.sym
 > ⚠️ **Symbols must match the binary exactly.** Rebuild the program and the old `.sym` is worthless —
 > and worse than worthless, because it will produce confidently wrong function names.
 
-### 🔬 Deep dive — where the ~43 GB goes
+### 🔬 Deep dive — where the 79 GB goes
 
 <details>
-<summary>Optional. Useful if you are short of disk, or wondering why an OS needs 43 GB.</summary>
+<summary>Optional. Useful if you are short of disk, or wondering why an OS needs this much.</summary>
 
-Measured on a verified install: free space fell from 951 GB to 908 GB — about **43 GB**, well above
-the 8–12 GB commonly quoted (and previously stated by this course, [D-008](../meta/Doubts.md#d-008)).
+✅ **Measured on a verified install:**
+
+```text
+$ du -sh ~/qnx800
+79G
+
+$ du -sh ~/qnx800/*
+53G   images/       the VM image — by far the largest item
+23G   target/       two architectures + debug symbols
+2.7G  host/         the toolchains
+1.1G  bsp/          Board Support Packages (Ch 22)
+315M  custom/  · 24M source/ · 4.6M sources/ · 2.9M docs/ · 1.5M gfx-source/
+```
+
+> ⚠️ **Two numbers that disagree, and both are right.** Setup Guide 02 records **43 GB**, measured as
+> a `df` delta during the SDP install. This is **79 GB**, measured with `du` on one directory —
+> *after* the VM image was unpacked, which the earlier measurement predates. The `df` figure also
+> counted QNX Software Center and its download cache, which live **outside** `~/qnx800`.
+>
+> 💡 **`df` measures the filesystem over time; `du` measures a directory now.** Quoting one as though
+> it were the other is how disk estimates go wrong — a lesson worth more than the QNX-specific
+> numbers.
+
+**Budget ~85 GB** for a full install with the QEMU image.
 
 The multipliers:
 
@@ -413,7 +445,7 @@ The multipliers:
 | **Two architectures** | `x86_64/` and `aarch64le/` are complete, independent copies |
 | **Debug symbols for everything** | The `.sym` files are frequently larger than the binaries |
 | **Host tools** | A full GCC 12.2.0 toolchain, GDB, binutils — twice, since they target two architectures |
-| **Target images** | QSTI alone is ~1.9 GB compressed and far more unpacked |
+| **Target images** | ⭐ **The single biggest item.** QSTI is ~1.9 GB compressed and **53 GB unpacked** — the virtual disk is *not* sparse ([D-008](../meta/Doubts.md#d-008)) |
 | **Documentation and samples** | Substantial |
 
 **Reducing it.** QNX Software Center lets you deselect target architectures. Dropping `aarch64le`
@@ -430,8 +462,8 @@ host$ du -sh ~/qnx800/*
 |---------|----------|------|
 | `du -sh` | POSIX | *Disk usage*; `-s` summarise (one total per argument), `-h` human-readable |
 
-📋 The course does not yet know the real per-directory breakdown. If you run it, the numbers are
-wanted — block **V10**.
+✅ **Done** — the breakdown above is that measurement. What remains unmeasured is the split *inside*
+`target/` between the two architectures, which would tell you exactly what dropping `aarch64le` saves.
 
 </details>
 
@@ -618,8 +650,10 @@ host$ ls $QNX_TARGET/x86_64/usr/lib/ | head -20
 <details>
 <summary>Answers</summary>
 
-1. **~43 GB** on a verified install. `target/` should dominate — two complete architectures plus
-   debug symbols (§3 deep dive).
+1. **79 GB.** ⚠️ **`images/` dominates at 53 GB** — the unpacked VM image, not the SDP itself.
+   `target/` is second at 23 GB (two complete architectures plus debug symbols), and `host/` is only
+   2.7 GB. If you expected `target/` to be the largest, you were reasoning about the *SDP*; the
+   *directory* is mostly a virtual disk (§3 deep dive).
 2. Dozens: `qcc`, `q++`, `ntox86_64-gcc`, `ntox86_64-gdb`, `objdump`, `nm`, `mkifs`, `mkqnximage`,
    and the `aarch64le` equivalents of each.
 3. **`$QNX_TARGET/usr/include/sys/neutrino.h`** — *outside* the architecture directories, because
@@ -630,8 +664,9 @@ host$ ls $QNX_TARGET/x86_64/usr/lib/ | head -20
 
 </details>
 
-📋 **Please paste the `du -sh` output.** The course knows the total but not the breakdown, and it
-should.
+✅ **This measurement has been done** and is recorded in §3's deep dive and
+[D-008](../meta/Doubts.md#d-008). Run it anyway — your numbers may differ, and the exercise is
+reading the breakdown, not producing it.
 
 ---
 
@@ -919,7 +954,8 @@ job exists is worth a great deal.
 - **QSC vocabulary:** installation · profile · baseline · package. **`-help` is authoritative**;
   `-listAvailablePackages` does not exist.
 - **`.sym` files are separated debug symbols** — small binaries on the target, full symbols for `gdb`.
-- The install is **~43 GB**, mostly two architectures plus debug symbols.
+- `~/qnx800` measures **79 GB** — `images/` **53 GB** (the VM image, not sparse), `target/` 23 GB,
+  `host/` 2.7 GB, `bsp/` 1.1 GB. **Budget ~85 GB.**
 - **`file` belongs in your build habits.** `interpreter /usr/lib/ldqnx-64.so.2` is the proof.
 - The worst failure is the silent one: plain `gcc` builds a **working binary for the wrong OS**.
 
@@ -1023,4 +1059,5 @@ apart.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | **Disk figures corrected from measurement.** `~/qnx800` is **79 GB**, not ~43 GB: `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB. The virtual disk is **not sparse**, contrary to earlier speculation ([D-008](../meta/Doubts.md#d-008)). The `df`-versus-`du` discrepancy is explained rather than papered over. §3.1's layout gains `bsp/`, `custom/`, `docs/`, `source/`, `sources/`, `gfx-source/` and `qnxsdp-env.bat`, with a note that `bsp/` is Chapter 22's subject already on disk. |
 | 1.0 | 2026-08-26 | Created. The host/target split as the organising idea, with the *"which CPU and OS executes this file?"* test. Covers the `~/qnx800` layout, what `qnxsdp-env.sh` changes and why `source` matters, QNX Software Center's installation/profile/baseline/package model with **verified** CLT options, `.sym` files, and where ~43 GB goes. §5 traces one `qcc` invocation to the exact tree each piece came from, and names the silent failure: plain `gcc` produces a working binary for the wrong OS. Labs are `[UNVERIFIED]` pending block **V10**. |

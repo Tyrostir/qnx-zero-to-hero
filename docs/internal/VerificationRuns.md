@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6–V11 pending**
+status: Active — V1–V5 ✅ complete; **V6–V12 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -78,7 +78,7 @@ Worked / Failed. Notes: ...
 | **Machine** | Your laptop — Ubuntu 26.04 LTS on WSL2 |
 | **Repo checkout** | `~/exercises/qnx-zero-to-hero` |
 | **Time** | V1 ≈ 45 min · V2 ≈ 15 min + approval wait · V3 ≈ 60–90 min (~10 GB download) · V4 ≈ 10 min |
-| **Disk** | ~25 GB free |
+| **Disk** | **~85 GB** free ⚠️ *(measured: `~/qnx800` = 79 GB)* |
 | **Network** | A good connection for V3 |
 
 > ⚠️ **Sync first.** The repository has been updated since you last worked on the laptop. Before you
@@ -97,7 +97,7 @@ Worked / Failed. Notes: ...
 |-------|-------|
 | **V1** — host preparation | ✅ **Verified 2026-08-25.** `19 passed · 6 warnings · 0 failed` |
 | **V2** — licence | ✅ **Complete 2026-08-26.** Requested, accepted and **deployed** |
-| **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`, ~43 GB |
+| **V3** — Software Center + SDP | ✅ **Complete 2026-08-26.** SDP 8.0 at `~/qnx800`; 43 GB `df` delta, **79 GB measured later with the image** |
 | **V4** — toolchain proof | ✅ **Complete 2026-08-26.** `24 passed · 3 warnings · 0 failed` |
 | **V5** — the QEMU VM | ✅ 🎉 **Complete 2026-08-26.** Boots, networked, and runs a cross-compiled binary |
 | **V6** — the first chapter lab | 👉 **Next.** Verifies the lab mechanism all remaining chapters use |
@@ -106,6 +106,7 @@ Worked / Failed. Notes: ...
 | **V9** — licence inspection | ⬜ Chapter 04, 15 minutes. **Host only** |
 | **V10** — SDP exploration | ⬜ Chapter 05, 25 minutes. **Host only.** Confirms the chapter's central mechanism |
 | **V11** — image archaeology | ⬜ Chapter 06, 45 minutes. **V11.2 is the highest-value request outstanding** |
+| **V12** — a healthy-system baseline | ⬜ Chapter 07, 30 minutes. Feeds Chapter 25's diagnostic lab |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -731,9 +732,14 @@ host$ ls $QNX_TARGET/usr/include/sys/ | head -20
 ```
 
 📋 **Paste all of it.**
-🎯 **Why:** the course knows the **total** (~43 GB, from block V3's `df` delta) but has never seen the
-**breakdown**, and has never confirmed `$MAKEFLAGS` at all — Setup Guide 02 §10.3 lists it from
-documentation, not observation.
+✅ **The `du` breakdown has been supplied** (drop 6) and is recorded in
+[D-008](../meta/Doubts.md#d-008): `~/qnx800` = **79 GB**, `images/` 53 GB, `target/` 23 GB, `host/`
+2.7 GB, `bsp/` 1.1 GB. It corrected published figures in `PLAN.md`, both setup guides and Chapters 05
+and 06, and settled that the virtual disk is **not sparse**.
+
+🎯 **Still wanted from this checkpoint:** `echo $MAKEFLAGS` — never confirmed, since Setup Guide 02
+§10.3 lists it from documentation rather than observation — plus the `ls` listings of
+`$QNX_HOST/usr/bin` and `$QNX_TARGET/usr/include/sys/`.
 
 ### V10.2 — Watch `qcc` cross the trees
 
@@ -840,6 +846,57 @@ please paste whatever the target says.
 
 ---
 
+## 7h. Block V12 — Chapter 07's baseline of a healthy system
+
+> 🎯 **Goal:** capture what *healthy* looks like, so later chapters have something to compare against.
+> ⏱️ 30 minutes. Target only, **no compiler**.
+> 📖 [Chapter 07 Labs 07.1, 07.2 and 💥](../chapters/Chapter07_FirstContactTheQNXShell.md)
+
+### V12.1 — The state census ⭐
+
+```bash
+qnx# pidin info
+qnx# pidin | wc -l
+qnx# pidin | awk '{print $5}' | sort | uniq -c | sort -rn
+qnx# pidin | grep -v RECEIVE | grep -v SIGWAITINFO | grep -v NANOSLEEP
+```
+
+📋 **Paste all four.**
+🎯 **Why:** Chapter 07 asserts that **`RECEIVE` dominates a healthy QNX system**, and that filtering
+the idle states leaves only the interesting threads. Neither has been measured. This becomes the
+course's **documented picture of a healthy system**, which Chapter 25's `⭐ L25` diagnostic lab needs
+in order to teach recognising an *unhealthy* one.
+
+### V12.2 — The communication graph
+
+```bash
+qnx# pidin fds | head -40
+qnx# pidin -p io-sock | head -20
+qnx# ls /dev
+qnx# pidin | grep devc
+```
+
+📋 **Paste all four.**
+🎯 **Why:** `pidin fds` is claimed to show which **server** each descriptor connects to — the system's
+communication graph, with no direct Linux equivalent. The course has never seen its output format.
+`ls /dev` alongside `pidin | grep devc` is the evidence for §2.3's claim that `/dev` entries are
+processes.
+
+### V12.3 — 💥 Two kinds of waiting
+
+In session 1 (console): `sleep 300`
+In session 2 (SSH as `qnxuser`): `pidin | grep sleep`
+
+Then `Ctrl+C`, and in session 1: `cat` (no arguments — it waits on input).
+In session 2: `pidin | grep cat` and `pidin -p cat`.
+
+📋 **Report both states.**
+🎯 **The claim being tested:** `sleep` should show **`NANOSLEEP`** (waiting on a *timer* — resolves by
+itself) and `cat` a **`REPLY`-family** state (waiting on *another process*). That distinction is the
+chapter's central teaching point, and **only the second can deadlock**. Predicted, never observed.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -880,7 +937,7 @@ please paste whatever the target says.
 | V9.2 | 💥 Is `qcc` licence-gated? | 👤 | — | Ch 04 §3.2 | ⬜ |
 | V9.3 | Read the agreement; report discrepancies | 👤 | — | Ch 04 §2 | ⬜ |
 | — | Clear Chapter 04's lab markers | 🤖 | V9.2 | — | ⏸️ |
-| **V10.1** | SDP layout + disk breakdown + `$MAKEFLAGS` | 👤 | — | Lab 05.1 | ⬜ |
+| **V10.1** | SDP layout + disk breakdown + `$MAKEFLAGS` | 👤 | — | Lab 05.1 | 🔄 **disk breakdown ✅ done**; `$MAKEFLAGS` and the layout listings still wanted |
 | V10.2 | `qcc -v` — prove the host/target crossing | 👤 | — | **Ch 05 §5.1's central claim** | ⬜ |
 | V10.3 | 💥 The three deliberate failures | 👤 | — | Ch 05 §4.3 | ⬜ |
 | — | Clear Chapter 05's lab markers | 🤖 | V10.2 | — | ⏸️ |
@@ -888,6 +945,10 @@ please paste whatever the target says.
 | **V11.2** | ⭐ `ifs.build` + `disk.layout` from the host | 👤 | — | **Ch 21's source material** | ⬜ |
 | V11.3 | 💥 What survives a reboot | 👤 | — | **Ch 06 §3.3's central claim** | ⬜ |
 | — | Clear Chapter 06's lab markers | 🤖 | V11.3 | — | ⏸️ |
+| **V12.1** | ⭐ State census of a healthy system | 👤 | — | Ch 07 §3.2 · **Ch 25's baseline** | ⬜ |
+| V12.2 | `pidin fds` + `/dev` ↔ process correspondence | 👤 | — | Ch 07 §2.3, §3.3 | ⬜ |
+| V12.3 | 💥 `NANOSLEEP` vs `REPLY` | 👤 | — | **Ch 07's central distinction** | ⬜ |
+| — | Clear Chapter 07's lab markers | 🤖 | V12.3 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -931,6 +992,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V10.1 (part)** | ✅ **Disk breakdown supplied** | `du -sh ~/qnx800` = **79 GB** — `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB, `custom/` 315 MB. **Settles D-008: the virtual disk is NOT sparse.** Reconciles with block V3's 43 GB `df` delta, which predated the image and covered more than one directory. Corrected `PLAN.md` (~50 → **~85 GB** budget), Setup Guides 01 and 02, Chapters 05 and 06, and `check-environment.sh`'s thresholds. **T-016 closed.** |
 | 2026-08-26 | **V5.6 – V5.7** | ✅ 🎉 **BLOCK V5 COMPLETE** | `./hello_qnx` on the target printed `Hello from QNX!` / `My process ID is 14032920` — **the full edit → cross-compile → deploy → run loop is closed.** SSH confirmed as `qnxuser`/`qnxuser`, `sudo` password the same. **Correction to D-009:** the image ships **`PermitRootLogin no`**, not `prohibit-password` — keys do not help root either; Setup Guide 03 §9.5 had said they would. `/etc/passwd` captured (9 accounts, homes on the writable `/data` partition, `sshd` privilege-separated). Setup Guide 03 → **v2.0**. +D-011, D-012, D-013. |
 | 2026-08-26 | **V5.3 – V5.5** | ✅ 🎉 **M2 REACHED** | **QNX 8.0.0 boots** (kernel build `2026/02/27-11:02:56EST`, host `qnxqemu`). 31 processes, 207 threads, 8 CPUs, 3659/4095 MB free. **Bridged networking worked on WSL2** — `192.168.122.46` on `vtnet0` — so hazard **H-9** did not materialise. **One real failure:** `sshd` refuses password auth for root (`PermitRootLogin prohibit-password`) → **D-009**, use `qnxuser`. Four benign boot warnings explained → **D-010**. `pidin`, `pidin info`, `ls /proc/boot` captured as course material. Setup Guide 03 → **v1.2**, §§4–9 verified. |
 | 2026-08-26 | **V5.1 – V5.2** | ✅ **Passed, with 3 bugs found** | QSTI was **already installed** with SDP (archives `qnx_sdp8.0_qemu_quickstart_20260606.tar.gz.{0,1}`, ~1.9 GB). Unpack produced `qemu/output/` with `ifs.bin` (20 MB), `disk-qemu` (47 GB apparent), `procnto-smp-instr.sym` (12 MB) and the **`mkifs` build files**. Bugs: **(a)** `unpack_qemu_image.sh` extracts into a nested `qemu/` — the guide assumed `output/` in place → **D-006**; **(b)** `-listAvailablePackages` does not exist → **D-007**; **(c)** the 47 GB disk is undocumented → **D-008**. |
@@ -969,7 +1031,7 @@ future readers than a step that silently worked.
 | Cross-compiler | **GCC 12.2.0** (not the host's 15.2.0) |
 | Targets | `gcc_ntox86_64` *(default)*, `gcc_ntox86_64_gpp`, `gcc_ntox86_64_cxx`,<br>`gcc_ntoaarch64le`, `gcc_ntoaarch64le_gpp`, `gcc_ntoaarch64le_cxx` |
 | Dynamic linker | `/usr/lib/ldqnx-64.so.2` |
-| Disk consumed | **~43 GB** (951 GB free → 908 GB) |
+| Disk consumed | **43 GB** `df` delta at install · ✅ **79 GB** `du ~/qnx800` measured 2026-08-26 (`images/` 53 GB · `target/` 23 GB · `host/` 2.7 GB · `bsp/` 1.1 GB) |
 | SDP build number | ⬜ **not captured — T-202** |
 
 ### QNX target observed (2026-08-26) — verified, for chapter front matter
@@ -1007,6 +1069,8 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.15 | 2026-08-26 | **Block V12 added** for Chapter 07 — a state census of a healthy system, the `pidin fds` communication graph, and the `NANOSLEEP`-versus-`REPLY` distinction. |
+| 1.14 | 2026-08-26 | **V10.1's disk breakdown supplied and applied.** D-008 answered definitively; disk budget corrected across six documents and the environment check. |
 | 1.13 | 2026-08-26 | **Block V11 added** for Chapter 06 — `slm.cfg`, the `ifs.build`/`disk.layout` recipe, and the what-survives-a-reboot test. V11.2 is the most valuable outstanding request: it turns Chapter 21 into a walkthrough of a system already booted. |
 | 1.12 | 2026-08-26 | **Block V10 added** for Chapter 05 — layout, disk breakdown, `$MAKEFLAGS`, the `qcc -v` crossing, and three deliberate failures. Host-only; folds into a V9 session. |
 | 1.11 | 2026-08-26 | **Block V9 added** for Chapter 04 — licence file contents, whether `qcc` is licence-gated, and reading the binding agreement. Host-only. |

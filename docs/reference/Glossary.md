@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.9
+version: 1.10
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -31,7 +31,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | Term | Definition | Ch. |
 |------|-----------|-----|
 | **Baseline (QSC)** | QNX Software Center's term for a complete SDP release, installed with `-installBaseline`. Contrast a **package**, one component installed with `-installPackage`. | 05 |
-| **Blocking state** | The precise reason a thread is not running: `SEND`, `REPLY`, `RECEIVE`, `MUTEX`, `CONDVAR`, `SIGWAIT`, `NANOSLEEP`, `INTR`, etc. Shown by `pidin`. Reading blocking states is *the* core QNX debugging skill. | 13 🌱 |
+| **Blocking state** | The precise reason a thread is not running — `RECEIVE`, `REPLY`, `SEND`, `MUTEX`, `CONDVAR`, `SEM`, `SIGWAITINFO`, `NANOSLEEP`, `INTR`, `DEAD`. Shown by `pidin`. **`RECEIVE` dominates a healthy system**; **`REPLY`** names the PID being waited on, so chains can be followed and cycles (deadlock) spotted directly. Reading these is *the* core QNX debugging skill. | 07, 13, 25 |
 | **BSP** | *Board Support Package* — the hardware-specific software (IPL, `startup-*`, drivers, build files) that lets QNX boot on a particular board. | 22 🌱 |
 | **Build file** | The text file (`*.build`) telling `mkifs` what goes into a boot image: which kernel, which drivers, which files, and what runs at startup. Your QSTI image ships the ones that built it, in `output/build/ifs.build` — readable now, taught in Ch 21. | 06, 21 |
 
@@ -85,6 +85,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`hogs`** | QNX utility listing the top CPU consumers, sampled. Roughly Linux's `top`. Distinguishes a *busy* system from a *blocked* one — a different investigation each. | 07, 25 |
 | **Header file** | A `.h` file holding *declarations* — signatures, types, constants — that the compiler reads. It contains no machine code; that lives in a library. On QNX, target headers are under `$QNX_TARGET/usr/include/`. Reading the header is the authoritative way to check a signature for *your* version. | 01 |
 | **Hard real-time** | A system in which missing a deadline is a failure, possibly causing harm. The value of a late result is *negative*. Contrast **firm** (value zero) and **soft** (value diminishing). Hardness is about **consequences**, not tightness. | 01 |
 | **HAM** | *High Availability Manager* — a QNX process that monitors other processes and automatically restarts them (or runs recovery actions) on failure. | 27 🌱 |
@@ -113,6 +114,12 @@ update_trigger: "Every time a chapter introduces a new term"
 |------|-----------|-----|
 | **Jitter** | The *variation* in latency, usually reported as `max − min` or as a percentile spread (p99.9 − p50). Matters most for periodic tasks, where a wandering interval makes every derivative term in a controller wrong. | 01 |
 | **Jitter** | Variation in the timing of a repeated event. Low average latency with high jitter is often worse for control systems than higher but stable latency. | 01 🌱 |
+
+## K
+
+| Term | Definition | Ch. |
+|------|-----------|-----|
+| **`ksh`** | The Korn shell — QNX's default. POSIX-compliant, so ordinary shell skills transfer. `bash` is also present on the QSTI image. | 07 |
 
 ## L
 
@@ -156,6 +163,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Pathname space** | The namespace `procnto` maintains, mapping paths to the **processes** that registered them. `open("/dev/ser1")` asks who owns that path and returns a connection to that process; `read()`/`write()` then become **messages**. Why `/dev` entries on QNX are running services rather than device nodes. | 07, 16 |
 | **Production use** | Running software for real, as something people rely on — **including internally and without payment**. One of the two boundaries of the non-commercial licence (the other being distribution). A permanent internal test rig is plausibly production use. | 04 |
 | **`PREEMPT_RT`** | The Linux real-time preemption patch set, mainlined in 2024. Makes Linux genuinely usable for soft and many firm real-time systems. Does **not** provide a certified OS with an evidence package — the gap that keeps QNX in safety-critical products. | 03 |
 | **`procnto`** | The QNX kernel — *process manager* + *Neutrino*. Provides scheduling, memory management, timers and message passing, **and nothing else**. Always pid 1. Ships in variants: `-smp` (multi-core), `-instr` (kernel tracing compiled in, needed for Ch 26). | 02, 09 |
@@ -208,6 +216,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`slog2info`** | Reads QNX's structured system log. **The first command to run after something misbehaved** — the console scrolls, the log does not. | 07, 24 |
 | **`slm` — System Launch and Monitor** | QNX's service manager: starts components in dependency order, waits for readiness, and can restart one that dies. Its entire configuration is one readable file, `/proc/boot/slm.cfg`. Roughly Linux's `systemd`, but far smaller and with restart as its core purpose. 22 components on the QSTI image. | 06, 27 |
 | **Syspage** | The structure `startup-*` builds and hands to `procnto`, describing the hardware it found: memory map, CPU count and features, timer frequency, interrupt controller. **`procnto` contains no board-specific code** — it learns the machine from the syspage, which is why one kernel binary runs on QEMU, a Raspberry Pi and an automotive SoC. What a BSP fundamentally provides. | 06, 21, 22 |
 | **`startup-*`** | The QNX boot stage that runs before the kernel: initialises CPU, memory and interrupt controller, builds the **syspage**, and prints **`Startup complete`** — the boundary between debugging the *board* and debugging the *system*. Board-specific; part of a BSP. | 06, 22, 32 |
@@ -229,6 +238,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`toybox`** | The compact multi-call binary supplying much of QNX's core userland (`ls`, `grep`, `sed`, …). Present in `/proc/boot`. Implements the commonly used subset of each tool, so an unfamiliar GNU flag being rejected is usually `toybox`, not a QNX quirk. | 07 |
 | **Target** | The machine running QNX (here: the QEMU VM). Contrast **host**, the machine you develop on. | 08 🌱 |
 | **`tracelogger`** | The tool that captures kernel event traces for later analysis in the System Analysis Toolkit. | 26 🌱 |
 | **Typed memory** | QNX's mechanism for allocating from specific, named physical memory regions (e.g. DMA-capable or device-specific memory). | 15 🌱 |
@@ -237,6 +247,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`use`** | QNX's built-in help command — `use pidin` extracts the usage message embedded in the binary. Correct for the exact build you are running, and works offline. | 07 |
 | **Utilisation (`U`)** | The fraction of CPU a task set demands: `Σ(Cᵢ/Tᵢ)`. `U > 1.0` is infeasible on one core; `U ≤ 1.0` is necessary but not sufficient — see **rate-monotonic**. | 01, 11 |
 | **`[UNVERIFIED]`** | A marker on a step that was written from documentation but **has not been executed on a real machine**. Removed only when someone runs it and pastes back the real output. There are currently none in this course. | 00 |
 
@@ -267,6 +278,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.10 | 2026-08-26 | Chapter 07: +6 terms (`ksh` — with a new K section, pathname space, `slog2info`, `toybox`, `use`, `hogs`) and **blocking state** promoted from a planning stub with the full state list. |
 | 1.9 | 2026-08-26 | Chapter 06: +5 terms (IFS, `slm`, syspage, `startup-*`, data partition) and **build file** promoted from a planning stub. |
 | 1.8 | 2026-08-26 | Chapter 05: +8 terms (`$QNX_HOST`, `$QNX_TARGET`, `qcc`, `qnxsdp-env.sh`, separated debug symbols, sysroot, cross-compilation, QSC baseline). |
 | 1.7 | 2026-08-26 | Chapter 04: +3 terms (development licence, distribution licence, production use) and **QNX Everywhere** corrected — customer demonstrations are permitted, and the boundary is production and distribution rather than money. |

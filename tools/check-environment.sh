@@ -92,9 +92,9 @@ else                              bad  "RAM" "${MEM_GB} GiB — 8 GiB minimum re
 
 DISK_AVAIL_GB="$(df -BG --output=avail "$HOME" 2>/dev/null | tail -1 | tr -dc '0-9')"
 if [[ -n "$DISK_AVAIL_GB" ]]; then
-    if   [[ "$DISK_AVAIL_GB" -ge 50 ]]; then ok   "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — plenty (need ~25 GB)"
-    elif [[ "$DISK_AVAIL_GB" -ge 25 ]]; then warn "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — just enough (need ~25 GB)"
-    else                                     bad  "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — need ~25 GB for SDP + VM"; fi
+    if   [[ "$DISK_AVAIL_GB" -ge 100 ]]; then ok   "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — plenty (need ~85 GB)"
+    elif [[ "$DISK_AVAIL_GB" -ge  85 ]]; then warn "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — just enough (need ~85 GB)"
+    else                                      bad  "Free disk (\$HOME)" "${DISK_AVAIL_GB} GB — need ~85 GB for SDP + VM image"; fi
 fi
 
 # ------------------------------------------------------------------------ tools

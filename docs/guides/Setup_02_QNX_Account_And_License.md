@@ -1,7 +1,7 @@
 ---
 title: "Setup Guide 02 — QNX Account, Licence & SDP 8.0 Install"
 document_id: SETUP-02
-version: 2.2
+version: 2.3
 status: ✅ Published & verified — executed end to end
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -24,8 +24,8 @@ prereqs: "Setup Guide 01"
 > executed on **Ubuntu 26.04 LTS under WSL2** and ends with `24 passed · 3 warnings · 0 failed`.
 > The version numbers, paths and command output shown below are real, not illustrations.
 >
-> 💡 **Two figures worth knowing before you start:** the install consumes roughly **43 GB** (see
-> §12.1 — more than QNX's own materials suggest), and the cross-compiler is **GCC 12.2.0**, entirely
+> 💡 **Two figures worth knowing before you start:** the install consumes roughly **43 GB**, and once
+> the QEMU image is unpacked `~/qnx800` reaches **79 GB** — **budget ~85 GB** (see §12.1 — more than QNX's own materials suggest), and the cross-compiler is **GCC 12.2.0**, entirely
 > separate from your host's GCC.
 
 ---
@@ -315,7 +315,7 @@ easy to confuse.
 flowchart TD
     LIC["🔑 Your deployed licence<br/>(on QNX's servers)"] -.->|"authorises"| QSC
     QSC["📦 QNX Software Center<br/>~300 MB<br/>installed on your host"] -->|"downloads &<br/>installs"| SDP
-    SDP["🔷 QNX SDP 8.0<br/>~8–12 GB<br/>~/qnx800/"]
+    SDP["🔷 QNX SDP 8.0<br/>~43 GB<br/>~/qnx800/"]
     SDP --> H["host/ — tools that run on Linux<br/>qcc, q++, gdb, mkifs, mkqnximage"]
     SDP --> T["target/ — QNX headers, libraries,<br/>binaries for the target"]
     SDP --> E["qnxsdp-env.sh — the script that<br/>points your shell at all of it"]
@@ -476,7 +476,9 @@ Center"](https://www.qnx.com/developers/docs/qsc/com.qnx.doc.qsc.user_guide/topi
 ## 9. Step 6 — Install QNX SDP 8.0
 
 
-This is the big download: **~8–12 GB**. Use a good connection and don't interrupt it.
+This is the big download. QNX quotes **8–12 GB**; measured, the install consumes about **43 GB**,
+and `~/qnx800` reaches **79 GB** once the QEMU image is unpacked (§12.1). Use a good connection and
+don't interrupt it.
 
 ### 9.1 Route A — Graphical
 
@@ -900,17 +902,33 @@ And the summary line:
 
 ### 12.1 ⚠️ How much disk this really takes
 
-**Budget 45 GB, not the 8–12 GB you may have read.**
+**Budget ~85 GB, not the 8–12 GB you may have read.**
 
 Measured on a verified install: free space on `$HOME` went from **951 GB to 908 GB** — about
 **43 GB consumed** by QNX Software Center, its downloads, and SDP 8.0 with its target images. That is
 well above the figure QNX's own materials suggest, because a full SDP install pulls both `x86_64` and
 `aarch64le` targets plus debug symbols for everything.
 
-You can see what your own install cost:
+✅ **Measured 2026-08-26**, after the QEMU image was also unpacked:
+
+```text
+$ du -sh ~/qnx800
+79G
+
+$ du -sh ~/qnx800/*
+53G  images/    23G  target/    2.7G  host/    1.1G  bsp/    315M  custom/
+```
+
+> ⚠️ **Why 43 GB and 79 GB are both correct.** The 43 GB above is a **`df` delta** — everything
+> written anywhere during the install, including QNX Software Center's own download cache, which
+> lives outside `~/qnx800`. The 79 GB is **`du` on one directory**, measured later, and includes the
+> unpacked VM image. `df` measures the filesystem over time; `du` measures a directory now.
+
+Check your own:
 
 ```bash
 host$ du -sh ~/qnx800
+host$ du -sh ~/qnx800/*
 host$ df -h ~
 ```
 
@@ -1034,6 +1052,7 @@ But you have **nowhere to run it**. That's next.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.3 | 2026-08-26 | Disk figures corrected with real `du` output: `~/qnx800` reaches **79 GB** once the QEMU image is unpacked; budget **~85 GB**. The 43 GB `df` delta and the 79 GB `du` total are reconciled rather than left contradicting each other ([D-008](../meta/Doubts.md#d-008)). |
 | 2.2 | 2026-08-26 | **Licence correction.** §2 listed *"demo to existing or potential customers"* as forbidden; QNX's licensing page lists it as **permitted** (*"e.g. as part of a product roadmap"*). Corrected, and the permitted list expanded with the exact conditions QNX attaches to hobby/maker use and to OSS (*"publicly available at no charge"*). The forbidden list now stresses that production use includes **internal, unpaid** deployments and that distribution includes **a single pilot unit**. Full treatment in [Chapter 04](../chapters/Chapter04_LicensingAndQNXEverywhere.md). |
 | 2.1 | 2026-08-26 | **Correction:** §9.2 used `-listAvailablePackages`, which does not exist — replaced with `-listAccessible` and the real option list, verified against CLT `2.0.4:v202501021438`. |
 | 2.0 | 2026-08-26 | **Verified end to end.** All `[UNVERIFIED]` markers cleared. Real output throughout: `qcc -V` target list (GCC **12.2.0**, `x86_64` + `aarch64le`, C/`_gpp`/`_cxx`), `$QNX_HOST`/`$QNX_TARGET`, `file` output, and the `24 · 3 · 0` environment report. **Two corrections:** §11.2's sample program was missing `#include <unistd.h>` and emitted an implicit-declaration warning for `getpid()` — fixed, and turned into a lesson on POSIX vs. QNX-specific headers; §11.3 claimed `file` would print "QNX", which it never does — the real tell is the `ldqnx-64.so.2` interpreter. **New §12.1:** the install costs ~43 GB, not the 8–12 GB previously stated. |

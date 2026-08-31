@@ -1,7 +1,7 @@
 ---
 title: "Setup Guide 01 — Prerequisites & Host Preparation"
 document_id: SETUP-01
-version: 2.0
+version: 2.1
 status: ✅ Published & verified
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -87,7 +87,7 @@ software changes system-wide directories, which ordinary users can't write to.
 |------|------|
 | Time for this guide | 30–45 minutes (mostly downloading) |
 | Disk used by this guide | ~1.5 GB |
-| Disk needed for the whole course | **~25 GB** |
+| Disk needed for the whole course | **~85 GB** ⚠️ *(measured — see below)* |
 | Internet needed | ~1 GB for this guide; ~10 GB in Setup Guide 02 |
 
 ---
@@ -148,7 +148,7 @@ QNX SDP 8.0 has hard host requirements. These are not negotiable.
 | **CPU architecture** | **x86-64 (Intel/AMD)** | ⚠️ QNX SDP is **not supported on ARM hosts**. An Apple Silicon Mac or ARM Windows laptop cannot host QNX SDP. |
 | **Host OS** | **Linux or Windows** | ⚠️ QNX SDP 8.0 **does not support macOS**. |
 | **RAM** | 8 GB minimum, 16 GB comfortable | The VM wants 2–4 GB; the tools want the rest |
-| **Free disk** | ~25 GB | SDP ~8–12 GB, VM image ~4 GB, working space |
+| **Free disk** | **~85 GB** | ⚠️ Measured, not estimated: SDP ~26 GB, **unpacked VM image ~53 GB**, working space. QNX's own 8–12 GB figure covers only part of the SDP ([D-008](../meta/Doubts.md#d-008)) |
 | **Virtualization** | VT-x (Intel) or AMD-V | Without it the VM runs 10–50× slower |
 
 > 📎 The authoritative, always-current list of supported host OS versions is in the
@@ -659,7 +659,7 @@ completed Setup Guide 01 run on Ubuntu 26.04 / WSL2:
 3. Memory & disk
 ────────────────────────────────────────────────────────────────
   ✅ RAM                    23 GiB total
-  ✅ Free disk ($HOME)      951 GB — plenty (need ~25 GB)
+  ✅ Free disk ($HOME)      951 GB — plenty (need ~85 GB)
 
 4. Required host tools
 ────────────────────────────────────────────────────────────────
@@ -711,7 +711,7 @@ Section 7 (PDF toolchain) is optional and can stay ⚠️ indefinitely.
 - [ ] `groups` includes `kvm`
 - [ ] The KVM test in §9.2 gets past KVM initialisation
 - [ ] `~/qnx-workspace/` exists with four subdirectories
-- [ ] At least 25 GB free on `~`
+- [ ] At least **85 GB** free on `~`
 
 ---
 
@@ -914,6 +914,7 @@ Your host is ready. 🎉
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.1 | 2026-08-26 | Disk requirement corrected from ~25 GB to **~85 GB**, measured with `du` rather than estimated. The unpacked VM image alone is 53 GB ([D-008](../meta/Doubts.md#d-008)). |
 | 2.0 | 2026-08-26 | **Verified end to end on the real host.** All `[UNVERIFIED]` markers cleared. Expected-output blocks replaced with real observed output: GCC 15.2.0, Make 4.4.1, OpenJDK 25.0.4, QEMU 10.2.1. §9.2 KVM proof rewritten around the command actually run (SeaBIOS → iPXE → *No bootable device*), with an explanation of why that failure is the pass. §11 now shows the real 19/6/0 report. Repo path corrected to `~/exercises/qnx-zero-to-hero`. Risk R9 recorded as not materialised — every documented package name still exists on 26.04. |
 | 1.1 | 2026-08-26 | Corrected the `verified_on` claim: only the host readiness check was ever run, not the install steps. Added the `[UNVERIFIED]` notice (ADR-024). |
 | 1.0 | 2026-08-25 | Created. Verified against Ubuntu 26.04 / WSL2 / i7-11850H. Documents the Ubuntu 26.04 package-name divergence from QNX's documented 22.04/24.04 lists (risk R9). |

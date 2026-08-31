@@ -7,7 +7,7 @@ core_lab: "L06 ⭐"
 est_time: "90 minutes reading · 45 minutes labs"
 prereqs: "Chapters 02 and 05. Setup Guide 03 (you already booted this VM)."
 status: Published
-version: 1.0
+version: 1.1
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -49,7 +49,7 @@ current directory; one level up it offers to build a **new** image — **never p
 | Path | What |
 |------|------|
 | `output/ifs.bin` | **20 MB.** The bootable image: `procnto`, drivers, a shell, ~80 files |
-| `output/disk-qemu` + `.vmdk` | The virtual disk. 47 GB apparent, likely sparse ([D-008](../meta/Doubts.md#d-008)) |
+| `output/disk-qemu` + `.vmdk` | The virtual disk. **47 GB, and genuinely allocated — not sparse** ([D-008](../meta/Doubts.md#d-008)) |
 | `output/build/` | ⭐ **The `mkifs` build files that produced it** — Chapter 21's source material |
 | `output/option_files/`, `local/snippets/` | The feature switches that composed the image (CTI) |
 | `output/procnto-smp-instr.sym` | 12 MB of kernel debug symbols |
@@ -102,7 +102,7 @@ flowchart TB
     subgraph HOSTSIDE["🖥️ Host — ~/qnx800/images/qemu/qemu"]
         BUILD["📁 output/build/<br/>ifs.build · system.build<br/>disk.layout · startup.sh"]
         IFS["📦 output/ifs.bin<br/>20 MB"]
-        DISK["💽 output/disk-qemu<br/>47 GB apparent"]
+        DISK["💽 output/disk-qemu<br/>47 GB"]
         MK["⚙️ mkqnximage --run"]
     end
     subgraph GUEST["🔷 Running QNX guest"]
@@ -311,7 +311,7 @@ console · mqueue · post_start · iousb · set-host · ca-trust-init · pam · 
     │   └── misc_files/        ssh host keys, shadow, part.info
     └── output/                the BUILT image
         ├── ifs.bin            20 MB — the boot image
-        ├── disk-qemu          47 GB apparent — the virtual disk
+        ├── disk-qemu          47 GB — the virtual disk (not sparse)
         ├── disk-qemu.vmdk     171 bytes — a descriptor pointing at it
         ├── procnto-smp-instr.sym   12 MB kernel debug symbols
         ├── build/             ⭐ the generated mkifs build files
@@ -329,7 +329,7 @@ console · mqueue · post_start · iousb · set-host · ca-trust-init · pam · 
 
 | | `ifs.bin` | `disk-qemu` |
 |---|---|---|
-| Size | **20 MB** | 47 GB apparent |
+| Size | **20 MB** | **47 GB, really allocated** |
 | Loaded by | QEMU, as a kernel | Attached as an IDE disk |
 | Lives in | **RAM**, permanently | Virtual storage |
 | Appears as | **`/proc/boot`** | `/`, `/usr`, `/system`, `/data` |
@@ -494,7 +494,7 @@ host$ ~/exercises/qnx-zero-to-hero/tools/qemu/qnx-vm.sh run
 |------|------|
 | The image directory | `~/qnx800/images/qemu/qemu` |
 | Boot image | `output/ifs.bin` |
-| Virtual disk | `output/disk-qemu` (+ `.vmdk` descriptor) |
+| Virtual disk | `output/disk-qemu` (+ `.vmdk` descriptor) — **53 GB with the archives** |
 | **The build files** ⭐ | `output/build/` — `ifs.build`, `system.build`, `disk.layout`, `startup.sh` |
 | Feature switches | `output/option_files/`, `local/snippets/` |
 | Resolved configuration | `output/options`, `local/options` |
@@ -511,6 +511,10 @@ image is disposable.
 | VM wedged | `mkqnximage --stop`, or close the terminal, then `--run` again |
 | Guest filesystem broken | Reboot. Only `/data` persists, so most damage undoes itself |
 | Genuinely unrecoverable | Re-run `unpack_qemu_image.sh` from `~/qnx800/images/qemu`, overwriting `qemu/` |
+
+> ⚠️ **Rebuilding costs disk, not just time.** `images/` occupies **53 GB** — the largest item in the
+> whole SDP. Delete the `.tar.gz` archives only once you are confident you will not need to re-unpack
+> ([D-008](../meta/Doubts.md#d-008)).
 
 > 💡 **Treat the VM as disposable and you will experiment more freely.** That is the point of using a
 > VM before touching hardware: the worst outcome is a two-minute rebuild. Chapter 32, on bringing up
@@ -1084,4 +1088,5 @@ QNX is a path, and what that gets you.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Disk figures corrected: `disk-qemu` is **not sparse** — it really occupies its 47 GB, and `images/` is **53 GB**, the largest item in the SDP ([D-008](../meta/Doubts.md#d-008)). |
 | 1.0 | 2026-08-26 | Created. ⭐ Contains core lab **L06**. Covers the full boot chain with `Startup complete` identified as the BSP/system boundary; the syspage and why `procnto` is board-independent; `ifs.bin` versus the virtual disk, and `/proc/boot` as a mounted 20 MB file; `slm`'s 22 components read as a dependency argument; and the read-only-image / writable-`/data` split with its consequences. §5 places every line of the verified boot log. Labs open `output/build/` — Chapter 21's source material — fifteen chapters early. All labs `[UNVERIFIED]` pending block **V11**. |
