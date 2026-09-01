@@ -26,9 +26,9 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **8 / 34** — Part 0 complete; Part 1 nearly complete |
+| **Chapters published** | **9 / 34** — 🎉 **Parts 0 and 1 complete** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
-| **Labs published** | **1 / 21** compiled (Lab 01.2, pending V6) · plus non-compiled labs in Ch 00, 02, 03, 04, 05, 06 |
+| **Labs published** | **2 / 21** compiled — Lab 01.2 (V6) and **⭐ L08** (V13) · plus non-compiled labs in every published chapter |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
@@ -39,14 +39,14 @@ update_trigger: "End of every working session, and after every chapter is publis
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
-Part 1  Environment        [████████████████    ]  80 %   (4/5 chapters)
+Part 1  Environment        [████████████████████] 100 %   (5/5 chapters) 🎉
 Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [████                ]  24 %   (8/34)
+OVERALL                    [█████               ]  26 %   (9/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [████                ]  24 %   (8/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 07](../chapters/Chapter07_FirstContactTheQNXShell.md)** (~75 min). Seven blocks open; **V11.2** (`ifs.build`) remains the highest-value, and **V12.1** captures the healthy-system baseline Chapter 25 will need. |
-| 🤖 **Me — next turn** | ⭐ **Chapter 08 — The Toolchain & Deployment** (T-115e) — the last chapter of Part 1 and a `⭐ core` lab: cross-compiling in earnest, QNX recursive Makefiles, and **remote debugging over `qconn`**. |
+| 👤 **You — do next** | ⭐ **Read [Chapter 08](../chapters/Chapter08_ToolchainAndDeployment.md)** (~120 min) and do **core lab L08** — block **V13**. It is the most consequential outstanding block since V5: every chapter from 09 onwards assumes this loop works. |
+| 🤖 **Me — next turn** | **Part 2 begins: Chapter 09 — Microkernel Architecture & `procnto`** (T-130). What is actually inside the kernel, why a driver crash is survivable, and how a system of cooperating processes stays fast enough to be worth it. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -124,7 +124,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | 05 | Installing QNX SDP 8.0 | 📕 | — | v1.0. The host/target split as the organising idea. |
 | 06 | Your First QNX VM on QEMU ⭐ | 📕 | — | v1.0. Contains **core lab L06**. |
 | 07 | First Contact — The QNX Shell | 📕 | — | v1.0. `pidin` and blocking states, properly. |
-| 08 | The Toolchain & Deployment ⭐ | 📄 | — | |
+| 08 | The Toolchain & Deployment ⭐ | 📕 | — | v1.0. **Core lab L08.** Remote debugging. |
 
 ### Part 2 — Microkernel Core
 
@@ -198,7 +198,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 |-----------|-----------|--------|--------------|
 | **M0** Plan approved | `PLAN.md` status = Approved | ⬜ In progress | — |
 | **M1** "I get it" | Ch 00–03 read | 🎉 **All four published** — reached when the learner finishes Ch 03 | 2026-08-26 |
-| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | ✅ 🎉 **COMPLETE** | 2026-08-26 |
+| **M2** "It boots" 🎉 | QNX VM boots to a shell; hello-world runs | ✅ 🎉 **COMPLETE** — and Parts 0+1 are now written | 2026-08-26 |
 | **M3** "I speak QNX" | Ch 09–15 + labs done | ⬜ | — |
 | **M4** "I can extend the OS" | Resource manager written and working | ⬜ | — |
 | **M5** "I own the image" | Custom IFS boots | ⬜ | — |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 020 — 2026-08-26 🎉 **Part 1 complete**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 08, closing Part 1. |
+| **Done** | ⭐ **Chapter 08 — The Toolchain & Deployment** published (1177 lines), containing **core lab L08**. **Parts 0 and 1 are now complete: 9/34 chapters.**<br>• The chapter's centre is **remote debugging through `qconn`** — and specifically the split that makes it work: **symbols stay on the host**, only addresses and raw memory cross the network. That is why a stripped target binary is still fully debuggable, and the same split as Chapter 05's `.sym` files<br>• Its one hazard given equal weight: **mismatched host and target builds produce confident nonsense**, with no warning. The 💥 exercise reproduces it deliberately, because in the wild it is genuinely disorienting<br>• The structural fix stated repeatedly — never deploy by hand; make `run` and `debug` depend on `deploy`, which depends on the build<br>• §3.2 walks ADR-007's build-system progression (raw `qcc` → plain Makefile → QNX recursive → CMake) and says why each hides the last<br>• §5 finds an off-by-one buffer overrun with the debugger, and argues why `printf` debugging is actively harmful on a real-time system: it changes timing, and therefore the bug<br>• 🐣 Path A reads a debugging session rather than running one — so the chapter's TOC tag gains 🐣<br>• Ships **`labs/lab08_devloop/`**, which inverts the usual roles: `skeleton/` is a complete, compiling, **subtly wrong** program and `solution/` is the fix, because the exercise is *debugging* rather than filling in `TODO`s<br>• The Makefile's `file` check catches Chapter 05 §5.3's silent failure at build time<br>• Glossary +5; **block V13** added — the most consequential since V5 |
+| **Learner decisions** | "Proceed to next" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Part 2 begins — Chapter 09: Microkernel Architecture & `procnto`** |
 
 ### Session 019 — 2026-08-26 📕 **Chapter 07 · disk figures corrected**
 
@@ -442,6 +453,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | Session 020: ⭐ **Chapter 08 published — Parts 0 and 1 complete (9/34)**. Core lab L08 and `labs/lab08_devloop/`. Block V13 added. |
 | 1.18 | 2026-08-26 | Session 019: disk figures corrected from measurement; **Chapter 07 published** (8/34). Block V12 added. |
 | 1.17 | 2026-08-26 | Session 018: ⭐ **Chapter 06 published** (7/34) with core lab L06. Block V11 added. |
 | 1.16 | 2026-08-26 | Session 017: **Chapter 05 published** (6/34). Block V10 added. |

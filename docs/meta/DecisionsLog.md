@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.18
+version: 1.19
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1833,10 +1833,94 @@ the course's own documents — which is precisely why `[UNVERIFIED]` and the ver
 
 ---
 
+## 2026-08-26 — Session 020 (Chapter 08; Parts 0 and 1 complete)
+
+### DECIDED — Chapter 08's centre is the symbols-stay-on-the-host split
+
+The chapter could have been a `qcc` flag reference. Instead it is built around **remote debugging**,
+and specifically around one design decision: `gdb` runs on the host with the debug information, while
+`qconn` on the target does control and speaks only in addresses and raw memory.
+
+**Why that framing.** It explains three things at once that otherwise look arbitrary: why a production
+target can ship a **stripped** binary and stay debuggable, why Chapter 05's `.sym` files exist, and
+why core-dump analysis in Chapter 25 works the way it does. One idea, three payoffs.
+
+**And it comes with a cost, stated with equal weight.** Nothing verifies that the binary on the target
+is the one the host has symbols for, so **mismatched builds produce confident, detailed, entirely
+fictional answers**. The 💥 exercise reproduces this deliberately, because it is worse than a crash —
+a crash tells you something is wrong.
+
+The remedy offered is structural rather than vigilance: never deploy by hand, and make `run` and
+`debug` depend on `deploy`, which depends on the build. Stated in section 3.2, section 4.3, section 4.5, the
+recap and a mastery-check answer.
+
+---
+
+### DECIDED — `labs/lab08_devloop/` inverts skeleton and solution
+
+Chapter 00 established the convention: `skeleton/` has `TODO`s to fill in, `solution/` is the complete
+reference.
+
+**Lab 08 reverses it.** `skeleton/avg.c` is a **complete, compiling, subtly wrong** program;
+`solution/avg.c` is the corrected version. The exercise is **debugging**, not writing, so a skeleton
+full of `TODO`s would teach the wrong skill.
+
+The README says so explicitly and tells the reader **not to open `solution/` first**. The Makefile
+defaults to the skeleton, so `make run` builds the buggy program without the learner having to choose.
+
+> The bug is an off-by-one buffer overrun that `-Wall -Wextra` **cannot** catch, because the compiler
+> does not know `count`'s value at the call site. That is deliberate: a bug the compiler finds would
+> not motivate a debugger.
+
+---
+
+### DECIDED — Chapter 08 gains a 🐣 path tag the TOC did not give it
+
+The Table of Contents tagged Chapter 08 as 🚶🏃 only, reasonably — it is a hands-on toolchain chapter.
+
+**ADR-008 wins again**, as it did for Chapter 01. The 🐣 activity is *reading* a debugging session
+rather than running one, and answering four questions about it — including which information crossed
+the network and which did not. That is genuinely valuable for someone who will never drive a debugger
+but will read colleagues' bug reports.
+
+TOC tag updated to 🐣🚶🏃.
+
+---
+
+### VERIFIED — What Chapter 08 states and what it predicts
+
+**Carried from earlier verification:** `qcc` is GCC 12.2.0 with six targets (V4.1); `qconn` is running
+and started by `slm` (V5.3's boot log); SSH requires `qnxuser` (V5.5, D-009); `/data` is the writable
+area (Ch 06 §3.3).
+
+**Predicted, never observed** — and marked as such:
+
+| Prediction | Where |
+|------------|-------|
+| `target qnx <ip>:8000` is the correct `gdb` incantation | §2.4, §3.4 — **the chapter's central mechanism** |
+| `info pidlist` and `attach` work through `qconn` | §3.4, §4.4 |
+| `upload` copies over the debug link | §4.4 |
+| A symbol mismatch produces confident nonsense rather than an error | 💥 |
+
+Block **V13** closes these. As with Chapter 05, **the chapter's most important claim is currently its
+least evidenced** — and the chapter says so where it matters.
+
+---
+
+### 🎉 PARTS 0 AND 1 COMPLETE
+
+Nine chapters, two `⭐ core` labs (L06, L08), three verified setup guides, and a development loop.
+**Part 2 begins the microkernel itself**, and from Chapter 09 every chapter has code the learner
+builds with `qcc` and debugs with `gdb` — which is why Chapter 08 came last in Part 1 rather than
+first.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | Session 020 appended: the symbols-on-the-host framing and its hazard; the inverted skeleton/solution roles; a 🐣 tag added against the TOC; **Parts 0 and 1 complete**. |
 | 1.18 | 2026-08-26 | Session 019 appended: disk figures corrected from `du` measurement across six documents and the check script; D-008 answered; `df`-versus-`du` reconciled; the third instance of a plausible-but-wrong published claim. |
 | 1.17 | 2026-08-26 | Session 018 appended: `Startup complete` as the partitioning line; the syspage introduced early; persistence made testable; build files opened fifteen chapters early; V11.2 flagged as the highest-value outstanding request. |
 | 1.16 | 2026-08-26 | Session 017 appended: the organising question rather than a directory tour; the silent `gcc` failure; an explicit split between what Chapter 05 verifies and what it predicts; explaining-after-doing as a deliberate pattern. |

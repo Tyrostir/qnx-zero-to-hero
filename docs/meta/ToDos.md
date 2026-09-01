@@ -31,6 +31,7 @@ update_trigger: "Continuously"
 
 
 
+| T-027 | 🔴 | ⭐ **Run block V13** — core lab L08: build, deploy, and **debug a target process from your host** | ⬜ | — | **The most consequential block since V5.** Every chapter from 09 onwards assumes this loop works. |
 | T-026 | 🟠 | **Run block V12** — the healthy-system baseline (`pidin` state census, `fds`, `NANOSLEEP` vs `REPLY`) | ⬜ | — | Target only, 30 min. Feeds Chapter 25's `⭐ L25` diagnostic lab. |
 | T-025 | 🔴 | **Run block V11** — ⭐ **especially V11.2**: paste `output/build/ifs.build` and `disk.layout` | ⬜ | — | **The most valuable outstanding request in the course.** It turns Chapter 21 from documentation into a walkthrough of the system you booted. V11.3 tests Ch 06 §3.3's central claim. |
 | T-024 | 🟠 | **Run block V10** — SDP layout, disk breakdown, `qcc -v` paths, and three deliberate failures | ⬜ | — | **Host only**, ~25 min; folds into a V9 session. V10.2 tests Chapter 05 §5.1's central claim. |
@@ -57,7 +58,7 @@ update_trigger: "Continuously"
 | T-144 | ✅ | Clear the Setup **02** markers | ✅ | Done — Setup 02 → v2.0, 3 guide bugs fixed |
 | T-140 | ✅ | Create `docs/internal/` tier: `CLAUDE-MEMORY.md`, `NewAgentOnboardingGuide.md`, `NewAgentOnboardingPrompts.md`, `VerificationRuns.md` | ✅ | Done, Session 003 |
 | T-141 | ✅ | Clear the `[UNVERIFIED]` markers | ✅ | **All three published setup guides verified end to end.** Zero markers remain in the course. |
-| T-115e | 🔴 | Write `Chapter08_ToolchainAndDeployment.md` ⭐ | ⬜ | **Next — closes Part 1, and a `⭐ core` lab.** Cross-compiling in earnest, QNX recursive Makefiles, `qconn` + remote `gdb`. |
+| T-130 | 🔴 | Write `Chapter09_MicrokernelArchitecture.md` | ⬜ | **Next — Part 2 begins.** What is inside `procnto`, why a driver crash is survivable, and the cost of the design. |
 
 | T-112 | ✅ | Write `Setup_03_QEMU_VM.md` (QSTI route) + `tools/qemu/qnx-vm.sh` | ✅ | Done 2026-08-26. All steps `[UNVERIFIED]` pending block V5. |
 | T-114 | 🟡 | Start `Setup_05_Troubleshooting.md` | ⬜ | Seed it from QNX's official QSTI-for-QEMU troubleshooting page |
@@ -139,6 +140,7 @@ update_trigger: "Continuously"
 | T-141 | Clear the `[UNVERIFIED]` markers (both guides) | 2026-08-26 | 005 |
 | T-144 | Clear Setup Guide 02 Part B markers → v2.0 | 2026-08-26 | 005 |
 | T-200 | Verify every install command actually works | 2026-08-26 | 005 |
+| T-115e | Write `Chapter08_ToolchainAndDeployment.md` ⭐ + `labs/lab08_devloop/` — **Part 1 complete** | 2026-08-26 | 020 |
 | T-115d | Write `Chapter07_FirstContactTheQNXShell.md` | 2026-08-26 | 019 |
 | T-016 | Measure the SDP's real disk usage — **79 GB**, image not sparse (D-008) | 2026-08-26 | 019 |
 | T-151 | Correct the disk budget across PLAN, both setup guides, Ch 05/06 and `check-environment.sh` | 2026-08-26 | 019 |
@@ -182,6 +184,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | ⭐ **Chapter 08 published — Part 1 complete.** T-115e closed; T-130 (Chapter 09, Part 2) promoted; T-027 added (block V13). |
 | 1.18 | 2026-08-26 | **Chapter 07 published**; T-016 and T-151 closed (disk figures corrected). T-115d closed; T-115e (Chapter 08 ⭐) promoted; T-026 added (block V12). |
 | 1.17 | 2026-08-26 | ⭐ **Chapter 06 published** with core lab L06. T-115c closed; T-115d (Chapter 07) promoted; T-025 added (block V11). |
 | 1.16 | 2026-08-26 | **Chapter 05 published.** T-115b closed; T-115c (Chapter 06 ⭐) promoted; T-024 added (block V10). |

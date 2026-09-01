@@ -68,7 +68,7 @@ all of Part 0 while your QNX licence request is being processed.*
 | 05 | [Installing QNX SDP 8.0](chapters/Chapter05_InstallingQNXSDP.md) | 🐣🚶🏃 | 90 m | 📕 |
 | 06 | [Your First QNX VM on QEMU](chapters/Chapter06_FirstQNXVMOnQEMU.md) ⭐ | 🐣🚶🏃 | 90 m | 📕 |
 | 07 | [First Contact — The QNX Shell](chapters/Chapter07_FirstContactTheQNXShell.md) | 🐣🚶🏃 | 75 m | 📕 |
-| 08 | [The Toolchain: qcc, q++ and Deployment](chapters/Chapter08_ToolchainAndDeployment.md) ⭐ | 🚶🏃 | 120 m | 📄 |
+| 08 | [The Toolchain: qcc, q++ and Deployment](chapters/Chapter08_ToolchainAndDeployment.md) ⭐ | 🐣🚶🏃 | 120 m | 📕 |
 
 **Companion setup guides:** see [Part I — Setup Guides](#-part-i--setup-guides) below.
 
@@ -261,6 +261,7 @@ documented**; you are not locked in.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | **Chapter 08 published — Part 1 complete (5/5).** Its path tag gains 🐣: ADR-008 requires all three paths in every chapter, and Chapter 08 ships a read-a-debugging-session activity. |
 | 1.10 | 2026-08-26 | **Chapter 07 published.** |
 | 1.9 | 2026-08-26 | **Chapter 06 published — the first ⭐ core chapter.** |
 | 1.8 | 2026-08-26 | **Chapter 05 published.** |

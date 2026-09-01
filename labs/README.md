@@ -92,4 +92,5 @@ All lab source code is MIT licensed. See [`../LICENSE`](../LICENSE) § 2.
 | Lab | Chapter | Title | Paths | Status |
 |-----|---------|-------|-------|--------|
 | [01.2](lab01_timing/) | 01 | Measure jitter | 🚶🏃 | `[UNVERIFIED]` — block V6 |
+| [08.1 ⭐](lab08_devloop/) | 08 | **The development loop, with a debugger** | 🚶🏃 | `[UNVERIFIED]` — block V13 |
 

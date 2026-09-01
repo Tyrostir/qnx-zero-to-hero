@@ -40,15 +40,15 @@ update_trigger: "End of every session — regenerate from CourseState + Decision
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ **Approved** 2026-08-25 |
-| Chapters published | **8 / 34** — Part 0 complete (00–03) · Part 1: 04, 05, 06 ⭐, 07 |
+| Chapters published | **9 / 34** — 🎉 **Parts 0 and 1 complete** (00–08) |
 | Setup guides published | **3 / 5** — **all ✅ verified**, zero `[UNVERIFIED]` markers |
 | Host ready | ✅ **Setup 01 complete** — 19 pass / 6 warn / **0 fail** |
 | QNX licence | ✅ **deployed** 2026-08-26 |
 | QNX installed | ✅ **SDP 8.0 at `~/qnx800`** · cross-compile proven |
 | VM booting | ✅ 🎉 **QNX 8.0.0 boots** — M2 reached 2026-08-26 |
 | Blocker | **None.** Setup Guide 03 awaits its first real run |
-| Next (me) | ⭐ **Chapter 08 — Toolchain & Deployment** (T-115e) — closes Part 1 |
-| Next (learner) | 📕 Read Ch 07 · blocks **V6–V12** open · **V11.2** (`ifs.build`) still highest-value |
+| Next (me) | **Part 2: Chapter 09 — Microkernel Architecture & `procnto`** (T-130) |
+| Next (learner) | ⭐ Read Ch 08 + **core lab L08 (block V13)** — the loop every later chapter assumes |
 | On hold | ⏸️ **Chapter 00**, by learner instruction, until the markers are cleared |
 
 ## HOST ENVIRONMENT (verified 2026-08-25)
@@ -197,7 +197,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 - **Learner's open actions:** none blocking. Optional: T-017 image README · T-014 QSC install route ·
   T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
-- **Labs:** 1 published (`lab01_timing`, `[UNVERIFIED]` pending V6 — the first compiled lab, so V6 verifies the lab mechanism itself).
+- **Labs:** 2 compiled — `lab01_timing` (V6) and **`lab08_devloop` ⭐ L08** (V13, the development loop).
 - **Doubts logged:** 14 (D-001…D-014, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
@@ -206,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | Regenerated after Session 020: **Parts 0 and 1 complete**; Part 2 next. |
 | 1.18 | 2026-08-26 | Regenerated after Session 019: real disk figures (79 GB; image not sparse); budget ~85 GB. |
 | 1.17 | 2026-08-26 | Regenerated after Session 018: Chapter 06 (core lab L06); block V11. |
 | 1.16 | 2026-08-26 | Regenerated after Session 017: Chapter 05 published. |

@@ -27,6 +27,9 @@ The course itself. Chapters are published in order and appear here as they are w
 | 05 | [Installing QNX SDP 8.0](Chapter05_InstallingQNXSDP.md) | 🐣🚶🏃 | 90 m |
 | 06 | [Your First QNX VM on QEMU](Chapter06_FirstQNXVMOnQEMU.md) ⭐ | 🐣🚶🏃 | 90 m |
 | 07 | [First Contact — The QNX Shell](Chapter07_FirstContactTheQNXShell.md) | 🐣🚶🏃 | 75 m |
+| 08 | [The Toolchain & Deployment](Chapter08_ToolchainAndDeployment.md) ⭐ | 🐣🚶🏃 | 120 m |
+
+**🎉 Part 1 complete.**
 
 
 > 📑 Full chapter list with status, path tags and time estimates:

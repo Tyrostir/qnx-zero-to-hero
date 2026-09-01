@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.10
+version: 1.11
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -51,6 +51,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Development loop** | Edit → build → deploy → run → **debug**. On QNX the middle two cross a network, and the classic failures are a **stale binary**, a **symbol mismatch**, the **wrong target architecture**, and an **unwritable destination**. The structural fix is making `run` and `debug` depend on `deploy`, which depends on the build. | 08 |
 | **Data partition (`/data`)** | The writable partition on a QNX target image. **The only place changes survive a reboot** — `/proc/boot` is read-only, `/tmp` is RAM, and `/`, `/usr` and `/etc` come from the image's system partition. Permanent configuration therefore belongs in the *image* (Ch 21), not in the running filesystem. | 06, 21 |
 | **Development licence** | A QNX licence permitting you to *build* software. **It does not permit shipping** — *"distribution and production use is not permitted under a development license and requires a separate distribution license"*. Both the non-commercial and commercial development licences work this way. | 04 |
 | **Distribution licence** | The **separate** QNX licence required to give software containing QNX to anyone else. Needed in addition to a commercial development licence. Frequently discovered late, at launch planning. | 04 |
@@ -149,6 +150,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`ntox86_64-gdb`** | The cross-debugger in `$QNX_HOST/usr/bin`. Runs on Linux, controls a process on the QNX target through **`qconn`**. Companions: `ntox86_64-objdump`, `-nm`, `-strip`. | 08, 25 |
 | **Neutrino** | The QNX microkernel line introduced in **1995**, and the origin of `procnto`. Present-day products are called *QNX OS*; "Neutrino RTOS" in a product name signals **6.x-era material**. The name survives internally — the `nto` in `procnto` and in `gcc_ntox86_64`. | 02 |
 | **Neutrino** | The historical product name of the QNX microkernel OS (SDP 6.x/7.x era). Surviving in the `nto` in tool names like `gcc_ntox86_64`. | 02 🌱 |
 | **`nto`** | Abbreviation of "Neutrino", used throughout QNX target triples and tool names. | 08 🌱 |
@@ -186,6 +188,8 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`qconn`** | The QNX **remote agent** on a target: lets a host-side debugger start, stop, inspect and control target processes, list them (`info pidlist`) and attach to a running one. Listens on port **8000**; started automatically by `slm`. More capable than Linux's `gdbserver`, which can only debug a process it launched itself. | 08 |
+| **`q++`** | `qcc` for C++. Equivalent to `qcc -V<target>_gpp`. Use `_gpp` (GNU `libstdc++`) unless you specifically need `_cxx`, QNX's older C++ library. | 08 |
 | **`$QNX_HOST`** | Environment variable naming the SDP directory of programs that **execute on your development machine** — `qcc`, `q++`, `ntox86_64-gdb`, `mkifs`, `mkqnximage`. Set by `qnxsdp-env.sh`. Verified value: `~/qnx800/host/linux/x86_64`. | 05 |
 | **`$QNX_TARGET`** | Environment variable naming the SDP directory of files **for the QNX target** — headers, libraries and target binaries, organised by architecture (`x86_64/`, `aarch64le/`). Verified value: `~/qnx800/target/qnx`. Also serves as `mkifs` source material (Ch 21). | 05, 21 |
 | **`qcc`** | QNX's compiler **driver** — not itself a compiler. Reads `-V<target>`, looks it up in `$QNX_HOST/etc/qcc/`, and assembles the real `ntox86_64-gcc` (GCC **12.2.0**) command with the right `-I` and `-L` paths into `$QNX_TARGET`. `qcc -v` shows what it ran. | 05, 08 |
@@ -205,6 +209,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Remote debugging** | Running the debugger on the **host** while the process runs on the **target**. On QNX: `ntox86_64-gdb prog` then `target qnx <ip>:8000`. **Symbols stay on the host** — only addresses, registers and raw memory cross the network — which is why a stripped target binary is still fully debuggable, and why mismatched host/target builds produce confident nonsense. | 08, 25 |
 | **Rate-monotonic** | Fixed-priority scheduling in which a shorter period earns a higher priority. Guarantees schedulability only up to `U ≤ n(2^(1/n) − 1)`, which approaches **≈ 69 %** for large task sets — so deadlines can be missed with a third of the CPU idle. | 01, 11 |
 | **Real-time system** | A system whose **correctness depends on when a result is produced as well as what it is**. A late answer is a wrong answer. Says nothing about speed. | 01 |
 | **Response time (`R`)** | Release → completion, **including any time spent preempted or blocked**. Deadlines apply to `R`, not to execution time `C`. Confusing the two is the most common beginner error in timing analysis. | 01 |
@@ -278,6 +283,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.11 | 2026-08-26 | Chapter 08: +5 terms (`qconn`, `q++`, remote debugging, `ntox86_64-gdb`, development loop). |
 | 1.10 | 2026-08-26 | Chapter 07: +6 terms (`ksh` — with a new K section, pathname space, `slog2info`, `toybox`, `use`, `hogs`) and **blocking state** promoted from a planning stub with the full state list. |
 | 1.9 | 2026-08-26 | Chapter 06: +5 terms (IFS, `slm`, syspage, `startup-*`, data partition) and **build file** promoted from a planning stub. |
 | 1.8 | 2026-08-26 | Chapter 05: +8 terms (`$QNX_HOST`, `$QNX_TARGET`, `qcc`, `qnxsdp-env.sh`, separated debug symbols, sysroot, cross-compilation, QSC baseline). |

@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.16
+version: 1.17
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -46,7 +46,7 @@ hands-on work. You write Markdown; you do not run software. The course is
 **6 parts, 34 chapters, ~21 labs, 1 capstone**, published as Markdown *and* PDF, teaching QNX SDP 8.0
 on a QEMU/KVM virtual machine at zero cost.
 
-**Progress: Phase 2. 8/34 chapters — Part 0 complete (M1), Part 1 at 4/5. Core lab L06 published. 3/5 setup guides, all verified.**
+**Progress: Phase 2. 9/34 chapters — Parts 0 and 1 complete. Core labs L06 and L08 published. 3/5 setup guides, all verified.**
 
 **Cadence: one chapter per turn**, committed and pushed, with `docs/meta/` updated each time.
 
@@ -170,7 +170,7 @@ filesystem costume.
 |---|---|
 | Phase | **2 — writing chapters** |
 | Plan | ✅ Approved 2026-08-25 |
-| Chapters published | **8 / 34** — Part 0 complete (00–03) · Part 1: 04, 05, 06 ⭐ (**core lab L06**), 07 (`pidin` and blocking states) |
+| Chapters published | **9 / 34** — 🎉 **Parts 0 and 1 complete (00–08).** Core labs **L06** and **L08** published |
 | Setup guides published | **3 / 5** — **all three ✅ verified end to end**; zero `[UNVERIFIED]` markers in the course |
 | Host preparation | ✅ **Complete** — `19 passed · 6 warnings · 0 failed` |
 | QNX licence | ✅ **Requested, accepted and deployed** 2026-08-26 |
@@ -181,7 +181,7 @@ filesystem costume.
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
-| Blocker | **None.** ⭐ **Chapter 08 (T-115e) is next and closes Part 1.** Blocks V6–V12 are with the learner; **V11.2 remains the highest-value outstanding request** (`ifs.build`, which Chapter 21 needs). |
+| Blocker | **None.** **Part 2 begins: Chapter 09 (T-130).** Blocks V6–V13 are with the learner. **V13 is the most consequential** (core lab L08 — every later chapter assumes that loop); **V11.2** (`ifs.build`) remains the highest-value for a future chapter. |
 
 **Always confirm against [`docs/meta/CourseState.md`](../meta/CourseState.md) — it is authoritative.**
 
@@ -348,6 +348,7 @@ Full text: [`Decisions.md`](../meta/Decisions.md) · rationale and history:
 |---------|------|-------|---------------|
 | **001** | 2026-08-25 | GitHub Copilot | Repo created. Host verified. QNX product/licensing state researched post-rebrand. `README`, `PLAN`, `TableOfContents`, all six `docs/meta/` documents, all `docs/reference/` documents, folder structure, `.gitignore`, `LICENSE`, `check-environment.sh`, `build-pdf.sh` written. ADR-001…014. Commit `4755aaa`. |
 | **002** | 2026-08-25 | GitHub Copilot | `check-environment.sh` run on the execution box → found `/dev/kvm` present but **not writable** (T-008). Discovered **QSTI/CTI**, the Porting Guide and the DDK Guide → ADR-004 revised. **Plan approved** with two learner amendments (all three paths authored in full; three capstone flavours). ADR-019/020/021 added. **Setup Guides 01 and 02 published.** Commit `79029c2`. |
+| **020** | 2026-08-26 | Claude (Opus 5) | ⭐ **Chapter 08 published — Parts 0 and 1 COMPLETE (9/34).** Contains **core lab L08** and ships `labs/lab08_devloop/`. Centre of the chapter is **remote debugging through `qconn`** and the split that makes it work: **symbols stay on the host**, only addresses cross the network — with its one hazard (mismatched builds → confident nonsense, no warning) given equal weight and a 💥 exercise. The lab **inverts the usual roles**: `skeleton/` is a complete, compiling, subtly wrong program; `solution/` is the fix, because the exercise is debugging. Glossary +5; **block V13** added — the most consequential since V5. |
 | **019** | 2026-08-26 | Claude (Opus 5) | ⚠️ **Disk figures corrected across six documents and `check-environment.sh`** — `~/qnx800` is **79 GB**, not ~43 GB, and the VM image is **not sparse** (D-008 answered). The `df`/`du` discrepancy reconciled rather than replaced. **`bsp/` (1.1 GB) discovered** — Ch 22 material already on disk. 📕 **Chapter 07 published** (992 lines): `pidin` and **blocking states** as the centre, the `REPLY`-chain technique, `/dev` entries as processes, and why QNX's `/proc` is small. Glossary +6 (new **K** section); **block V12** added. |
 | **018** | 2026-08-26 | Claude (Opus 5) | ⭐ **Chapter 06 published** (1087 lines) — the first core chapter, containing **lab L06**. Full boot chain with `Startup complete` as the BSP/system boundary; the **syspage** as what makes `procnto` board-independent; `ifs.bin` (20 MB, RAM-mounted, read-only) versus the disk; `slm`'s 22 components read as a dependency argument; §3.3 on what persists (only `/data`). §5 places every line of the verified boot log. Labs open `output/build/` — Chapter 21's source material — early. Glossary +5; **block V11** added, whose **V11.2 (`ifs.build` + `disk.layout`) is the highest-value outstanding request in the course**. |
 | **017** | 2026-08-26 | Claude (Opus 5) | 📕 **Chapter 05 published** (1026 lines). Organised around the host/target split and the test *"which CPU and OS executes this file?"*. `qcc` runs from the host tree and reads the target tree; §4.3 shows the four common build failures are one bug from four angles. Covers `source` vs `./`, QSC's four nouns with **verified** CLT options, `.sym` files, and where ~43 GB goes. §5 traces one `qcc` invocation and names the silent failure — plain `gcc` builds a working binary for the wrong OS. Glossary +8; **block V10** added, whose V10.2 tests the chapter's central mechanism (never yet confirmed). |
@@ -398,6 +399,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.17 | 2026-08-26 | Session 020: **Parts 0 and 1 complete**; core lab L08; block V13. |
 | 1.16 | 2026-08-26 | Session 019: disk figures corrected; Chapter 07; block V12. |
 | 1.15 | 2026-08-26 | Session 018: Chapter 06 (core lab L06); block V11. |
 | 1.14 | 2026-08-26 | Session 017: Chapter 05; block V10. |

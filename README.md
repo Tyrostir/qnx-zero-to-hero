@@ -5,7 +5,7 @@
 **A complete, hands-on, beginner-friendly course on the QNX Real-Time Operating System**
 *for embedded engineers with a C/C++ and Python background.*
 
-[![Course Status](https://img.shields.io/badge/chapters-8%2F34-yellow)](docs/meta/CourseState.md)
+[![Course Status](https://img.shields.io/badge/chapters-9%2F34-yellow)](docs/meta/CourseState.md)
 [![QNX SDP](https://img.shields.io/badge/QNX%20SDP-8.0-blue)](https://qnx.software/)
 [![Lab Platform](https://img.shields.io/badge/labs-QEMU%2FKVM-green)](docs/guides/Setup_03_QEMU_VM.md)
 [![License](https://img.shields.io/badge/course%20content-CC%20BY--SA%204.0-lightgrey)](LICENSE)
@@ -183,7 +183,7 @@ part of the course material. Chapters cross-reference doubts where relevant.
 |---|---|
 | **Phase** | 2 — Writing chapters |
 | **Plan** | ✅ Approved (2026-08-25) |
-| **Chapters published** | **8 / 34** — Part 0 complete; Part 1 nearly complete: [00 How To Use This Course](docs/chapters/Chapter00_HowToUseThisCourse.md) · [01 What Is a Real-Time System?](docs/chapters/Chapter01_WhatIsARealTimeSystem.md) · [02 What Is QNX?](docs/chapters/Chapter02_WhatIsQNX.md) · [03 Why & Where QNX Is Used](docs/chapters/Chapter03_WhyAndWhereQNXIsUsed.md) · [04 QNX Licensing](docs/chapters/Chapter04_LicensingAndQNXEverywhere.md) · [05 Installing QNX SDP 8.0](docs/chapters/Chapter05_InstallingQNXSDP.md) · [06 Your First QNX VM ⭐](docs/chapters/Chapter06_FirstQNXVMOnQEMU.md) · [07 First Contact — The QNX Shell](docs/chapters/Chapter07_FirstContactTheQNXShell.md) |
+| **Chapters published** | **9 / 34** — 🎉 **Parts 0 and 1 complete**: [00 How To Use This Course](docs/chapters/Chapter00_HowToUseThisCourse.md) · [01 What Is a Real-Time System?](docs/chapters/Chapter01_WhatIsARealTimeSystem.md) · [02 What Is QNX?](docs/chapters/Chapter02_WhatIsQNX.md) · [03 Why & Where QNX Is Used](docs/chapters/Chapter03_WhyAndWhereQNXIsUsed.md) · [04 QNX Licensing](docs/chapters/Chapter04_LicensingAndQNXEverywhere.md) · [05 Installing QNX SDP 8.0](docs/chapters/Chapter05_InstallingQNXSDP.md) · [06 Your First QNX VM ⭐](docs/chapters/Chapter06_FirstQNXVMOnQEMU.md) · [07 First Contact — The QNX Shell](docs/chapters/Chapter07_FirstContactTheQNXShell.md) · [08 Toolchain & Deployment ⭐](docs/chapters/Chapter08_ToolchainAndDeployment.md) |
 | **Setup guides published** | **3 / 5, all ✅ verified end to end** — [01 Prerequisites](docs/guides/Setup_01_Prerequisites.md) · [02 Licence & SDP](docs/guides/Setup_02_QNX_Account_And_License.md) · [03 QEMU VM](docs/guides/Setup_03_QEMU_VM.md) |
 | **Verified against** | QNX 8.0.0 (kernel build `2026/02/27`) on QEMU/KVM, Ubuntu 26.04 / WSL2 |
 | **Start here** | [Chapter 00](docs/chapters/Chapter00_HowToUseThisCourse.md), then [Setup Guide 01](docs/guides/Setup_01_Prerequisites.md) |

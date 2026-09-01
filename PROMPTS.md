@@ -71,6 +71,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#16](#prompt16) | 2026-08-26 | Claude (Opus 5) | Write Chapter 05 | 📕 **Chapter 05 published** (6/34) · the host/target split · block V10 · Glossary +8 |
 | [PROMPT#17](#prompt17) | 2026-08-26 | Claude (Opus 5) | Write Chapter 06 | ⭐ **Chapter 06 published** (7/34) — first core chapter, lab L06 · block V11 · Glossary +5 |
 | [PROMPT#18](#prompt18) | 2026-08-26 | Claude (Opus 5) | `du` measurement supplied; write Chapter 07 | ⚠️ **Disk figures corrected across 6 docs + the check script** (79 GB; not sparse) · 📕 **Chapter 07 published** (8/34) · block V12 |
+| [PROMPT#19](#prompt19) | 2026-08-26 | Claude (Opus 5) | "proceed to next" | 🎉 **Chapter 08 published — Parts 0 and 1 complete (9/34)** · core lab L08 · `labs/lab08_devloop/` · block V13 |
 
 ---
 
@@ -2312,10 +2313,130 @@ After that, **Part 2 begins the microkernel itself.**
 
 ---
 
+## PROMPT#19
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 020 |
+| **Context** | Chapter 07 published; the learner asked for the next chapter, which closes Part 1. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> proceed to next
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 🎉 Chapter 08 published — Parts 0 and 1 complete (9/34)
+
+1177 lines, containing **core lab L08**, and shipping `labs/lab08_devloop/`.
+
+```text
+Part 0  Orientation   [████████████████████] 100 %  (4/4) 🎉
+Part 1  Environment   [████████████████████] 100 %  (5/5) 🎉
+OVERALL               [█████               ]  26 %  (9/34)
+```
+
+## The chapter's centre: symbols stay on the host
+
+Chapter 08 could have been a `qcc` flag reference. Instead it's built around **remote debugging**, and specifically one design decision:
+
+> `gdb` runs on **your host** with the debug information. `qconn` on the target does *control* and speaks only in **addresses and raw memory**. Nothing that knows a function name ever crosses the network.
+
+That single idea explains three things at once: why a production target can ship a **stripped** binary and stay fully debuggable, why Chapter 05's `.sym` files exist, and why core-dump analysis works the way Chapter 25 will describe.
+
+**And it comes with a cost, given equal weight.** Nothing verifies the target binary is the one your host has symbols for — so **mismatched builds produce confident, detailed, entirely fictional answers.**
+
+> That's worse than a crash. A crash tells you something is wrong. Here `gdb` insists you're stopped in `beta()` while the target prints `ALPHA`, and you'll believe it for as long as it takes to notice.
+
+The 💥 exercise reproduces it deliberately. The remedy offered is structural, not vigilance: **never deploy by hand** — make `run` and `debug` depend on `deploy`, which depends on the build.
+
+## §5 — finding a bug you can't see
+
+An off-by-one buffer overrun that `-Wall -Wextra` **cannot** catch (the compiler doesn't know `count`'s value at the call site). Found with `print r[4]` rather than by reading.
+
+And the argument for why this matters more here than elsewhere:
+
+> `printf` debugging **changes timing**, and on a real-time system that changes the bug. It can hide a race, create one, or move a deadline miss out of reach — then it vanishes when you remove the `printf`.
+
+That's why remote debugging is a `⭐ core` skill in this course rather than a convenience.
+
+## The lab inverts skeleton and solution
+
+`labs/lab08_devloop/` breaks Chapter 00's convention deliberately:
+
+| | Usual | Here |
+|---|---|---|
+| `skeleton/` | `TODO`s to fill in | A **complete, compiling, subtly wrong** program |
+| `solution/` | The reference implementation | The **fix** |
+
+Because the exercise is *debugging*, not writing. The README says so and tells you **not to open `solution/` first**; the Makefile defaults to the skeleton so `make run` builds the buggy one without you choosing.
+
+The Makefile also catches Chapter 05 §5.3's silent failure at build time:
+
+```make
+@if file $@ | grep -q 'ldqnx' && file $@ | grep -q 'x86-64'; then \
+   echo "OK: QNX x86_64 binary"; else echo "WARNING: ..."; fi
+```
+
+## ⚠️ What's verified, and what isn't
+
+**Carried from your runs:** GCC 12.2.0 and the six targets · `qconn` running, started by `slm` · SSH needs `qnxuser` · `/data` is writable.
+
+**Predicted, never observed:**
+
+| Prediction | Where |
+|---|---|
+| `target qnx <ip>:8000` is the right incantation | §3.4 — **the chapter's central mechanism** |
+| `info pidlist` / `attach` work through `qconn` | §3.4 |
+| `upload` copies over the debug link | §4.4 |
+| A symbol mismatch gives nonsense rather than an error | 💥 |
+
+As with Chapter 05, **the most important claim is the least evidenced**, and the chapter says so where it matters.
+
+---
+
+### What changed on disk
+
+`Chapter08_ToolchainAndDeployment.md` (new, 1177 lines) · **`labs/lab08_devloop/`** (Makefile, buggy skeleton, fixed solution, README) · Glossary **+5** · **block V13** · TOC tag gains 🐣 (ADR-008 again — the Path A activity *reads* a debugging session) · `DecisionsLog` Session 020 · all trackers. Link check across nine chapters: **zero broken**.
+
+---
+
+## 👉 Block V13 is the one to do
+
+Eight blocks are open, but this is **the most consequential since V5** — every chapter from 09 onwards assumes the loop works:
+
+```bash
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ export TGT=$(cd ~/qnx800/images/qemu/qemu && mkqnximage --getip)
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab08_devloop
+host$ make TGT=$TGT run
+host$ make TGT=$TGT debug
+```
+
+Then in `gdb`: `break sum_readings`, `run`, step until `i` is 4, and `print r[4]`.
+
+**What I most want back is the `gdb` session itself.** `target qnx <ip>:8000`, `info pidlist` and `attach` are all asserted from reasoning; if any of the syntax is wrong, `help target` inside `gdb` will give the real form.
+
+**Next: Part 2 begins — Chapter 09, Microkernel Architecture & `procnto`.** What's actually inside the kernel, why a driver crash is survivable, and how a system assembled from cooperating processes stays fast enough to be worth it. This is where QNX stops resembling Linux, and where your remaining core labs live — **L13** and **L14** are message passing, the centre of the whole course.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.17 | 2026-08-26 | PROMPT#19 logged: Chapter 08; Parts 0 and 1 complete. |
 | 2.16 | 2026-08-26 | PROMPT#18 logged: disk corrections and Chapter 07. |
 | 2.15 | 2026-08-26 | PROMPT#17 logged: Chapter 06, the first core chapter. |
 | 2.14 | 2026-08-26 | PROMPT#16 logged: Chapter 05 published. |

@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6–V12 pending**
+status: Active — V1–V5 ✅ complete; **V6–V13 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -107,6 +107,7 @@ Worked / Failed. Notes: ...
 | **V10** — SDP exploration | ⬜ Chapter 05, 25 minutes. **Host only.** Confirms the chapter's central mechanism |
 | **V11** — image archaeology | ⬜ Chapter 06, 45 minutes. **V11.2 is the highest-value request outstanding** |
 | **V12** — a healthy-system baseline | ⬜ Chapter 07, 30 minutes. Feeds Chapter 25's diagnostic lab |
+| **V13** — ⭐ the development loop | ⬜ Chapter 08, 60 minutes. **The most consequential block since V5** — every later chapter assumes it |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -897,6 +898,95 @@ chapter's central teaching point, and **only the second can deadlock**. Predicte
 
 ---
 
+## 7i. Block V13 — Chapter 08's development loop ⭐
+
+> 🎯 **Goal:** prove the loop that every remaining chapter depends on — build, deploy, run, and
+> **debug a target process from the host**.
+> ⏱️ 60 minutes. Host **and** target.
+> 📖 [Chapter 08 Labs 08.1, 08.2 and 💥](../chapters/Chapter08_ToolchainAndDeployment.md) ·
+> [`labs/lab08_devloop/README.md`](../../labs/lab08_devloop/README.md)
+>
+> ⭐ **This is core lab L08, and the most consequential block since V5.** Everything from Chapter 09
+> onwards assumes this loop works.
+
+### V13.1 — Build and deploy
+
+```bash
+host$ source ~/qnx800/qnxsdp-env.sh
+host$ export TGT=$(cd ~/qnx800/images/qemu/qemu && mkqnximage --getip)
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab08_devloop
+host$ make
+host$ make TGT=$TGT run
+```
+
+📋 **Paste the full output**, including the Makefile's `OK: QNX x86_64 binary` check and whatever the
+program prints.
+🎯 **Why:** this is the course's **first multi-target Makefile** and its first automated deploy.
+Whatever breaks here breaks in every later lab.
+
+### V13.2 — ⭐ Remote debugging
+
+```bash
+host$ make TGT=$TGT debug
+(gdb) break sum_readings
+(gdb) run
+(gdb) info args
+(gdb) next          # repeat until i reaches 4
+(gdb) print i
+(gdb) print count
+(gdb) print r[4]
+(gdb) print r[3]
+```
+
+📋 **Paste the whole `gdb` session.**
+🎯 **The claims being tested, none of them yet observed:**
+
+| Claim | Where |
+|-------|-------|
+| `target qnx <ip>:8000` connects to the running `qconn` | §2.4, §3.4 |
+| `break <function>` resolves using **host-side** symbols | §3.4 |
+| `print r[4]` shows garbage while `r[3]` shows 40 | §5.3 |
+| `upload` copies a file over the debug link | §4.4 |
+
+⚠️ **The `gdb` command syntax is unverified.** If `target qnx` is wrong, `help target` inside `gdb`
+lists what it accepts — please paste that instead.
+
+### V13.3 — Attach to a running process
+
+```bash
+qnx$  sleep 600 &
+host$ ntox86_64-gdb
+(gdb) target qnx <ip>:8000
+(gdb) info pidlist
+(gdb) attach <pid>
+(gdb) backtrace
+(gdb) detach
+```
+
+📋 **Report whether `info pidlist` and `attach` work**, with their output.
+🎯 **Why it matters separately:** this is the capability `qconn` has and `gdbserver` does not — and it
+is the situation you are actually in when a target misbehaves. §3.4 asserts it; nobody has tried it.
+
+### V13.4 — 💥 The symbol mismatch
+
+Follow Chapter 08's 💥 exercise: deploy version 1, rebuild the **host** copy with different function
+names, do **not** redeploy, then debug.
+
+📋 **Report what `gdb` did.**
+🎯 **The claim:** confident nonsense — wrong function names, misplaced breakpoints, **no warning**.
+This is the one hazard of the symbols-on-the-host design, and the chapter asserts it from reasoning.
+
+### V13.5 — Optional: sizes and optimisation
+
+```bash
+host$ make release
+host$ ls -l avg avg-rel
+```
+
+📋 **Report both sizes.** 🎯 The difference is why Chapter 05's `.sym` files exist.
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -949,6 +1039,12 @@ chapter's central teaching point, and **only the second can deadlock**. Predicte
 | V12.2 | `pidin fds` + `/dev` ↔ process correspondence | 👤 | — | Ch 07 §2.3, §3.3 | ⬜ |
 | V12.3 | 💥 `NANOSLEEP` vs `REPLY` | 👤 | — | **Ch 07's central distinction** | ⬜ |
 | — | Clear Chapter 07's lab markers | 🤖 | V12.3 | — | ⏸️ |
+| **V13.1** | ⭐ Build + deploy via the Makefile | 👤 | — | Lab 08.1 · **every later lab** | ⬜ |
+| **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | ⬜ |
+| V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | ⬜ |
+| V13.4 | 💥 Symbol mismatch produces confident nonsense | 👤 | V13.2 | Ch 08 💥 | ⬜ |
+| V13.5 | Optional: debug vs stripped release sizes | 👤 | V13.1 | Ch 05 §3.4 | ⬜ |
+| — | Clear Chapter 08's lab markers | 🤖 | V13.2 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -1069,6 +1165,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-08-26 | **Block V13 added** for Chapter 08's core lab L08 — build, deploy, **remote debugging through `qconn`**, attach-to-running, and the symbol-mismatch hazard. The most consequential block since V5. |
 | 1.15 | 2026-08-26 | **Block V12 added** for Chapter 07 — a state census of a healthy system, the `pidin fds` communication graph, and the `NANOSLEEP`-versus-`REPLY` distinction. |
 | 1.14 | 2026-08-26 | **V10.1's disk breakdown supplied and applied.** D-008 answered definitively; disk budget corrected across six documents and the environment check. |
 | 1.13 | 2026-08-26 | **Block V11 added** for Chapter 06 — `slm.cfg`, the `ifs.build`/`disk.layout` recipe, and the what-survives-a-reboot test. V11.2 is the most valuable outstanding request: it turns Chapter 21 into a walkthrough of a system already booted. |
