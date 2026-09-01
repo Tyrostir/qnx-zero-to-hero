@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.19
+version: 1.20
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1916,10 +1916,93 @@ first.
 
 ---
 
+## 2026-08-26 — Session 021 (Chapter 09; Part 2 begins)
+
+### DECIDED — Fault isolation is explained mechanically, not asserted
+
+Chapter 02 made the architectural claim; Chapter 09's job is to make it *mechanical*. Section 3 walks the
+page tables, the fault path and `procnto`'s seven-step teardown, and states the point people miss:
+
+> The bad pointer cannot reach your memory because your pages are **not mapped** in the driver's
+> address space. Not "protected by convention" — **absent**. There is no address it could compute
+> that would reach you.
+
+**Why the detail earns its space.** "A driver crash is survivable" is a slogan until a reader can say
+*what stopped it*. The mechanism also explains the limits, which is the more valuable half.
+
+---
+
+### DECIDED — Equal weight to what is NOT survivable
+
+Sections 3.3 and 4.3 are as long as the isolation argument, and deliberately so:
+
+| Not survivable | Why |
+|----------------|-----|
+| `procnto` faulting | It is the scheduler |
+| A driver misusing hardware it legitimately controls | Memory is protected; **the device is not** |
+| Interrupts disabled too long | Chapter 01's unbound ① — isolation is irrelevant |
+| ⚠️ **Deadlock** | **Nothing faults, so nothing detects it.** Every protection in the chapter is silent on it |
+
+**Deadlock is the one that matters most**, because it is where the chapter's own subject stops
+helping. Every other entry in the blast-radius table is about a component failing *loudly*. That is
+also the retrospective justification for Chapter 07 having spent a whole chapter on blocking states:
+`pidin` is the only thing that finds a failure the kernel cannot.
+
+> A course that only teaches where its subject succeeds produces engineers who are surprised in
+> production. The hardware-misuse row is the sharpest case: the driver is **not faulty**, so no
+> protection applies.
+
+---
+
+### DECIDED — Section 5's lesson is about `errno`, not about crashing
+
+The obvious ending for a fault-isolation chapter is *"and the system survived"*. Section 5.4 goes one
+step further, to the client:
+
+> **The microkernel converts another process's catastrophe into your `errno`.** What you do with it
+> is the part it cannot help you with.
+
+**Why that framing.** Isolation alone would leave every client stuck in `REPLY` forever. The step that
+makes the design *useful* is `procnto` waking clients with `ESRCH` — and that hands the responsibility
+straight back to application code. A client that ignores `MsgSend`'s return value inherits the crash
+it was supposedly protected from.
+
+This sets up Chapter 13 (the return values), Chapter 27 (what a good recovery looks like), and the
+capstone's error-handling rubric.
+
+---
+
+### DECIDED — "POSIX on top, messages underneath" is Part 2's organising sentence
+
+Section 2.3 states it as the single most important idea in Part 2, and it does three jobs at once:
+
+- explains why the learner's Linux C compiles unchanged;
+- explains why writing a QNX driver means writing a **program**, not patching a kernel;
+- explains why QNX's kernel-call list has been essentially stable since 1995, while Linux has grown to
+  ~400 syscalls — new QNX functionality arrives as **new servers**, not new kernel entry points.
+
+Chapters 13 and 16–17 both depend on the reader having internalised it here.
+
+---
+
+### OPEN — A third block now exists to serve a later chapter
+
+| Block | Serves | Wanted |
+|-------|--------|--------|
+| **V11.2** | Chapter 21 | `ifs.build`, `disk.layout` — the image recipe |
+| **V12.1** | Chapter 25 | A healthy-system `pidin` state census |
+| **V14.4** | Chapter 25 | Where `dumper` writes core dumps |
+
+Recorded together so the dependencies are visible when those chapters are written. All three are
+cheap for the learner and materially change what the chapter can be.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.20 | 2026-08-26 | Session 021 appended: fault isolation explained mechanically; equal weight to what is not survivable; section 5's `errno` framing; "POSIX on top, messages underneath" as Part 2's organising sentence; three blocks now serving later chapters. |
 | 1.19 | 2026-08-26 | Session 020 appended: the symbols-on-the-host framing and its hazard; the inverted skeleton/solution roles; a 🐣 tag added against the TOC; **Parts 0 and 1 complete**. |
 | 1.18 | 2026-08-26 | Session 019 appended: disk figures corrected from `du` measurement across six documents and the check script; D-008 answered; `df`-versus-`du` reconciled; the third instance of a plausible-but-wrong published claim. |
 | 1.17 | 2026-08-26 | Session 018 appended: `Startup complete` as the partitioning line; the syspage introduced early; persistence made testable; build files opened fifteen chapters early; V11.2 flagged as the highest-value outstanding request. |

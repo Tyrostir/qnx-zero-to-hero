@@ -82,7 +82,7 @@ all of Part 0 while your QNX licence request is being processed.*
 
 | # | Chapter | Paths | Est. | Status |
 |---|---------|-------|------|--------|
-| 09 | [Microkernel Architecture & procnto](chapters/Chapter09_MicrokernelArchitecture.md) | 🐣🚶🏃 | 90 m | 📄 |
+| 09 | [Microkernel Architecture & procnto](chapters/Chapter09_MicrokernelArchitecture.md) | 🐣🚶🏃 | 90 m | 📕 |
 | 10 | [Processes and Threads](chapters/Chapter10_ProcessesAndThreads.md) | 🚶🏃 | 90 m | 📄 |
 | 11 | [Scheduling & Real-Time Priorities](chapters/Chapter11_SchedulingAndPriorities.md) | 🚶🏃 | 100 m | 📄 |
 | 12 | [Synchronization Primitives](chapters/Chapter12_Synchronization.md) | 🚶🏃 | 100 m | 📄 |
@@ -261,6 +261,7 @@ documented**; you are not locked in.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | **Chapter 09 published — Part 2 begins.** |
 | 1.11 | 2026-08-26 | **Chapter 08 published — Part 1 complete (5/5).** Its path tag gains 🐣: ADR-008 requires all three paths in every chapter, and Chapter 08 ships a read-a-debugging-session activity. |
 | 1.10 | 2026-08-26 | **Chapter 07 published.** |
 | 1.9 | 2026-08-26 | **Chapter 06 published — the first ⭐ core chapter.** |

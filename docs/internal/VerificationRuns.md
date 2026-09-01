@@ -2,7 +2,7 @@
 title: "Verification Runs — Clearing the [UNVERIFIED] Markers"
 document_id: VERIFY
 version: 1.4
-status: Active — V1–V5 ✅ complete; **V6–V13 pending**
+status: Active — V1–V5 ✅ complete; **V6–V14 pending**
 created: 2026-08-26
 last_updated: 2026-08-26
 audience: "The learner and the AI agent (Tier 3 — internal)"
@@ -108,6 +108,7 @@ Worked / Failed. Notes: ...
 | **V11** — image archaeology | ⬜ Chapter 06, 45 minutes. **V11.2 is the highest-value request outstanding** |
 | **V12** — a healthy-system baseline | ⬜ Chapter 07, 30 minutes. Feeds Chapter 25's diagnostic lab |
 | **V13** — ⭐ the development loop | ⬜ Chapter 08, 60 minutes. **The most consequential block since V5** — every later chapter assumes it |
+| **V14** — fault isolation | ⬜ Chapter 09, 45 minutes. V14.3 tests the chapter's central mechanical claim |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -987,6 +988,81 @@ host$ ls -l avg avg-rel
 
 ---
 
+## 7j. Block V14 — Chapter 09's fault isolation
+
+> 🎯 **Goal:** confirm the chapter's central mechanical claim — that a crash stays local, and that
+> clients blocked on a dying server are **woken with an error** rather than left stuck.
+> ⏱️ 45 minutes. Host **and** target.
+> 📖 [Chapter 09 Labs 09.1, 09.2 and 💥](../chapters/Chapter09_MicrokernelArchitecture.md)
+
+### V14.1 — The kernel's real API surface
+
+```bash
+host$ grep -c "^extern" $QNX_TARGET/usr/include/sys/neutrino.h
+host$ grep -oE '\b(Msg|Thread|Sched|Sync|Timer|Clock|Interrupt|Channel|Connect)[A-Za-z]+' \
+        $QNX_TARGET/usr/include/sys/neutrino.h | sort -u
+```
+
+📋 **Paste the family list.**
+🎯 **Why:** §4.1's table is drawn from QNX's **documentation**, not from your header. The header is
+authoritative for your build, and the course has never read it. **If it shows families §4.1 omits, or
+omits ones §4.1 claims, that is a finding.**
+
+### V14.2 — A fault stays local
+
+```bash
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab09_faultisolation
+host$ make TGT=$TGT deploy
+```
+
+Then, in two target sessions — baseline, crash, re-measure:
+
+```bash
+qnx$ pidin info ; pidin | wc -l      # session 2, before
+qnx$ /data/faulter                    # session 1
+qnx$ pidin info ; pidin | wc -l      # session 2, after
+qnx$ slog2info | tail -20
+```
+
+📋 **Paste before and after.**
+🎯 **The claim:** the process count returns to baseline and **nothing else changes**. Also wanted:
+does `slog2info` record the fault, and at what severity?
+
+### V14.3 — ⭐ 💥 A client blocked on a dying server
+
+Find a client in `REPLY`, kill the server it names, and look at the client immediately:
+
+```bash
+qnx$ pidin | grep REPLY
+qnx# slay -f vncserv
+qnx$ pidin | grep -E '<client-pid>|vncserv'
+qnx# vncserv &
+qnx$ pidin | grep vncserv
+```
+
+⚠️ **`vncserv`, not `io-sock`** — the latter would kill your SSH session.
+
+📋 **Report the client's state immediately after the kill.**
+🎯 **This is the chapter's central mechanical claim** (§3.2 step 6, §5.4): `procnto` should **wake**
+the client with `-1` / `ESRCH`, not leave it in `REPLY` on a PID that no longer exists.
+**If the client stays stuck, §3.2 is wrong and needs rewriting.** Also confirm the restarted server
+gets a **new PID** ([D-013](../meta/Doubts.md#d-013)).
+
+### V14.4 — Where does `dumper` write?
+
+```bash
+qnx$ pidin | grep dumper
+qnx$ ls /var/dumps 2>/dev/null || ls / | grep -i dump
+qnx$ use dumper 2>/dev/null | head -20
+```
+
+📋 **Report the core-dump location.**
+🎯 **Why:** `dumper` is in `slm`'s component list, so core dumps are presumably enabled — but where
+they land on this image is unknown, and **Chapter 25 needs it**. Third block created to serve a later
+chapter, after V11.2 (Ch 21) and V12.1 (Ch 25).
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -1045,6 +1121,11 @@ host$ ls -l avg avg-rel
 | V13.4 | 💥 Symbol mismatch produces confident nonsense | 👤 | V13.2 | Ch 08 💥 | ⬜ |
 | V13.5 | Optional: debug vs stripped release sizes | 👤 | V13.1 | Ch 05 §3.4 | ⬜ |
 | — | Clear Chapter 08's lab markers | 🤖 | V13.2 | — | ⏸️ |
+| **V14.1** | The kernel's real API surface from the header | 👤 | — | Ch 09 §4.1 | ⬜ |
+| V14.2 | A fault stays local | 👤 | — | Lab 09.2 | ⬜ |
+| **V14.3** | ⭐ 💥 Client woken with `ESRCH`, not stuck | 👤 | — | **Ch 09's central claim** | ⬜ |
+| V14.4 | Where `dumper` writes core dumps | 👤 | — | **Ch 25 needs this** | ⬜ |
+| — | Clear Chapter 09's lab markers | 🤖 | V14.3 | — | ⏸️ |
 | **V5.1** | Install the QSTI package | 👤 | — | Setup 03 §4 | ✅ *(was already installed with SDP)* — **found a bug** |
 | V5.2 | Unpack the image | 👤 | V5.1 | Setup 03 §5 | ✅ — **found the nested `qemu/` trap** |
 | V5.3 | **Boot to a `#` prompt** 🎉 | 👤 | V5.2 | Setup 03 §7 · **M2** | ✅ 🎉 **MILESTONE M2 REACHED** |
@@ -1165,6 +1246,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.17 | 2026-08-26 | **Block V14 added** for Chapter 09 — the kernel's real API surface, fault locality, and (V14.3) whether a client blocked on a dying server is really woken with `ESRCH`. V14.4 finds the core-dump location for Chapter 25. |
 | 1.16 | 2026-08-26 | **Block V13 added** for Chapter 08's core lab L08 — build, deploy, **remote debugging through `qconn`**, attach-to-running, and the symbol-mismatch hazard. The most consequential block since V5. |
 | 1.15 | 2026-08-26 | **Block V12 added** for Chapter 07 — a state census of a healthy system, the `pidin fds` communication graph, and the `NANOSLEEP`-versus-`REPLY` distinction. |
 | 1.14 | 2026-08-26 | **V10.1's disk breakdown supplied and applied.** D-008 answered definitively; disk budget corrected across six documents and the environment check. |

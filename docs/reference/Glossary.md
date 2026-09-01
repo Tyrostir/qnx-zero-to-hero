@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.11
+version: 1.12
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -21,6 +21,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Address space** | The MMU-enforced mapping from the virtual addresses a process uses to the physical memory it may touch. Each QNX process has its own, which is *mechanically* why a driver fault cannot reach your memory: your pages are not **mapped** in the driver's address space, so no address it could compute would reach you. | 09, 15 |
 | **Adaptive Partitioning** | A QNX scheduler feature that guarantees each *partition* (group of threads) a minimum percentage of CPU time over a window, while still allowing free use of idle CPU. Prevents one misbehaving subsystem from starving another, without the rigidity of fixed time slicing. | 27 🌱 |
 | **`aarch64le`** | QNX's name for the 64-bit ARM little-endian target architecture. Used for Raspberry Pi and most automotive SoCs. | 08 🌱 |
 | **ASIL** | *Automotive Safety Integrity Level* (A–D) from ISO 26262. **ASIL D** is the most stringent; QNX OS and the QNX Hypervisor are certified to it. Level is assigned per hazard from severity, exposure and controllability — it is a property of the *hazard*, not of the software. | 03, 29 |
@@ -30,6 +31,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Blast radius** | How far a failure propagates. On QNX: an application fault kills its process; a driver fault kills that driver and returns errors to its clients; a `procnto` fault stops the system. ⚠️ Bounded only for failures that are **loud** — a deadlock produces no fault, so nothing detects it. | 09 |
 | **Baseline (QSC)** | QNX Software Center's term for a complete SDP release, installed with `-installBaseline`. Contrast a **package**, one component installed with `-installPackage`. | 05 |
 | **Blocking state** | The precise reason a thread is not running — `RECEIVE`, `REPLY`, `SEND`, `MUTEX`, `CONDVAR`, `SEM`, `SIGWAITINFO`, `NANOSLEEP`, `INTR`, `DEAD`. Shown by `pidin`. **`RECEIVE` dominates a healthy system**; **`REPLY`** names the PID being waited on, so chains can be followed and cycles (deadlock) spotted directly. Reading these is *the* core QNX debugging skill. | 07, 13, 25 |
 | **BSP** | *Board Support Package* — the hardware-specific software (IPL, `startup-*`, drivers, build files) that lets QNX boot on a particular board. | 22 🌱 |
@@ -68,6 +70,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **`ESRCH`** | *No such process.* The `errno` value `MsgSend` returns when the server a client was blocked on has died. **The kernel converting another process's catastrophe into your error return** — and the point at which the robustness becomes your error handling's responsibility. | 09, 13 |
 | **EN 50128 / EN 50657** | European rail software standards (trackside / on-board). QNX holds **SIL 3**. Rail deadlines are often *seconds* — hard real-time with loose deadlines. | 03, 29 |
 | **Evidence package** | The artefacts a certified OS vendor supplies — safety manual, hazard analysis, test reports, tool-qualification data — that let your assessor examine *your application* against a certified baseline instead of a bare kernel. **This is what you buy when you buy a certified OS.** | 03, 29 |
 | **`errno`** | A per-thread integer that failing library calls set to say *why* they failed. Meaningful **only immediately after** a call that reported failure — a successful call may leave anything in it. Always test the return value first, then read `errno`. `perror()` and `strerror()` turn it into text. | 01 |
@@ -120,6 +123,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
+| **Kernel call** | A function that traps directly into `procnto` — declared in `<sys/neutrino.h>`, named CamelCase by family (`Msg*`, `Thread*`, `Sched*`, `Sync*`, `Timer*`, `Interrupt*`). Distinct from a **library call**, which runs in your process, and from a **message**, which goes to another process. QNX has a few dozen; Linux has ~400 syscalls, because on QNX new functionality arrives as new *servers* rather than new kernel entry points. | 09 |
 | **`ksh`** | The Korn shell — QNX's default. POSIX-compliant, so ordinary shell skills transfer. `bash` is also present on the QSTI image. | 07 |
 
 ## L
@@ -283,6 +287,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.12 | 2026-08-26 | Chapter 09: +4 terms (address space, kernel call, blast radius, `ESRCH`). |
 | 1.11 | 2026-08-26 | Chapter 08: +5 terms (`qconn`, `q++`, remote debugging, `ntox86_64-gdb`, development loop). |
 | 1.10 | 2026-08-26 | Chapter 07: +6 terms (`ksh` — with a new K section, pathname space, `slog2info`, `toybox`, `use`, `hogs`) and **blocking state** promoted from a planning stub with the full state list. |
 | 1.9 | 2026-08-26 | Chapter 06: +5 terms (IFS, `slm`, syspage, `startup-*`, data partition) and **build file** promoted from a planning stub. |

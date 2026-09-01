@@ -26,9 +26,9 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **9 / 34** — 🎉 **Parts 0 and 1 complete** |
+| **Chapters published** | **10 / 34** — Parts 0 and 1 complete; **Part 2 begun** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
-| **Labs published** | **2 / 21** compiled — Lab 01.2 (V6) and **⭐ L08** (V13) · plus non-compiled labs in every published chapter |
+| **Labs published** | **3 / 21** compiled — Lab 01.2 (V6), **⭐ L08** (V13), Lab 09.2 (V14) · plus non-compiled labs in every published chapter |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
@@ -40,13 +40,13 @@ update_trigger: "End of every working session, and after every chapter is publis
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
 Part 1  Environment        [████████████████████] 100 %   (5/5 chapters) 🎉
-Part 2  Microkernel Core   [                    ]   0 %   (0/7 chapters)
+Part 2  Microkernel Core   [██                  ]  14 %   (1/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [█████               ]  26 %   (9/34)
+OVERALL                    [█████               ]  29 %   (10/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [█████               ]  26 %   (9/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | ⭐ **Read [Chapter 08](../chapters/Chapter08_ToolchainAndDeployment.md)** (~120 min) and do **core lab L08** — block **V13**. It is the most consequential outstanding block since V5: every chapter from 09 onwards assumes this loop works. |
-| 🤖 **Me — next turn** | **Part 2 begins: Chapter 09 — Microkernel Architecture & `procnto`** (T-130). What is actually inside the kernel, why a driver crash is survivable, and how a system of cooperating processes stays fast enough to be worth it. |
+| 👤 **You — do next** | 📕 **Read [Chapter 09](../chapters/Chapter09_MicrokernelArchitecture.md)** (~90 min). **Block V13 (core lab L08) remains the priority** — everything from here builds and debugs code. V14.3 tests Chapter 09's central claim. |
+| 🤖 **Me — next turn** | **Chapter 10 — Processes and Threads** (T-130b). The process model, address spaces, thread lifecycle, and how `pthread_*` maps onto `ThreadCreate` — plus why QNX schedules *threads*. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -130,7 +130,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
-| 09 | Microkernel Architecture & procnto | 📄 | — | |
+| 09 | Microkernel Architecture & procnto | 📕 | — | v1.0. Opens Part 2. Fault isolation, mechanically. |
 | 10 | Processes and Threads | 📄 | — | |
 | 11 | Scheduling & Real-Time Priorities | 📄 | — | |
 | 12 | Synchronization Primitives | 📄 | — | |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 021 — 2026-08-26 📕 **Chapter 09 — Part 2 begins**
+
+| | |
+|---|---|
+| **Goal** | Open Part 2 with the chapter everything else in it rests on. |
+| **Done** | 📕 **Chapter 09 — Microkernel Architecture & `procnto`** published (1004 lines)<br>• Enumerates the **eight things** `procnto` provides, and what is deliberately outside — including the distinction between interrupt *plumbing* (kernel) and interrupt *handling* (your driver, your process)<br>• Introduces the **kernel-call families** and their CamelCase naming, with the note that the header is authoritative for the reader's build<br>• ⭐ Establishes **POSIX on top, messages underneath** as Part 2's central idea: `read()` becomes `MsgSend` to a user-space process and your source is unchanged — which is why Linux code compiles, and why writing a driver means writing a *program*<br>• §3 explains fault isolation **mechanically** — page tables, the fault path, and `procnto`'s seven-step teardown — culminating in the step that matters: **clients blocked on a dying server are woken with `ESRCH`**<br>• §3.3 and §4.3 give **equal weight to what is not survivable**: `procnto` faulting, a driver misusing hardware it legitimately controls, and — the honest one — **deadlock, which fails silently and defeats every protection in the chapter**<br>• §5 traces a NULL dereference end to end, and argues the kernel's real contribution is *converting another process's catastrophe into the client's `errno`* — after which robustness is the client's error handling<br>• 🔬 Deep dive on why first-generation microkernels lost the throughput argument and QNX did not<br>• Ships **`labs/lab09_faultisolation/`**; Glossary +4; **block V14** added, whose V14.3 tests the chapter's central mechanical claim and V14.4 finds the core-dump location Chapter 25 needs |
+| **Learner decisions** | "Proceed to chapter 09" |
+| **Questions logged** | None new |
+| **Blockers** | None |
+| **Next session** | **Chapter 10 — Processes and Threads** |
 
 ### Session 020 — 2026-08-26 🎉 **Part 1 complete**
 
@@ -453,6 +464,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.20 | 2026-08-26 | Session 021: **Chapter 09 published — Part 2 begins** (10/34). Block V14 added. |
 | 1.19 | 2026-08-26 | Session 020: ⭐ **Chapter 08 published — Parts 0 and 1 complete (9/34)**. Core lab L08 and `labs/lab08_devloop/`. Block V13 added. |
 | 1.18 | 2026-08-26 | Session 019: disk figures corrected from measurement; **Chapter 07 published** (8/34). Block V12 added. |
 | 1.17 | 2026-08-26 | Session 018: ⭐ **Chapter 06 published** (7/34) with core lab L06. Block V11 added. |

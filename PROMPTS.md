@@ -72,6 +72,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#17](#prompt17) | 2026-08-26 | Claude (Opus 5) | Write Chapter 06 | ⭐ **Chapter 06 published** (7/34) — first core chapter, lab L06 · block V11 · Glossary +5 |
 | [PROMPT#18](#prompt18) | 2026-08-26 | Claude (Opus 5) | `du` measurement supplied; write Chapter 07 | ⚠️ **Disk figures corrected across 6 docs + the check script** (79 GB; not sparse) · 📕 **Chapter 07 published** (8/34) · block V12 |
 | [PROMPT#19](#prompt19) | 2026-08-26 | Claude (Opus 5) | "proceed to next" | 🎉 **Chapter 08 published — Parts 0 and 1 complete (9/34)** · core lab L08 · `labs/lab08_devloop/` · block V13 |
+| [PROMPT#20](#prompt20) | 2026-08-26 | Claude (Opus 5) | Write Chapter 09 | 📕 **Chapter 09 published — Part 2 begins** (10/34) · fault isolation, mechanically · `labs/lab09_faultisolation/` · block V14 |
 
 ---
 
@@ -2432,10 +2433,112 @@ Then in `gdb`: `break sum_readings`, `run`, step until `i` is 4, and `print r[4]
 
 ---
 
+## PROMPT#20
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 021 |
+| **Context** | Parts 0 and 1 complete; the learner asked for the chapter that opens Part 2. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> proceed to chapter 09
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+# 📕 Chapter 09 — Microkernel Architecture & `procnto` (10/34)
+
+1004 lines. **Part 2 begins**, and this is the chapter the rest of it rests on.
+
+## The organising sentence
+
+> **POSIX on top, messages underneath.**
+
+`read(fd, buf, n)` on Linux enters the kernel. On QNX it becomes `MsgSend` to a **user-space process** — and your source is identical. That one sentence does three jobs:
+
+- explains why your Linux C compiles unchanged
+- explains why writing a QNX driver means writing a **program**, not patching a kernel
+- explains why QNX's kernel-call list has been essentially stable since 1995 while Linux has grown to ~400 syscalls — new QNX functionality arrives as **new servers**, not new kernel entry points
+
+## Fault isolation, mechanically rather than as a slogan
+
+Chapter 02 made the claim. Chapter 09 walks the page tables:
+
+> The bad pointer cannot reach your memory because your pages are **not mapped** in the driver's address space. Not "protected by convention" — **absent**. There is no address it could compute that would reach you.
+
+Then `procnto`'s seven-step teardown — free memory, close connections, destroy channels, remove paths, detach interrupts, notify watchers, and the one that matters:
+
+> ⭐ **Wake every client blocked on it, with an error.**
+
+Without that step, isolation alone would leave every client stuck in `REPLY` forever, waiting on a process that will never answer.
+
+## The half I'm most pleased with: what is *not* survivable
+
+§3.3 and §4.3 are as long as the isolation argument:
+
+| Not survivable | Why |
+|---|---|
+| `procnto` faulting | It *is* the scheduler |
+| A driver misusing hardware it legitimately controls | Memory is protected; **the device is not** |
+| ⚠️ **Deadlock** | **Nothing faults, so nothing detects it** |
+
+**Deadlock is the one that matters**, because it's where the chapter's own subject stops helping. Every other entry is about failing *loudly*. It's also the retrospective justification for Chapter 07 — `pidin` is the only thing that finds a failure the kernel cannot.
+
+And the hardware row is the sharpest case: **the driver is not faulty.** It had legitimate access and used it as instructed. Memory protection is irrelevant. That needs abilities and security policies — Chapter 28.
+
+## §5's lesson
+
+The obvious ending for this chapter is *"and the system survived"*. I went one step further, to the client:
+
+> **The microkernel converts another process's catastrophe into your `errno`.** What you do with it is the part it cannot help you with.
+
+A client that ignores `MsgSend`'s return value inherits the crash it was supposedly protected from. That's the honest meaning of "QNX is robust" — not *nothing goes wrong*, but *everything that goes wrong arrives at your code as an error, at a point where you can act on it*.
+
+Also: a 🔬 deep dive on why first-generation microkernels lost the throughput argument (Mach survives as a hybrid inside macOS) and QNX didn't — synchronous IPC as *the* system call mechanism rather than one service among many, plus priority inheritance built into messaging.
+
+---
+
+### What changed on disk
+
+`Chapter09_MicrokernelArchitecture.md` (new, 1004 lines) · **`labs/lab09_faultisolation/`** · Glossary **+4** (address space, kernel call, blast radius, `ESRCH`) · **block V14** · `DecisionsLog` Session 021 · all trackers. Link check across ten chapters: **zero broken**.
+
+---
+
+## 👉 Where things stand
+
+```text
+Part 0  [████████████████████] 100 %  (4/4) 🎉
+Part 1  [████████████████████] 100 %  (5/5) 🎉
+Part 2  [██                  ]  14 %  (1/7)
+OVERALL [█████               ]  29 %  (10/34)
+```
+
+**Block V13 is still the priority** — core lab L08, the development loop. Everything from here builds and debugs code, so it's the block that unblocks the most.
+
+**V14.3 is the interesting new one.** It tests Chapter 09's central mechanical claim in four commands: kill a server while a client is blocked on it, and see whether the client is *woken with an error* or *stuck in `REPLY` on a PID that no longer exists*. If it's the latter, §3.2 is wrong and I'll rewrite it.
+
+There are now **three blocks that exist to serve later chapters** — V11.2 → Chapter 21, V12.1 and V14.4 → Chapter 25. All cheap, all materially change what those chapters can be. I've recorded them together in the decisions log so the dependency is visible when I get there.
+
+**Next: Chapter 10 — Processes and Threads.** The process model, address spaces, thread lifecycle, how `pthread_*` maps onto `ThreadCreate` — and why QNX schedules **threads** rather than processes, which is the fact behind every `pidin` listing you've read.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.18 | 2026-08-26 | PROMPT#20 logged: Chapter 09; Part 2 begins. |
 | 2.17 | 2026-08-26 | PROMPT#19 logged: Chapter 08; Parts 0 and 1 complete. |
 | 2.16 | 2026-08-26 | PROMPT#18 logged: disk corrections and Chapter 07. |
 | 2.15 | 2026-08-26 | PROMPT#17 logged: Chapter 06, the first core chapter. |

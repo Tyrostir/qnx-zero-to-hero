@@ -31,6 +31,10 @@ The course itself. Chapters are published in order and appear here as they are w
 
 **🎉 Part 1 complete.**
 
+| # | Chapter | Paths | Time |
+|---|---------|-------|------|
+| 09 | [Microkernel Architecture & `procnto`](Chapter09_MicrokernelArchitecture.md) | 🐣🚶🏃 | 90 m |
+
 
 > 📑 Full chapter list with status, path tags and time estimates:
 > **[../TableOfContents.md](../TableOfContents.md)**
