@@ -966,21 +966,45 @@ host$ make TGT=$TGT debug
 ⚠️ **The `gdb` command syntax is unverified.** If `target qnx` is wrong, `help target` inside `gdb`
 lists what it accepts — please paste that instead.
 
-### V13.3 — Attach to a running process
+### V13.3 — Attach to a running process — ✅ **RUN 2026-08-26** *(partially)*
+
+**What was observed:**
+
+| Claim | Result |
+|-------|--------|
+| `target qnx <ip>:8000` connects to `qconn` | ✅ **Confirmed.** *"Remote debugging using 192.168.122.46:8000 / MsgNak received - resending / Remote target is little-endian"* |
+| `info pidlist` lists target processes | ✅ **Confirmed.** Format `path - pid/tid`, e.g. `proc/boot/slm - 16386/1`; the kernel appears as `/proc/boot/procnto-smp-instr - 1/26` |
+| `attach <pid>` | ❌ **Failed** — `usr/bin/sleep: No such file or directory.` → **[D-016](../meta/Doubts.md#d-016)** |
+| `target qnx <ip>` **without** the port | 🆕 **Hangs.** Needed `Ctrl+C`. Not previously documented. |
+| Toolchain | GDB **14.2** (`qnx800-gdb-14.2-release-55-g85f1a3-dev`), target `x86_64-nto-qnx8.0.0` |
+
+> 💡 **The failure verified §3.4 more convincingly than success would have.** `gdb` connected, listed
+> the target's processes, and could control them — and *still* could not proceed without a **local**
+> copy of the binary, because symbols never cross the network. That is precisely the chapter's claim.
+
+**Retry, with the fix:**
 
 ```bash
-qnx$  sleep 600 &
-host$ ntox86_64-gdb
+# 5a — your own program (the realistic case)
+qnx$  ~/avg &
+host$ ntox86_64-gdb avg
 (gdb) target qnx <ip>:8000
 (gdb) info pidlist
 (gdb) attach <pid>
 (gdb) backtrace
 (gdb) detach
+
+# 5b — a target utility, symbols from the SDP's target tree
+qnx$  sleep 600 &
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx <ip>:8000
+(gdb) attach <the sleep pid>
+(gdb) backtrace
+(gdb) detach
 ```
 
-📋 **Report whether `info pidlist` and `attach` work**, with their output.
-🎯 **Why it matters separately:** this is the capability `qconn` has and `gdbserver` does not — and it
-is the situation you are actually in when a target misbehaves. §3.4 asserts it; nobody has tried it.
+📋 **Paste both.** 🎯 **Still unobserved:** whether `attach` succeeds once `gdb` has the symbols, and
+whether `backtrace` on a sleeping process shows `nanosleep` in the frame list.
 
 ### V13.4 — 💥 The symbol mismatch
 
@@ -1131,8 +1155,9 @@ chapter, after V11.2 (Ch 21) and V12.1 (Ch 25).
 | — | Clear Chapter 07's lab markers | 🤖 | V12.3 | — | ⏸️ |
 | **V13.1** | ⭐ Build + deploy via the Makefile | 👤 | — | Lab 08.1 · **every later lab** | 🔄 **found D-015** — `/data` root-owned; `DEST` fixed, retry |
 | V13.0 | `ls -ld /data /data/home /data/home/qnxuser` + `id` | 👤 | — | Confirms [D-015](../meta/Doubts.md#d-015) | ⬜ |
-| **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | ⬜ |
-| V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | ⬜ |
+| **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | 🟨 **connection confirmed** via V13.3; `break`/`print`/`upload` still unobserved |
+| V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | 🟨 **`target qnx` + `info pidlist` ✅; `attach` failed → [D-016](../meta/Doubts.md#d-016)**, retry |
+| V13.3b | Retry `attach` with the binary loaded (5a and 5b) | 👤 | V13.3 | Ch 08 §3.4, [D-016](../meta/Doubts.md#d-016) | ⬜ |
 | V13.4 | 💥 Symbol mismatch produces confident nonsense | 👤 | V13.2 | Ch 08 💥 | ⬜ |
 | V13.5 | Optional: debug vs stripped release sizes | 👤 | V13.1 | Ch 05 §3.4 | ⬜ |
 | — | Clear Chapter 08's lab markers | 🤖 | V13.2 | — | ⏸️ |
@@ -1184,6 +1209,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V13.3 (partial)** | 🟨 **2 confirmed, 1 failed, 1 new finding** | ✅ **`target qnx <ip>:8000` connects** and ✅ **`info pidlist` lists target processes** (`path - pid/tid`) — both were previously asserted from reasoning alone, and both are now observed on GDB 14.2 / `x86_64-nto-qnx8.0.0`. ❌ `attach 1540128` failed with `usr/bin/sleep: No such file or directory` → **[D-016](../meta/Doubts.md#d-016)**: `gdb` reads symbols **on the host** and had no local copy. 🆕 **`target qnx <ip>` without the port hangs** rather than erroring. Chapter 08 → v1.2; lab step 5 split into 5a/5b. **The failure is the strongest evidence yet for §3.4's central claim** — everything crossed the network except meaning. |
 | 2026-08-26 | **V13.1 (first attempt)** | ⚠️ **Failed → D-015** | `scp` to `/data` returned `Permission denied`; `mkdir` in `/data` as `qnxuser` failed the same way. **`/data` is the writable partition but its root is root-owned.** Deploy target corrected to `/data/home/$(USER)` in both lab Makefiles and in Chapters 06, 07, 08 and 09. The learner's `mkdir` test was good diagnosis — it eliminated SSH, `scp` and the network in one command. **Retry pending.** |
 | 2026-08-26 | **V10.1 (part)** | ✅ **Disk breakdown supplied** | `du -sh ~/qnx800` = **79 GB** — `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB, `custom/` 315 MB. **Settles D-008: the virtual disk is NOT sparse.** Reconciles with block V3's 43 GB `df` delta, which predated the image and covered more than one directory. Corrected `PLAN.md` (~50 → **~85 GB** budget), Setup Guides 01 and 02, Chapters 05 and 06, and `check-environment.sh`'s thresholds. **T-016 closed.** |
 | 2026-08-26 | **V5.6 – V5.7** | ✅ 🎉 **BLOCK V5 COMPLETE** | `./hello_qnx` on the target printed `Hello from QNX!` / `My process ID is 14032920` — **the full edit → cross-compile → deploy → run loop is closed.** SSH confirmed as `qnxuser`/`qnxuser`, `sudo` password the same. **Correction to D-009:** the image ships **`PermitRootLogin no`**, not `prohibit-password` — keys do not help root either; Setup Guide 03 §9.5 had said they would. `/etc/passwd` captured (9 accounts, homes on the writable `/data` partition, `sshd` privilege-separated). Setup Guide 03 → **v2.0**. +D-011, D-012, D-013. |
@@ -1262,6 +1288,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | **V13.3 run, partially.** `target qnx <ip>:8000` and `info pidlist` **confirmed** — the first direct observation of Chapter 08's central mechanism. `attach` failed → D-016 (host-side symbols); bare-IP hang is new. V13.3b added for the retry. |
 | 1.18 | 2026-08-26 | **V13.1 attempted and failed → D-015.** Deploy path corrected; V13.0 added to capture `/data`'s actual ownership. |
 | 1.17 | 2026-08-26 | **Block V14 added** for Chapter 09 — the kernel's real API surface, fault locality, and (V14.3) whether a client blocked on a dying server is really woken with `ESRCH`. V14.4 finds the core-dump location for Chapter 25. |
 | 1.16 | 2026-08-26 | **Block V13 added** for Chapter 08's core lab L08 — build, deploy, **remote debugging through `qconn`**, attach-to-running, and the symbol-mismatch hazard. The most consequential block since V5. |

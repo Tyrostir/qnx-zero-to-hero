@@ -1,7 +1,7 @@
 ---
 title: "ToDos — Open Work Items"
 document_id: TODO
-version: 1.2
+version: 1.22
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -33,6 +33,8 @@ update_trigger: "Continuously"
 
 | T-028 | 🟠 | **Run block V14** — the kernel's real API surface, fault locality, and ⭐ whether a client is woken with `ESRCH` | ⬜ | — | V14.3 tests Chapter 09's central claim; V14.4 finds the core-dump location Chapter 25 needs. |
 | T-029 | 🟡 | Paste `ls -ld /data /data/home /data/home/qnxuser` and `id` | ⬜ | — | Confirms [D-015](Doubts.md#d-015)'s inference with the actual modes. |
+| T-030 | 🔴 | **Retry Lab 08.1 step 5** — 5a (`ntox86_64-gdb avg`, attach to your own program) and 5b (`ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep`) | ⬜ | — | Closes V13.3b. `attach` failed for want of host-side symbols ([D-016](Doubts.md#d-016)); the fix is written but unobserved. |
+| T-031 | 🟡 | Finish **V13.2** — `break sum_readings`, `run`, `print r[4]` vs `r[3]`, `upload` | ⬜ | T-030 | The connection is now confirmed; the *debugging* claims are not. |
 | T-027 | 🔴 | ⭐ **Run block V13** — ⚠️ `git pull` first; the Makefile's `DEST` was corrected — core lab L08: build, deploy, and **debug a target process from your host** | ⬜ | — | **The most consequential block since V5.** Every chapter from 09 onwards assumes this loop works. |
 | T-026 | 🟠 | **Run block V12** — the healthy-system baseline (`pidin` state census, `fds`, `NANOSLEEP` vs `REPLY`) | ⬜ | — | Target only, 30 min. Feeds Chapter 25's `⭐ L25` diagnostic lab. |
 | T-025 | 🔴 | **Run block V11** — ⭐ **especially V11.2**: paste `output/build/ifs.build` and `disk.layout` | ⬜ | — | **The most valuable outstanding request in the course.** It turns Chapter 21 from documentation into a walkthrough of the system you booted. V11.3 tests Ch 06 §3.3's central claim. |
@@ -187,6 +189,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.22 | 2026-08-26 | D-016: T-030 (retry step 5 with symbols) and T-031 (finish V13.2) added. |
 | 1.21 | 2026-08-26 | D-015: deploy path corrected across four chapters and both lab Makefiles. T-029 added. |
 | 1.20 | 2026-08-26 | **Chapter 09 published — Part 2 begins.** T-130 closed; T-130b (Chapter 10) promoted; T-028 added (block V14). |
 | 1.19 | 2026-08-26 | ⭐ **Chapter 08 published — Part 1 complete.** T-115e closed; T-130 (Chapter 09, Part 2) promoted; T-027 added (block V13). |

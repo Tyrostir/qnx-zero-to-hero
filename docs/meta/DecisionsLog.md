@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.21
+version: 1.22
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1995,6 +1995,98 @@ Chapters 13 and 16–17 both depend on the reader having internalised it here.
 
 Recorded together so the dependencies are visible when those chapters are written. All three are
 cheap for the learner and materially change what the chapter can be.
+
+---
+
+## D-016 — the network carried everything except meaning
+
+**2026-08-26.** The learner reached Lab 08.1's step 5, connected to `qconn`, listed the target's
+processes, and then hit:
+
+```text
+(gdb) attach 1540128
+usr/bin/sleep: No such file or directory.
+```
+
+### This one is not a correction. It is a confirmation.
+
+The three earlier execution findings (D-007, D-008, D-015) each caught a **published claim that was
+wrong**. This one caught a published claim that was **right, and under-taught**.
+
+Chapter 08 §3.4 says, in bold, that symbols stay on the host and only addresses cross the network.
+The chapter then gave a recipe — `ntox86_64-gdb`, `target qnx`, `info pidlist`, `attach` — that
+**quietly assumed the reader would already have the binary loaded**, because in steps 1–4 they always
+did. Step 5 was the first time the assumption was not automatically satisfied, and the chapter did not
+say so.
+
+> **The gap was not in the claim. It was in the gap between the claim and the recipe.**
+
+### What the failure proves
+
+`gdb` had: a live connection, the target's full process list, and the ability to stop and inspect any
+of them. It lacked one thing — a **local file** — and could not proceed.
+
+| Crossed the network | Did not |
+|---------------------|---------|
+| Control (stop, continue, read registers, read memory) | Symbols |
+| Addresses | Names, types, line numbers |
+| The process list | The **meaning** of anything in it |
+
+**That is a better demonstration of §3.4 than a successful `attach` would have been.** A success shows
+the mechanism working; this failure shows *where the seam is*.
+
+### The path with no leading slash
+
+`info pidlist` printed `usr/bin/sleep` — *relative*. So `gdb` looked in the current directory. Had it
+printed `/usr/bin/sleep`, the outcome would have been **worse**: on an Ubuntu host that file exists,
+and `gdb` would have loaded **Linux's** `sleep` and reported its symbols with total confidence. That
+is Chapter 08's own 💥 exercise, arrived at by accident.
+
+### Where the symbols actually are
+
+Chapter 05 §2.2 noted that `$QNX_TARGET/x86_64/` is *a faithful image of a QNX filesystem*. Until now
+that was a description. Here it becomes a **tool**:
+
+```bash
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+```
+
+A chapter-5 observation paying off in chapter 8 is exactly the shape the course is trying to have, so
+the lab now makes it explicit rather than routing around it.
+
+### What changed
+
+Lab 08.1's step 5 splits in two. **5a attaches to the learner's own program** — the realistic case,
+where the host copy exists trivially and the lesson is simply *start `gdb` with it*. **5b keeps
+`sleep`**, precisely because it forces the `$QNX_TARGET` question. The failure is kept, and explained,
+rather than engineered away.
+
+Chapter 08 → **v1.2**. Hazard **H-15**.
+
+### And a smaller finding, worth more than it looks
+
+```text
+(gdb) target qnx 192.168.122.46      ← hangs
+(gdb) target qnx 192.168.122.46:8000 ← works
+```
+
+**It hangs rather than refusing.** A silent hang is the worst failure mode a documented command can
+have — the reader cannot tell a wrong command from a slow one, and will start suspecting the network,
+the VM, the firewall. Now stated wherever the command appears.
+
+### The scoreboard, updated
+
+| # | Claim | Verdict | Found by |
+|---|-------|---------|----------|
+| 1 | `-listAvailablePackages` | ❌ Does not exist | Running it (D-007) |
+| 2 | Customer demos forbidden | ❌ Backwards | Reading the source (Ch 04) |
+| 3 | Image is probably sparse | ❌ It is not | Running `du` (D-008) |
+| 4 | Deploy to `/data` | ❌ Root-owned | Running the lab (D-015) |
+| **5** | **`target qnx` + `info pidlist`** | ✅ **Correct — first confirmation of Ch 08's centre** | Running the lab (D-016) |
+| **5b** | **The `attach` recipe** | ⚠️ **Right but incomplete** | Running the lab (D-016) |
+
+**Five of six found by executing.** The one exception was found by reading a primary source. Neither
+was found by re-reading the draft.
 
 ---
 

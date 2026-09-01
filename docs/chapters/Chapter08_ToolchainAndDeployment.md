@@ -7,7 +7,7 @@ core_lab: "L08 ⭐"
 est_time: "120 minutes reading · 60 minutes labs"
 prereqs: "Chapters 05, 06 and 07. A booting VM reachable over SSH."
 status: Published
-version: 1.1
+version: 1.2
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -37,8 +37,11 @@ host$ qcc -Vgcc_ntox86_64 -g -O0 -o prog prog.c        # build (debuggable)
 host$ scp prog qnxuser@$TGT:~/                      # deploy — ⚠️ `~`, not /data (D-015)
 qnx$  ~/prog                                        # run
 host$ ntox86_64-gdb prog                                # debug — symbols from the HOST copy
-(gdb) target qnx $TGT:8000
+(gdb) target qnx $TGT:8000                              # ⚠️ the port is required
 ```
+
+⚠️ **To `attach` to a *running* process, start `gdb` with the binary** — it reads symbols locally
+([D-016](../meta/Doubts.md#d-016)).
 
 **`qcc` essentials:**
 
@@ -424,13 +427,45 @@ host$ ntox86_64-gdb prog
 (gdb) continue
 ```
 
-**Or attach to something already running:**
+**Or attach to something already running.** ⚠️ **This needs one more step than it looks:**
 
 ```bash
+host$ ntox86_64-gdb ./prog                    # ⭐ give gdb the HOST copy FIRST
 (gdb) target qnx 192.168.122.46:8000
 (gdb) info pidlist
 (gdb) attach 14032920
 ```
+
+> ⚠️ **`attach` alone is not enough — `gdb` needs a local copy of the binary to read symbols from.**
+> Attach without one and you get:
+>
+> ```text
+> (gdb) attach 1540128
+> usr/bin/sleep: No such file or directory.
+> ```
+>
+> That is **§3.4's design showing itself**, not a bug. `info pidlist` reports the path as it exists on
+> the *target* — and `gdb` tries to open it on the *host*, where it either does not exist or (worse) is
+> a Linux binary of the same name.
+>
+> **For your own programs** the host copy is right there — start `gdb` with it. **For a target
+> utility**, its host copy lives in the SDP's target tree (Chapter 05 §2.2):
+>
+> ```bash
+> host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+> ```
+>
+> Or point `gdb` at the whole tree once and let it resolve paths itself:
+>
+> ```bash
+> host$ ntox86_64-gdb -ex "set sysroot $QNX_TARGET/x86_64"
+> ```
+>
+> *(The **shell** expands `$QNX_TARGET` before `gdb` sees it — `gdb` does not expand shell variables.)*
+> Full explanation: [D-016](../meta/Doubts.md#d-016).
+
+> ⚠️ **The port is not optional.** `target qnx 192.168.122.46` — without `:8000` — **hangs** rather
+> than erroring; you have to `Ctrl+C` out. Always give the port.
 
 | `gdb` command | Does |
 |---------------|------|
@@ -530,6 +565,8 @@ host$ ntox86_64-gdb prog
 | `gdb` shows wrong function names, or nonsense | **Symbol mismatch** — host and target copies differ | Rebuild *and* redeploy from one command |
 | `cannot execute: required file not found` **on the target** | Built for the **wrong architecture** | `file prog` — check `x86-64` and `ldqnx-64.so.2` |
 | `Permission denied` on `scp` | Used **`root@`** | Use `qnxuser@` ([D-009](../meta/Doubts.md#d-009)) |
+| `target qnx <ip>` **hangs** | Port omitted | Always `<ip>:8000` |
+| `attach` says `…: No such file or directory` | **`gdb` has no local copy of the binary** | Start `gdb` with it, or `set sysroot $QNX_TARGET/x86_64` ([D-016](../meta/Doubts.md#d-016)) |
 | `scp: dest open "/data/x": Permission denied` | **`/data`'s root is owned by root** | Deploy to **`~`** (`/data/home/qnxuser`) — [D-015](../meta/Doubts.md#d-015) |
 | Deployed file gone after a reboot | Wrote to `/tmp` or `/etc` | Deploy to **`~`**, which is on the `/data` partition (Ch 06 §3.3) |
 | `qcc: command not found` | Environment not loaded | `source ~/qnx800/qnxsdp-env.sh` |
@@ -543,7 +580,9 @@ host$ ntox86_64-gdb prog
 |---------|------|
 | `target qnx <ip>:8000` | Connect to `qconn` |
 | `upload <host> <target>` | Copy a file over the debug link |
-| `info pidlist` · `attach <pid>` · `detach` | List target processes · attach · leave it running |
+| `info pidlist` | List target processes, as `path - pid/tid` |
+| `attach <pid>` · `detach` | Attach · leave it running. ⚠️ **`gdb` must already have a local copy of the binary** ([D-016](../meta/Doubts.md#d-016)) |
+| `set sysroot <dir>` | Where to look for target binaries and libraries — e.g. `$QNX_TARGET/x86_64` |
 | `break <fn>` · `break <file>:<line>` · `delete` | Set and remove breakpoints |
 | `run` · `continue` · `next` · `step` · `finish` | Start · resume · over · into · out |
 | `print <expr>` · `info locals` · `backtrace` | Inspect |
@@ -778,10 +817,27 @@ host$ make TGT=$TGT run
 
 **Step 5 — attach to something already running.**
 
+⚠️ **Start `gdb` *with* the binary.** `attach` needs a local copy to read symbols from — see below.
+
+**5a — attach to your own program** *(the realistic case)*:
+
+```bash
+qnx$  ~/avg &                                  # or any long-running program of yours
+qnx$  pidin | grep avg
+host$ ntox86_64-gdb avg                        # ⭐ the host copy, with symbols
+(gdb) target qnx <ip>:8000                     # ⚠️ the port is required
+(gdb) info pidlist
+(gdb) attach <pid>
+(gdb) backtrace
+(gdb) detach
+```
+
+**5b — attach to a target utility** *(where do its symbols live?)*:
+
 ```bash
 qnx$  sleep 600 &
 qnx$  pidin | grep sleep
-host$ ntox86_64-gdb
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
 (gdb) target qnx <ip>:8000
 (gdb) info pidlist
 (gdb) attach <the sleep pid>
@@ -789,7 +845,7 @@ host$ ntox86_64-gdb
 (gdb) detach
 ```
 
-📋 **Report whether `info pidlist` and `attach` worked**, and their output.
+📋 **Report both**, including any error.
 
 <details>
 <summary>Why step 5 matters more than it looks</summary>
@@ -804,6 +860,15 @@ live process list and attach with a click.
 
 **And note what you did not need:** no symbols on the target, no debug build deployed, no special
 kernel. The target ran an ordinary binary; everything else happened on your host.
+
+> ⚠️ **Which is exactly why 5b needs `$QNX_TARGET`.** `attach` gives `gdb` control of the process, but
+> `gdb` still has to find the *symbols* somewhere — and it looks **locally**. `info pidlist` reports
+> `usr/bin/sleep`, a path on the *target*; opening that on your host finds nothing (or, if you supply
+> a leading slash, finds **Linux's** `sleep` — the wrong binary for the wrong OS).
+>
+> The SDP's target tree is the answer, and it is the payoff for Chapter 05 §2.2's observation that
+> `$QNX_TARGET/x86_64/` is *a faithful image of a QNX filesystem*. **That is where a target
+> utility's symbols live on your host.** [D-016](../meta/Doubts.md#d-016).
 
 </details>
 
@@ -1082,8 +1147,9 @@ straightforward; the licensing question is the one that gets skipped and is genu
 - **`qconn` is already running** on port **8000**; `slm` starts it.
 - ⭐ **Symbols stay on the host.** Only addresses and bytes cross the network — which is why a
   stripped target binary is still fully debuggable.
-- **`gdb` can attach to an already-running process** via `info pidlist` / `attach`. `gdbserver`
-  cannot.
+- **`gdb` can attach to an already-running process** via `info pidlist` / `attach` — `gdbserver`
+  cannot. ⚠️ But `gdb` needs a **local copy of the binary** for symbols; for target utilities that is
+  `$QNX_TARGET/x86_64/...` ([D-016](../meta/Doubts.md#d-016)). And **`target qnx` requires the port**.
 - **Mismatched host and target copies produce confident nonsense**, and nothing warns you.
 - **The structural fix for stale binaries and symbol mismatch is the same**: make `run` and `debug`
   depend on `deploy`, which depends on the build.
@@ -1124,7 +1190,9 @@ ntox86_64-gdb prog
 | `gdb` | Does |
 |-------|------|
 | `target qnx <ip>:8000` | Connect to `qconn` |
-| `info pidlist` · `attach <pid>` · `detach` | List · attach · release |
+| `info pidlist` | List target processes (`path - pid/tid`) |
+| `attach <pid>` · `detach` | Attach · release. ⚠️ needs a **local** copy of the binary |
+| `set sysroot $QNX_TARGET/x86_64` | Where to find target binaries and libraries |
 | `break` · `delete` · `run` · `continue` · `next` · `step` · `finish` | Control |
 | `print` · `info locals` · `info args` · `backtrace` · `list` | Inspect |
 
@@ -1187,5 +1255,6 @@ Chapter 08 came first.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | **Verified and corrected against a real `gdb` session.** ✅ `target qnx <ip>:8000` and `info pidlist` both work as documented (GDB 14.2, `x86_64-nto-qnx8.0.0`). ⚠️ Two corrections: **the port is required** — a bare IP *hangs* rather than erroring; and **`attach` needs a local copy of the binary**, because `gdb` reads symbols on the host. Lab step 5 split into 5a (your own program) and 5b (a target utility, via `$QNX_TARGET/x86_64/usr/bin/…`), which turns the failure into the payoff for Chapter 05 §2.2. See [D-016](../meta/Doubts.md#d-016). |
 | 1.1 | 2026-08-26 | **Correction:** deployment target changed from `/data` to **`~`** (`/data/home/qnxuser`). `/data` is the writable *partition*, but its root is owned by root, so `scp` to it fails with `Permission denied` — found by the learner running Lab 08.1 ([D-015](../meta/Doubts.md#d-015)). Affects §2.2, §4.2, §4.3, §4.5, §5 and the cheat sheet. |
 | 1.0 | 2026-08-26 | Created. ⭐ Contains core lab **L08**, closing Part 1. Covers `qcc`/`q++` in earnest, the ADR-007 build-system progression, deployment to `/data` as `qnxuser`, and — the centre of the chapter — **remote debugging through `qconn`**, with the symbols-stay-on-the-host split explained and its one hazard (confident nonsense from mismatched builds) demonstrated in the 💥 exercise. §5 finds an off-by-one buffer overrun with the debugger rather than `printf`, and argues why that matters on a real-time system. Ships `labs/lab08_devloop/`. All labs `[UNVERIFIED]` pending block **V13**. |

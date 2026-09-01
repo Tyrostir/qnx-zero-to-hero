@@ -128,7 +128,11 @@ host$ make TGT=$TGT debug
 
 ## Going further
 
-- **Attach to a running process:** `sleep 600 &` on the target, then `info pidlist` and `attach <pid>`
+- **Attach to a running process:** start `gdb` **with the binary**, then `info pidlist` and
+  `attach <pid>`. ⚠️ `attach` alone fails with `…: No such file or directory` — `gdb` reads symbols on
+  the *host* and needs a local copy. Your own program: `ntox86_64-gdb avg`. A target utility:
+  `ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep`. See D-016.
+- ⚠️ **`target qnx <ip>` without `:8000` hangs** rather than erroring. Always give the port.
   in `gdb`. `gdbserver` cannot do this; `qconn` can.
 - **Compare `make` and `make release`** sizes. That difference is why Chapter 05's `.sym` files exist.
 - **Build the same source with `-O2 -g`** and try stepping through it. Expect `<optimized out>` — and

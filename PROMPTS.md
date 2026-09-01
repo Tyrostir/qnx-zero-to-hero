@@ -1,7 +1,7 @@
 ---
 title: "PROMPTS.md — Learner Prompt & Response Log (Claude sessions)"
 document_id: PROMPTS
-version: 2.0
+version: 2.20
 status: Active (living document)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -2659,10 +2659,226 @@ I deduced `/data`'s ownership from your failure; I've never seen the actual mode
 
 ---
 
+## PROMPT#22
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 023 |
+| **Context** | Lab 08.1, step 5 — `attach` to an already-running process. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I have a problem when performing Step 5 - attach to something already running. "[qnxuser@qnxqemu /data/home]$ sleep 600 &
+> [1] 1540128
+> [qnxuser@qnxqemu /data/home]$ pidin | grep sleep
+>  1540128   1 usr/bin/sleep                 10r NANOSLEEP
+> [qnxuser@qnxqemu /data/home]$ " and "tyrostir@APT-CR-5ZSYVG3:~/qnx800/images/qemu/qemu$ ntox86_64-gdb
+> GNU gdb (qnx800-gdb-14.2-release-55-g85f1a3-dev) 14.2
+> Copyright (C) 2023 Free Software Foundation, Inc.
+> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+> This is free software: you are free to change and redistribute it.
+> There is NO WARRANTY, to the extent permitted by law.
+> Type "show copying" and "show warranty" for details.
+> This GDB was configured as "--host=x86_64-pc-linux-gnu --target=x86_64-nto-qnx8.0.0".
+> Type "show configuration" for configuration details.
+> For bug reporting instructions, please see:
+> <https://www.gnu.org/software/gdb/bugs/>.
+> --Type <RET> for more, q to quit, c to continue without paging--
+> Find the GDB manual and other documentation resources online at:
+>     <http://www.gnu.org/software/gdb/documentation/>.
+>
+> For help, type "help".
+> Type "apropos word" to search for commands related to "word".
+> (gdb) target qnx 192.168.122.46
+> ^C(gdb) target qnx 192.168.122.46:8000
+> Remote debugging using 192.168.122.46:8000
+> MsgNak received - resending
+> Remote target is little-endian
+> (gdb) info pidlist
+> /proc/boot/procnto-smp-instr - 1/26
+> /proc/boot/procnto-smp-instr - 1/27
+> /proc/boot/procnto-smp-instr - 1/28
+> /proc/boot/procnto-smp-instr - 1/29
+> /proc/boot/procnto-smp-instr - 1/30
+> /proc/boot/procnto-smp-instr - 1/31
+> /proc/boot/procnto-smp-instr - 1/32
+> /proc/boot/procnto-smp-instr - 1/37
+> /proc/boot/procnto-smp-instr - 1/40
+> /proc/boot/procnto-smp-instr - 1/41
+> /proc/boot/procnto-smp-instr - 1/42
+> proc/boot/slm - 16386/1
+> --Type <RET> for more, q to quit, c to continue without paging--Quit
+> (gdb) attach 1540128
+> usr/bin/sleep: No such file or directory.
+> (gdb) "
+
+### Standing instructions
+
+SI-1…SI-14 all in force. Relevant here: **ADR-024** (only learner-pasted output clears an
+`[UNVERIFIED]` marker), **SI-8** (Tier 1 must not reveal the two-machine split), **SI-5/SI-6**
+(prompt and full response logged here).
+
+### Response (full)
+
+**Nothing is broken. Three of the four things in that paste are good news, and the fourth is the
+chapter's own design showing itself.**
+
+#### 1. ✅ You just verified Chapter 08's central mechanism
+
+`target qnx 192.168.122.46:8000` → *"Remote debugging using 192.168.122.46:8000"*, and `info pidlist`
+listing the target's processes. **Both of those were `[UNVERIFIED]`** — asserted from documentation
+and reasoning, never observed. They are now confirmed on GDB **14.2**, target `x86_64-nto-qnx8.0.0`.
+
+The output format is `path - pid/tid`, so `procnto-smp-instr` appears eleven times (one line per
+thread) — which is itself a nice preview of Chapter 10.
+
+`MsgNak received - resending` is **benign** — a retransmit in the `qconn` protocol. The session
+proceeded normally, which is the proof.
+
+#### 2. 🆕 The port is mandatory, and omitting it *hangs*
+
+```text
+(gdb) target qnx 192.168.122.46      ← hung; you had to Ctrl+C
+(gdb) target qnx 192.168.122.46:8000 ← worked
+```
+
+A silent hang is the worst failure mode a documented command can have — you cannot tell a wrong
+command from a slow network. **This is now stated wherever the command appears in the course.** Good
+catch, and it was free: you found it by mistyping.
+
+#### 3. ❌ Why `attach` failed
+
+```text
+(gdb) attach 1540128
+usr/bin/sleep: No such file or directory.
+```
+
+**`gdb` is looking for that file on your *host*, not on the target — and it is right to.**
+
+`attach` does two separate jobs:
+
+| | Where it happens | Did it work? |
+|---|---|---|
+| **Control** — stop the process, read its registers and memory | On the **target**, through `qconn` | ✅ Yes |
+| **Interpretation** — turn addresses into function names, lines, types | On the **host**, from a copy of the binary | ❌ **No copy to read** |
+
+`info pidlist` printed `usr/bin/sleep` — a path **on the target**. `gdb` tried to open it on your
+laptop and found nothing.
+
+> ⚠️ **Notice the missing leading slash.** It is relative, so `gdb` searched the directory you
+> started it from. And `/usr/bin/sleep` would have been **worse** — on Ubuntu that file *exists*, and
+> `gdb` would have cheerfully loaded **Linux's** `sleep` and reported its symbols as gospel. That is
+> Chapter 08's 💥 exercise, reached by accident.
+
+#### 4. The fix — where a target utility's symbols live on your host
+
+Chapter 05 §2.2 said `$QNX_TARGET/x86_64/` is *a faithful image of a QNX filesystem*. Here is the
+payoff:
+
+```text
+target:  /usr/bin/sleep
+host:    $QNX_TARGET/x86_64/usr/bin/sleep     ← the same binary, with symbols
+```
+
+So:
+
+```bash
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach 1540128
+(gdb) backtrace
+(gdb) detach
+```
+
+Two alternatives:
+
+```bash
+(gdb) file /home/tyrostir/qnx800/target/qnx/x86_64/usr/bin/sleep   # after connecting
+host$ ntox86_64-gdb -ex "set sysroot $QNX_TARGET/x86_64"           # point at the whole tree
+```
+
+> 💡 In the last one the **shell** expands `$QNX_TARGET` before `gdb` sees it. `gdb` does **not**
+> expand shell variables — inside `gdb`, type the literal path.
+
+**For your own programs this never comes up**, because the host copy is already in your hand:
+
+```bash
+host$ ntox86_64-gdb avg
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach <pid>
+```
+
+#### 5. 💡 Why this failure is worth more than a success would have been
+
+§3.4 claims that symbols stay on the host and only addresses cross the network. Look at what your
+session demonstrated: `gdb` had a live connection, the target's complete process list, and the power
+to stop and inspect any process on it — **and still could not proceed without one local file.**
+
+| Crossed the network | Did not |
+|---|---|
+| Control: stop, continue, registers, memory | Symbols |
+| Addresses | Names, types, line numbers |
+| The process list | **The meaning of anything in it** |
+
+A successful `attach` would have shown the mechanism working. **This showed you where the seam is.**
+
+#### 6. What I changed
+
+The chapter's *claim* was right; the gap was between the claim and the recipe. Steps 1–4 always had
+the binary loaded, so the requirement never surfaced — and step 5 was the first place it mattered.
+
+**Chapter 08 → v1.2:**
+
+- **§3.4** — the local-copy requirement, the exact error text, and all three remedies
+- **§4.4** — `info pidlist`'s output format; `attach`'s prerequisite; **`set sysroot`** added
+- **Fast-Track, recap, cheat sheet, troubleshooting table** — the port requirement and the `attach`
+  prerequisite, with the error text verbatim so a reader finds it by searching for what they saw
+- **Lab 08.1 step 5 split in two**: **5a** attaches to *your own program* (the realistic case);
+  **5b** keeps `sleep` **precisely because it forces the `$QNX_TARGET` question**. Your failure is
+  kept in the lab and explained, not engineered away
+
+**Also:** **D-016** written in full · hazard **H-15** · Glossary's `qconn` and *Sysroot* entries
+sharpened · **V13.3 recorded as partially verified** with V13.3b added for the retry · **T-030**
+(retry step 5) and **T-031** (finish V13.2 — `break`, `print r[4]`, `upload`) added.
+
+#### 📋 Two things to run when you have a moment
+
+```bash
+# T-030 — 5a: your own program
+qnx$  ~/avg &
+host$ ntox86_64-gdb avg
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach <pid>
+(gdb) backtrace
+(gdb) detach
+
+# T-030 — 5b: the target utility, with symbols this time
+qnx$  sleep 600 &
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach <the sleep pid>
+(gdb) backtrace
+(gdb) detach
+```
+
+I would expect `backtrace` on the sleeping process to show `nanosleep` in the frame list —
+consistent with `pidin`'s `NANOSLEEP` state. **That is still unobserved**, so please paste it.
+
+**The running scoreboard:** five of the six claims tested by execution so far were *found* by
+execution — four wrong, one right-but-incomplete. None was found by re-reading the draft.
+
+**Next chapter is 10 — Processes and Threads**, whenever you are ready.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.20 | 2026-08-26 | PROMPT#22 logged: `attach` diagnosed; Chapter 08's `qconn` connection verified for the first time. |
 | 2.19 | 2026-08-26 | PROMPT#21 logged: the deploy-path error and its correction. |
 | 2.18 | 2026-08-26 | PROMPT#20 logged: Chapter 09; Part 2 begins. |
 | 2.17 | 2026-08-26 | PROMPT#19 logged: Chapter 08; Parts 0 and 1 complete. |

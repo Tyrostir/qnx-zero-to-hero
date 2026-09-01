@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.6
+version: 1.7
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -75,8 +75,9 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-013](#d-013) | Concept | Why is my process ID `14032920` instead of a small number? | ✅ |
 | [D-014](#d-014) | Toolchain | `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in? | ✅ |
 | [D-015](#d-015) | Setup/Install | `scp` to `/data` fails with `Permission denied`, and `mkdir` in `/data` fails too. Why, and where should I deploy? | ✅ |
+| [D-016](#d-016) | Debug | `gdb` connects and `info pidlist` works, but `attach <pid>` says `usr/bin/sleep: No such file or directory`. Why? | ✅ |
 
-**Open questions: 0** · **Needs verification: 0** · **Answered: 15**
+**Open questions: 0** · **Needs verification: 0** · **Answered: 16**
 
 ---
 
@@ -1328,10 +1329,148 @@ Chapter 08's troubleshooting table gains the exact error text.
 
 ---
 
+## D-016
+
+### `attach <pid>` says `usr/bin/sleep: No such file or directory`. Why?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Chapter 08, core lab L08, step 5 — attaching to a running process |
+| **Category** | Debug |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).**
+
+```text
+(gdb) target qnx 192.168.122.46:8000
+Remote debugging using 192.168.122.46:8000
+MsgNak received - resending
+Remote target is little-endian
+(gdb) info pidlist
+/proc/boot/procnto-smp-instr - 1/26
+proc/boot/slm - 16386/1
+...
+(gdb) attach 1540128
+usr/bin/sleep: No such file or directory.
+```
+
+**Short answer.**
+**`gdb` is looking for the file on *your host*, not on the target** — and it is right to. Symbols live
+on the host (Chapter 08 §3.4), so `gdb` needs a local copy of the binary. Give it one:
+
+```bash
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach 1540128
+```
+
+**Nothing is broken.** This is the design announcing itself.
+
+**Full answer.**
+
+### What `gdb` was actually doing
+
+`attach` does two separate things:
+
+| | Where | Worked? |
+|---|-------|---------|
+| **Control** — stop the process, read its registers and memory | On the **target**, via `qconn` | ✅ Yes |
+| **Interpretation** — map addresses to function names, lines, types | On the **host**, from a copy of the binary | ❌ **No copy to read** |
+
+`info pidlist` reported the path **as it exists on the target** — `usr/bin/sleep`. `gdb` tried to open
+that on your host and found nothing.
+
+> ⚠️ **Note the missing leading slash.** `usr/bin/sleep` is *relative*, so `gdb` looked in whatever
+> directory you started it from. But supplying `/usr/bin/sleep` would have been **worse**: on your
+> host that is **Linux's** `sleep` — an ELF binary for the wrong operating system, whose symbols would
+> be confidently, entirely wrong (Chapter 08's 💥 exercise).
+
+### Where a target utility's symbols live on your host
+
+**In the SDP.** Chapter 05 §2.2 observed that `$QNX_TARGET/x86_64/` is *a faithful image of a QNX
+filesystem*. This is the payoff:
+
+```text
+target:  /usr/bin/sleep
+host:    $QNX_TARGET/x86_64/usr/bin/sleep     ← the same binary, with symbols
+```
+
+### Three ways to fix it
+
+```bash
+# 1. Start gdb with the binary  ⭐ simplest
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx <ip>:8000
+(gdb) attach <pid>
+
+# 2. Load it after connecting
+(gdb) file /home/you/qnx800/target/qnx/x86_64/usr/bin/sleep
+(gdb) attach <pid>
+
+# 3. Point gdb at the whole tree once
+host$ ntox86_64-gdb -ex "set sysroot $QNX_TARGET/x86_64"
+```
+
+> 💡 **In option 3 the *shell* expands `$QNX_TARGET`** before `gdb` ever sees it. `gdb` does not expand
+> shell variables — inside `gdb` you must type the literal path.
+
+### For your own programs this never arises
+
+```bash
+host$ ntox86_64-gdb avg          # the host copy is right there, with -g symbols
+(gdb) target qnx <ip>:8000
+(gdb) attach <pid>
+```
+
+Which is why Lab 08.1's step 5 now attaches to **your own program** first, and treats the
+target-utility case as the instructive variant.
+
+### Two other findings from the same session
+
+**⚠️ The port is not optional.**
+
+```text
+(gdb) target qnx 192.168.122.46      ← hangs; needs Ctrl+C
+(gdb) target qnx 192.168.122.46:8000 ← works
+```
+
+It **hangs rather than erroring**, which is worse than a refusal. Always give `:8000`.
+
+**`MsgNak received - resending` is benign.** It appeared once during connection and the session
+proceeded normally — a retransmit in the `qconn` protocol. Not an error.
+
+### ✅ What this session verified
+
+Two claims Chapter 08 had made **from reasoning alone** are now confirmed on a real system:
+
+| Claim | Status |
+|-------|--------|
+| `target qnx <ip>:8000` connects to `qconn` | ✅ **Confirmed** — *"Remote debugging using 192.168.122.46:8000"* |
+| `info pidlist` lists target processes | ✅ **Confirmed** — format is `path - pid/tid` |
+| Toolchain | GDB **14.2**, `qnx800-gdb-14.2-release-55-g85f1a3-dev`, target `x86_64-nto-qnx8.0.0` |
+
+> 💡 **And the failure verified the chapter's central claim more convincingly than success would
+> have.** §3.4 asserts that symbols stay on the host and only addresses cross the network. The proof
+> is that `gdb` — having successfully connected, successfully listed the target's processes, and being
+> perfectly able to control them — **still could not proceed without a local file.** The network gave
+> it everything except meaning.
+
+**Related.** [Chapter 08 §3.4](../chapters/Chapter08_ToolchainAndDeployment.md) ·
+[Chapter 05 §2.2](../chapters/Chapter05_InstallingQNXSDP.md) · Chapter 25
+
+**Action taken.** Chapter 08 → **v1.2**: §3.4 gains the local-copy requirement and all three
+remedies; the port requirement is stated in the Fast-Track, §3.4, §4.3 and the recap; §4.4 gains
+`set sysroot`; Lab 08.1's step 5 is split into **5a** (your own program) and **5b** (a target utility
+via `$QNX_TARGET`), with the failure explained as the design rather than a fault.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.7 | 2026-08-26 | +D-016 — `attach` needs a local copy of the binary, because symbols live on the host; the port is required on `target qnx`. Also **confirms** `target qnx <ip>:8000` and `info pidlist`, previously unverified. |
 | 1.6 | 2026-08-26 | +D-015 — `/data` is the writable *partition* but its root is root-owned; deploy to `/data/home/<user>`. Corrected in four chapters and both lab Makefiles. |
 | 1.5 | 2026-08-26 | **D-008 answered definitively** — `disk-qemu` is *not* sparse, and `~/qnx800` is **79 GB**, not ~43 GB. The `df`-versus-`du` discrepancy explained. |
 | 1.4 | 2026-08-26 | +D-014 (the four library functions in Lab 01.2 — a course-rule-#4 gap, now closed). |

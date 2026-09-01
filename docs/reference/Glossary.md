@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.13
+version: 1.14
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -192,7 +192,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Term | Definition | Ch. |
 |------|-----------|-----|
-| **`qconn`** | The QNX **remote agent** on a target: lets a host-side debugger start, stop, inspect and control target processes, list them (`info pidlist`) and attach to a running one. Listens on port **8000**; started automatically by `slm`. More capable than Linux's `gdbserver`, which can only debug a process it launched itself. | 08 |
+| **`qconn`** | The QNX **remote agent** on a target: lets a host-side debugger start, stop, inspect and control target processes, list them (`info pidlist`) and attach to a running one. Listens on port **8000** — and `target qnx` **requires** the port; a bare IP hangs. More capable than Linux's `gdbserver`, which can only debug a process it launched itself. ⚠️ It carries *control*, never *symbols*: `attach` still needs a host-side copy of the binary ([D-016](../meta/Doubts.md#d-016)). | 08 |
 | **`q++`** | `qcc` for C++. Equivalent to `qcc -V<target>_gpp`. Use `_gpp` (GNU `libstdc++`) unless you specifically need `_cxx`, QNX's older C++ library. | 08 |
 | **`$QNX_HOST`** | Environment variable naming the SDP directory of programs that **execute on your development machine** — `qcc`, `q++`, `ntox86_64-gdb`, `mkifs`, `mkqnximage`. Set by `qnxsdp-env.sh`. Verified value: `~/qnx800/host/linux/x86_64`. | 05 |
 | **`$QNX_TARGET`** | Environment variable naming the SDP directory of files **for the QNX target** — headers, libraries and target binaries, organised by architecture (`x86_64/`, `aarch64le/`). Verified value: `~/qnx800/target/qnx`. Also serves as `mkifs` source material (Ch 21). | 05, 21 |
@@ -230,7 +230,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | **Syspage** | The structure `startup-*` builds and hands to `procnto`, describing the hardware it found: memory map, CPU count and features, timer frequency, interrupt controller. **`procnto` contains no board-specific code** — it learns the machine from the syspage, which is why one kernel binary runs on QEMU, a Raspberry Pi and an automotive SoC. What a BSP fundamentally provides. | 06, 21, 22 |
 | **`startup-*`** | The QNX boot stage that runs before the kernel: initialises CPU, memory and interrupt controller, builds the **syspage**, and prints **`Startup complete`** — the boundary between debugging the *board* and debugging the *system*. Board-specific; part of a BSP. | 06, 22, 32 |
 | **Separated debug symbols (`.sym`)** | Debugging information — symbol names, line numbers, types — stripped from an executable and stored in a `.sym` file beside it. Keeps target binaries small while letting `gdb` on the host produce symbolic backtraces. Must match the binary exactly; a stale `.sym` yields confidently wrong function names. | 05, 25 |
-| **Sysroot** | The cross-compilation term for a directory tree standing in for the target's filesystem root, supplying headers and libraries at build time. `$QNX_TARGET` is QNX's equivalent — found via an environment variable rather than a `--sysroot=` flag. | 05 |
+| **Sysroot** | The cross-compilation term for a directory tree standing in for the target's filesystem root, supplying headers and libraries at build time. `$QNX_TARGET` is QNX's equivalent — found via an environment variable rather than a `--sysroot=` flag. Also a `gdb` setting (`set sysroot`) telling the debugger where to find **host copies of target binaries** when attaching to a running process. | 05, 08 |
 | **SIL** | *Safety Integrity Level* (1–4) from IEC 61508 — the general scale from which ASIL and rail levels derive. QNX holds **SIL 3**. | 03, 29 |
 | **Safety manual** | The document defining the **certified envelope** of an OS: which version, which configuration, which features are prohibited, and what assumptions the certificate rests on. Read it **before** the architecture is fixed — discovering late that your design relies on an excluded feature is the classic expensive mistake. | 03, 29 |
 | **`slay`** | QNX command that terminates processes **by name** rather than by PID — roughly Linux's `pkill`. `slay -f` forces. Because QNX drivers are ordinary processes, `slay` can stop a network stack or a disk driver, which has no equivalent on a monolithic kernel. | 02, 25 |
@@ -287,6 +287,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.14 | 2026-08-26 | **`qconn` and sysroot** sharpened — `qconn` carries control, never symbols; `target qnx` requires the port ([D-016](../meta/Doubts.md#d-016)). |
 | 1.13 | 2026-08-26 | **Data partition** corrected — `/data`'s root is root-owned; unprivileged writes go to `/data/home/<user>` ([D-015](../meta/Doubts.md#d-015)). |
 | 1.12 | 2026-08-26 | Chapter 09: +4 terms (address space, kernel call, blast radius, `ESRCH`). |
 | 1.11 | 2026-08-26 | Chapter 08: +5 terms (`qconn`, `q++`, remote debugging, `ntox86_64-gdb`, development loop). |

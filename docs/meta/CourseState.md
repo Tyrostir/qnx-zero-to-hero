@@ -1,7 +1,7 @@
 ---
 title: "Course State — Where We Are"
 document_id: STATE
-version: 1.2
+version: 1.23
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 023 — 2026-08-26 ✅ **D-016: Chapter 08's centre, verified — by a failure**
+
+| | |
+|---|---|
+| **Goal** | Unblock the learner at Lab 08.1 step 5, where `attach <pid>` failed. |
+| **Done** | ✅ **First direct verification of Chapter 08's central mechanism.** `target qnx <ip>:8000` connects to `qconn` and `info pidlist` lists the target's processes (`path - pid/tid`) — both had been asserted from reasoning alone since the chapter was written<br>❌ `attach 1540128` → `usr/bin/sleep: No such file or directory` — **not a bug.** `gdb` reads symbols on the **host** and had no local copy of the binary; `info pidlist` reports *target* paths, which mean nothing locally<br>💡 **The failure proves §3.4 better than a success would have** — control, the process list and full memory access all crossed the network; **meaning did not**<br>🆕 **`target qnx <ip>` without the port *hangs*** rather than erroring — the worst failure mode a documented command can have<br>• **Fix:** start `gdb` *with* the binary. Own program → `ntox86_64-gdb avg`. Target utility → `ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep`, which turns Chapter 05 §2.2's *"a faithful image of a QNX filesystem"* from a description into a tool<br>• **Lab 08.1 step 5 split** into **5a** (your own program — the realistic case) and **5b** (`sleep`, kept precisely because it forces the `$QNX_TARGET` question). The failure is explained, not engineered away<br>• **Chapter 08 → v1.2**: §3.4, §4.4 (`set sysroot`), Fast-Track, troubleshooting table, recap and cheat sheet<br>• **D-016** written in full; hazard **H-15**; Glossary `qconn` + *Sysroot* sharpened; **V13.3 recorded as partially verified**, V13.3b added for the retry |
+| **Learner decisions** | — |
+| **Questions logged** | **D-016** |
+| **Blockers** | None — T-030 is the retry, T-031 finishes V13.2 |
+| **Next session** | **Chapter 10 — Processes and Threads** |
 
 ### Session 022 — 2026-08-26 🔧 **D-015: the deploy path was wrong**
 

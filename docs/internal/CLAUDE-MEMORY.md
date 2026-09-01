@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.19
+version: 1.20
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -386,6 +386,7 @@ that is precisely why the onboarding documents exist.
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
 | **H-14** | **"The partition is writable" ≠ "you can write there."** The course told readers to deploy to `/data` for four chapters; its root is owned by `root`, so `scp` as `qnxuser` fails. **Unix permissions apply normally on QNX** — the exotic parts are `/proc/boot` and the read-only system partition, and nothing else. Deploy to `/data/home/<user>`. | ✅ Fixed 2026-08-26 (D-015) |
+| **H-15** | **A remote-debug connection is not a symbol source.** `qconn` carries control — stop, read registers, read memory — and *never* symbols. `attach <pid>` therefore fails unless `gdb` already has a **host-side** copy of the binary; `info pidlist`'s paths are *target* paths and mean nothing locally. Start `gdb` with the binary, or `set sysroot $QNX_TARGET/x86_64`. Also: **`target qnx <ip>` without `:8000` hangs**, it does not error. | ✅ Fixed 2026-08-26 (D-016) |
 | **H-13** | **Licence facts in this course came from a summary, and one was backwards.** Setup Guide 02 listed customer demonstrations as forbidden; they are explicitly permitted. Any licensing claim must be checked against QNX's licensing page or the EULA — never restated from an earlier course document. | ✅ Fixed 2026-08-26 (Ch 04) |
 | **H-12** | **Lab code is easy to under-explain.** Chapter 01's lab called `clock_gettime`, `nanosleep`, `perror` and `qsort` with no explanation of any — a course-rule-#4 violation that the writing rules missed because they spoke only of *terms*, not functions. Before publishing a lab, list every library call in it and confirm each is explained or linked. | ⚠️ Rule added to `PLAN.md` §2 and §17 |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
@@ -401,6 +402,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.20 | 2026-08-26 | Session 022 cont.: D-016 — `attach` needs host-side symbols; H-15. **First direct verification of Chapter 08's `qconn` connection.** |
 | 1.19 | 2026-08-26 | Session 022: D-015 — deploy path corrected across four chapters and both lab Makefiles; H-14. |
 | 1.18 | 2026-08-26 | Session 021: Chapter 09; Part 2 begins; block V14. |
 | 1.17 | 2026-08-26 | Session 020: **Parts 0 and 1 complete**; core lab L08; block V13. |

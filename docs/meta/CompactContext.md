@@ -1,7 +1,7 @@
 ---
 title: "Compact Context — One-Page Session Reload"
 document_id: CTX
-version: 1.2
+version: 1.22
 status: Active (regenerated every session)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -198,7 +198,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
   T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
 - **Labs:** 3 compiled — `lab01_timing` (V6), **`lab08_devloop` ⭐ L08** (V13), `lab09_faultisolation` (V14).
-- **Doubts logged:** 15 (D-001…D-015, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
+- **Doubts logged:** 16 (D-001…D-016, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
@@ -206,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.22 | 2026-08-26 | D-016: `attach` needs **host-side** symbols; `target qnx` requires `:8000`. **`target qnx <ip>:8000` and `info pidlist` are now VERIFIED** — the first direct observation of Chapter 08's central mechanism. |
 | 1.21 | 2026-08-26 | Regenerated after Session 022: deploy path corrected to `~` (D-015). |
 | 1.20 | 2026-08-26 | Regenerated after Session 021: Part 2 begun; Chapter 09. |
 | 1.19 | 2026-08-26 | Regenerated after Session 020: **Parts 0 and 1 complete**; Part 2 next. |
