@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.15
+version: 1.16
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -234,7 +234,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | **Target** | The machine running QNX (here: the QEMU VM). Contrast **host**, the machine you develop on. | 08 🌱 |
 | **Thread** | The **schedulable** entity on QNX: a stack, a register set, a priority, a scheduling policy, a signal mask and its own `errno`, running inside a process's address space. `procnto` schedules threads, never processes. Identified by a **tid**, small and numbered from 1 **within** its process. | 10 |
 | **`tid`** | Thread id. Small, numbered from 1 within each process, and — on QNX — the same value `pthread_self()` returns. A thread is named by **pid *and* tid**, never tid alone. | 10 |
-| **`toybox`** | The compact multi-call binary supplying much of QNX's core userland (`ls`, `grep`, `sed`, …). Present in `/proc/boot`. Implements the commonly used subset of each tool, so an unfamiliar GNU flag being rejected is usually `toybox`, not a QNX quirk. | 07 |
+| **`toybox`** | The compact multi-call binary supplying much of QNX's core userland (`ls`, `grep`, `sed`, `sleep`, …). Present in `/proc/boot`. Implements the commonly used subset of each tool, so an unfamiliar GNU flag being rejected is usually `toybox`, not a QNX quirk. ⭐ **Those commands are *links* into one binary, not programs of their own** — which is why they do not appear in `$QNX_TARGET/x86_64/usr/bin` and why a `mkifs` image needs `toybox` put in deliberately ([D-017](../meta/Doubts.md#d-017)). | 07, 21 |
 | **`tracelogger`** | The tool that captures kernel event traces for later analysis in the System Analysis Toolkit. | 26 🌱 |
 | **Typed memory** | QNX's mechanism for allocating from specific, named physical memory regions (e.g. DMA-capable or device-specific memory). | 15 🌱 |
 ## U
@@ -271,6 +271,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.16 | 2026-09-01 | `toybox` sharpened: the commands are links into one binary, which is why the SDP's target tree does not contain them ([D-017](../meta/Doubts.md#d-017)). |
 | 1.15 | 2026-09-01 | Chapter 10: +6 terms (thread, process, `tid`, detached thread, `posix_spawn`, async-signal-safe). **Every letter section re-sorted alphabetically**, which surfaced **18 duplicate entries** — each a 🌱 placeholder later superseded by a full entry. The placeholders are removed; the full entries are kept. |
 | 1.14 | 2026-08-26 | **`qconn` and sysroot** sharpened — `qconn` carries control, never symbols; `target qnx` requires the port ([D-016](../meta/Doubts.md#d-016)). |
 | 1.13 | 2026-08-26 | **Data partition** corrected — `/data`'s root is root-owned; unprivileged writes go to `/data/home/<user>` ([D-015](../meta/Doubts.md#d-015)). |

@@ -1,7 +1,7 @@
 ---
 title: "Compact Context — One-Page Session Reload"
 document_id: CTX
-version: 1.24
+version: 1.25
 status: Active (regenerated every session)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -198,7 +198,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
   T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
 - **Labs:** 3 compiled — `lab01_timing` (V6), **`lab08_devloop` ⭐ L08** (V13), `lab09_faultisolation` (V14).
-- **Doubts logged:** 17 (D-001…D-017; D-017 has one open sub-question). **`/btw` marks an aside that must be logged (ADR-025).**
+- **Doubts logged:** 17 (D-001…D-017, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
@@ -206,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.25 | 2026-09-01 | **D-017 closed:** the SDP does **not** ship the base userland — `ls`/`grep`/`sleep` are links into **`toybox`**, so they are not files in `$QNX_TARGET/x86_64/usr/bin`. Ch 05 §2.2 corrected (*laid out like*, not *a faithful image of*); Ch 08 → v1.4 with `scp`-off-the-target as the **primary** route. **H-17: Chapter 21 must add `toybox` deliberately** or the image boots with no `ls`. |
 | 1.24 | 2026-09-01 | **D-017:** `$QNX_TARGET/usr` is the architecture-*independent* headers side; target binaries are under `x86_64/`. Ch 08 → v1.3. Fallback that always works: `scp` the binary off the running target. |
 | 1.23 | 2026-09-01 | **Chapter 10 published (11/34).** A process is a container, a thread is a worker; **priority, blocking state and `errno` are per-thread**; `posix_spawn` not `fork`; ⭐ **`pidin`'s `Blocked` column names a tid for `MUTEX`/`JOIN` and a pid for `REPLY`** — the claim block V15 must confirm. |
 | 1.22 | 2026-08-26 | D-016: `attach` needs **host-side** symbols; `target qnx` requires `:8000`. **`target qnx <ip>:8000` and `info pidlist` are now VERIFIED** — the first direct observation of Chapter 08's central mechanism. |

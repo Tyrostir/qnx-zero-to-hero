@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.8
+version: 1.9
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -76,9 +76,9 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-014](#d-014) | Toolchain | `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in? | ✅ |
 | [D-015](#d-015) | Setup/Install | `scp` to `/data` fails with `Permission denied`, and `mkdir` in `/data` fails too. Why, and where should I deploy? | ✅ |
 | [D-016](#d-016) | Debug | `gdb` connects and `info pidlist` works, but `attach <pid>` says `usr/bin/sleep: No such file or directory`. Why? | ✅ |
-| [D-017](#d-017) | Setup/Install | `$QNX_TARGET/usr/bin` does not exist — `cd bin` fails. Where are the target's binaries? | ✅ |
+| [D-017](#d-017) | Setup/Install | `$QNX_TARGET/usr/bin` does not exist — `cd bin` fails. Where are the target's binaries? And is `sleep` in the SDP at all? | ✅ |
 
-**Open questions: 0** · **Needs verification: 1** *(is `sleep` in the SDP's target tree? — D-017)* · **Answered: 17**
+**Open questions: 0** · **Needs verification: 0** · **Answered: 17**
 
 ---
 
@@ -1476,7 +1476,7 @@ via `$QNX_TARGET`), with the failure explained as the design rather than a fault
 | **Date** | 2026-09-01 |
 | **Context** | Following [D-016](#d-016)'s fix for `attach` in Chapter 08's Lab 08.1 step 5b |
 | **Category** | Setup/Install |
-| **Status** | ✅ Answered · 📋 one sub-question left to the target |
+| **Status** | ✅ Answered — **both halves**, the second confirmed by the learner 2026-09-01 |
 
 **Question (verbatim).**
 
@@ -1547,20 +1547,55 @@ properly, but Chapter 08 is where the reader is *typing* it, five chapters later
 **Both places now** flag the architecture level explicitly, check the file exists before opening
 `gdb`, and give the fallback below. Chapter 08 → **v1.3**.
 
-### 📋 The sub-question this leaves open
+### ✅ The sub-question, answered — and it corrects Chapter 05
 
-**Is `sleep` in the SDP's target tree at all?** The course does not know. Much of QNX's userland is
-supplied by **`toybox`**, a multi-call binary (Glossary), so `/usr/bin/sleep` on the target may be a
-link to it rather than a program of its own — and the SDP tree may or may not mirror that.
+**Is `sleep` in the SDP's target tree at all?** ❌ **No.** Confirmed on the learner's install:
 
-```bash
-host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep
-host$ ls $QNX_TARGET/x86_64/usr/bin | head -30
+```text
+$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep
+ls: cannot access '/home/.../qnx800/target/qnx/x86_64/usr/bin/sleep': No such file or directory
 ```
 
-### The fallback that always works
+The directory itself exists — the learner was standing in it — so this is not another path error.
+**The file is genuinely absent**, while `/usr/bin/sleep` is demonstrably present *and running* on the
+target ([D-016](#d-016)'s `pidin` output).
 
-If the SDP does not ship it, **take the binary from the machine that is running it.** That copy is,
+#### Why — and it is worth more than the question that found it
+
+**The base userland is not shipped as separate files.** `ls`, `grep`, `sed`, `sleep` and most of the
+rest come from **`toybox`**: a single multi-call binary that behaves as whichever command name it was
+invoked under (Glossary; Chapter 07 found it in `/proc/boot`). On the target those names are links
+into `toybox`. They are **not programs of their own**, so there is nothing for the SDP tree to
+contain.
+
+> ⚠️ **Which makes Chapter 05 §2.2's original wording wrong.** It called the target tree *"a faithful
+> image of a real QNX filesystem"*. It is **not a superset of a running system**:
+>
+> | | Running target | SDP target tree |
+> |---|---|---|
+> | `/usr/bin/sleep` | ✅ present, **and running** | ❌ absent |
+> | `awk`, `aplay`, `callgrind_annotate` | present | ✅ present |
+>
+> **The rule that actually holds:** `$QNX_TARGET/x86_64/` holds the **optional, separately-shipped**
+> pieces you assemble an image *from*. The **base** userland arrives with the image itself, as
+> `toybox`. Chapter 05 → **v1.1**: §2.2 now says *laid out like* rather than *a faithful image of*,
+> states the distinction, and marks its illustrative listing `[UNVERIFIED]` pending V10.1.
+
+> 💡 **And this matters well beyond `gdb`.** Chapter 21 builds a boot image with `mkifs` by choosing
+> files out of `$QNX_TARGET/x86_64/`. Anyone who assumes that directory is *everything a QNX system
+> has* will build an image with no `ls` in it and lose an afternoon to it. **The base userland has to
+> be put in deliberately, as `toybox`.** Recorded as hazard **H-17** so Chapter 21 cannot forget.
+
+📋 **Still worth having** *(host only — and now raw material for Chapter 21)*:
+
+```bash
+host$ ls $QNX_TARGET/x86_64/usr/bin | head -30
+host$ find $QNX_TARGET -name 'toybox*' 2>/dev/null
+```
+
+### ⭐ The fallback — now the *primary* route for a base-userland utility
+
+The SDP does not ship it, so **take the binary from the machine that is running it.** That copy is,
 by definition, the one whose symbols match:
 
 ```bash
@@ -1583,7 +1618,13 @@ images out of `$QNX_TARGET/x86_64/`)
 **Action taken.** Chapter 08 → **v1.3**: §3.4 and Lab 08.1 step 5b both gain the ⚠️ note, an `ls`
 check before `gdb`, and the `scp`-off-the-target fallback; the troubleshooting table gains the exact
 `cd: bin: No such file or directory` text; the cheat sheet's `set sysroot` row notes the `x86_64/` is
-required. Lab 08's README updated. **V13.3b** extended to report which of the two routes was needed.
+required. Lab 08's README updated.
+
+**Then, once the second half came back:** Chapter 08 → **v1.4** — step 5b now uses `scp` as its
+**primary** route rather than its fallback, because the SDP demonstrably does not ship `sleep`.
+**Chapter 05 → v1.1** — §2.2's *"faithful image of a real QNX filesystem"* corrected. Hazard
+**H-17**. **V13.3c** closed; **T-035** narrowed to the `usr/bin` listing, which Chapter 21 wants
+anyway.
 
 ---
 
@@ -1591,6 +1632,7 @@ required. Lab 08's README updated. **V13.3b** extended to report which of the tw
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.9 | 2026-09-01 | **D-017's second half answered**: the SDP does **not** ship `sleep` — the base userland is `toybox`, a multi-call binary, so those names are not files. Corrects **Chapter 05 §2.2**, which had called the target tree *a faithful image of a real QNX filesystem*. Consequences for Chapter 21; hazard H-17. |
 | 1.8 | 2026-09-01 | +D-017 — `$QNX_TARGET/usr` is the architecture-independent headers side; target binaries live under `x86_64/`. Chapter 08 gave the path without flagging the architecture level. |
 | 1.7 | 2026-08-26 | +D-016 — `attach` needs a local copy of the binary, because symbols live on the host; the port is required on `target qnx`. Also **confirms** `target qnx <ip>:8000` and `info pidlist`, previously unverified. |
 | 1.6 | 2026-08-26 | +D-015 — `/data` is the writable *partition* but its root is root-owned; deploy to `/data/home/<user>`. Corrected in four chapters and both lab Makefiles. |

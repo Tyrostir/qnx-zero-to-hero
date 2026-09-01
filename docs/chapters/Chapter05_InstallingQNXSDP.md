@@ -207,10 +207,10 @@ or a link failure naming a symbol you have never heard of, or — most confusing
 ### 2.2 Why two trees, rather than one directory with flags
 
 You could imagine a single tree with `--target=qnx` selecting behaviour. QNX's arrangement is better
-for one specific reason: **the target tree is a faithful image of a real QNX filesystem.**
+for one specific reason: **the target tree is laid out like a real QNX filesystem.**
 
-`$QNX_TARGET/x86_64/usr/bin/` contains what `/usr/bin` looks like on a QNX system. That means the
-same tree serves three purposes at once:
+`$QNX_TARGET/x86_64/usr/bin/` is a directory of QNX programs, arranged where they would live on a
+running system. That means the same tree serves three purposes at once:
 
 | Purpose | Chapter |
 |---------|---------|
@@ -224,11 +224,35 @@ same tree serves three purposes at once:
 > host$ ls $QNX_TARGET/x86_64/usr/bin | head -20
 > ```
 >
-> On a verified install this begins `aac-enc`, `addr2line`, `amixer`, `aomdec`, `aplay`, `arecord`,
-> `awk`, `bc`, `bunzip2`, `bzip2`… — audio codecs, a touchscreen calibrator, Valgrind's
-> `callgrind_annotate`, camera samples. **That list is the reason a QNX boot image can be assembled
-> without a package manager**: everything is already on your disk, and Chapter 21 has you choose from
-> it.
+> Expect audio codecs, a touchscreen calibrator, Valgrind's `callgrind_annotate`, camera samples and
+> similar. **That directory is the reason a QNX boot image can be assembled without a package
+> manager**: the pieces are already on your disk, and Chapter 21 has you choose from them.
+>
+> 📌 `[UNVERIFIED]` — the exact contents. **Block V10.1** asks for the listing.
+
+> ⚠️ **"Laid out like" is not "identical to".** The target tree is **not a superset of a running QNX
+> system**, and the difference will bite you the first time you go looking for a specific program:
+>
+> ```text
+> On the running target:   /usr/bin/sleep          ✅ exists (pidin shows it running)
+> In the SDP:              $QNX_TARGET/x86_64/usr/bin/sleep    ❌ NOT THERE
+> ```
+>
+> **The core userland is not shipped as separate files.** Commands like `ls`, `grep`, `sed` and
+> `sleep` come from **`toybox`**, a single multi-call binary that behaves as whichever command it was
+> invoked under (Glossary). On the target those names are links into `toybox`; they are not programs
+> of their own, so there is nothing for the SDP tree to contain.
+>
+> **The rule to carry forward:** `$QNX_TARGET/x86_64/` holds the **optional, separately-shipped**
+> pieces you assemble an image *from*. The **base** userland arrives with the image itself.
+> [D-017](../meta/Doubts.md#d-017) has the full account, and Chapter 21 depends on the distinction.
+>
+> **When you need a target binary the SDP does not have** — to debug it, or to inspect it — take it
+> from the machine that is running it:
+>
+> ```bash
+> host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+> ```
 
 ### 🐧 In Linux this would be…
 
@@ -1060,4 +1084,5 @@ apart.
 | Version | Date | Change |
 |---------|------|--------|
 | 1.1 | 2026-08-26 | **Disk figures corrected from measurement.** `~/qnx800` is **79 GB**, not ~43 GB: `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB. The virtual disk is **not sparse**, contrary to earlier speculation ([D-008](../meta/Doubts.md#d-008)). The `df`-versus-`du` discrepancy is explained rather than papered over. §3.1's layout gains `bsp/`, `custom/`, `docs/`, `source/`, `sources/`, `gfx-source/` and `qnxsdp-env.bat`, with a note that `bsp/` is Chapter 22's subject already on disk. |
+| 1.1 | 2026-09-01 | **Correction to §2.2.** *"A faithful image of a real QNX filesystem"* overstated it — the SDP's target tree is **not a superset of a running system**. `/usr/bin/sleep` exists on the target and **not** in `$QNX_TARGET/x86_64/usr/bin`, because the base userland is supplied by the `toybox` multi-call binary and is not shipped as separate files. §2.2 now says *laid out like*, states the distinction between the optional pieces the SDP ships and the base userland the image carries, and gives the `scp`-from-the-target route. The illustrative `usr/bin` listing is marked `[UNVERIFIED]` pending V10.1. See [D-017](../meta/Doubts.md#d-017). |
 | 1.0 | 2026-08-26 | Created. The host/target split as the organising idea, with the *"which CPU and OS executes this file?"* test. Covers the `~/qnx800` layout, what `qnxsdp-env.sh` changes and why `source` matters, QNX Software Center's installation/profile/baseline/package model with **verified** CLT options, `.sym` files, and where ~43 GB goes. §5 traces one `qcc` invocation to the exact tree each piece came from, and names the silent failure: plain `gcc` produces a working binary for the wrong OS. Labs are `[UNVERIFIED]` pending block **V10**. |

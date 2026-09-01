@@ -131,9 +131,10 @@ host$ make TGT=$TGT debug
 - **Attach to a running process:** start `gdb` **with the binary**, then `info pidlist` and
   `attach <pid>`. ⚠️ `attach` alone fails with `…: No such file or directory` — `gdb` reads symbols on
   the *host* and needs a local copy. Your own program: `ntox86_64-gdb avg`. A target utility:
-  `ntox86_64-gdb $QNX_TARGET/`**`x86_64`**`/usr/bin/sleep` — ⚠️ **the `x86_64/` is required**;
-  `$QNX_TARGET/usr` is headers, not binaries (D-017). If the SDP does not ship the utility, copy it
-  off the running target: `scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx`. See D-016, D-017.
+  copy it off the running target: `scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx`, then
+  `ntox86_64-gdb /tmp/sleep.qnx`. ⚠️ **Do not look for it in the SDP** —
+  `$QNX_TARGET/x86_64/usr/bin/sleep` does not exist, because the base userland is `toybox`, one
+  multi-call binary answering to many names (D-017). See D-016, D-017.
 - ⚠️ **`target qnx <ip>` without `:8000` hangs** rather than erroring. Always give the port.
   in `gdb`. `gdbserver` cannot do this; `qconn` can.
 - **Compare `make` and `make release`** sizes. That difference is why Chapter 05's `.sym` files exist.

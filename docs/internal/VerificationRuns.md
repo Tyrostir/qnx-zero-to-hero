@@ -995,22 +995,19 @@ host$ ntox86_64-gdb avg
 (gdb) backtrace
 (gdb) detach
 
-# 5b — a target utility, symbols from the SDP's target tree
+# 5b — a target utility.  ⭐ The SDP does NOT ship `sleep` (D-017), so take it
+#      from the machine that is running it.
 qnx$  sleep 600 &
-host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep    # <-- does the SDP even ship it?  D-017
-host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
 (gdb) target qnx <ip>:8000
 (gdb) attach <the sleep pid>
 (gdb) backtrace
 (gdb) detach
-
-# 5b fallback, if the SDP does not ship it — always works
-host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
-host$ ntox86_64-gdb /tmp/sleep.qnx
 ```
 
-📋 **Also report `ls $QNX_TARGET/x86_64/usr/bin | head -30`** — [D-017](../meta/Doubts.md#d-017)
-does not know whether `sleep` is a program there or a link to `toybox`.
+🎯 **Still unobserved:** whether `attach` succeeds once `gdb` has the symbols, and whether
+`backtrace` on a sleeping process shows `nanosleep` — consistent with `pidin`'s `NANOSLEEP`.
 
 📋 **Paste both.** 🎯 **Still unobserved:** whether `attach` succeeds once `gdb` has the symbols, and
 whether `backtrace` on a sleeping process shows `nanosleep` in the frame list.
@@ -1247,7 +1244,8 @@ means something different:
 | **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | 🟨 **connection confirmed** via V13.3; `break`/`print`/`upload` still unobserved |
 | V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | 🟨 **`target qnx` + `info pidlist` ✅; `attach` failed → [D-016](../meta/Doubts.md#d-016)**, retry |
 | V13.3b | Retry `attach` with the binary loaded (5a and 5b) | 👤 | V13.3 | Ch 08 §3.4, [D-016](../meta/Doubts.md#d-016) | ⬜ |
-| V13.3c | `ls $QNX_TARGET/x86_64/usr/bin` — is `sleep` there, or a `toybox` link? | 👤 | — | [D-017](../meta/Doubts.md#d-017) · Ch 05 §2.2 · Ch 21 | ⬜ |
+| V13.3c | Is `sleep` in the SDP's target tree? | 👤 | — | [D-017](../meta/Doubts.md#d-017) · Ch 05 §2.2 · Ch 21 | ✅ **NO** — file absent, directory present. Base userland is `toybox`. **Corrected Ch 05 §2.2** |
+| V13.3d | `ls $QNX_TARGET/x86_64/usr/bin \| head -30` + `find $QNX_TARGET -name 'toybox*'` | 👤 | — | Ch 05 §2.2 `[UNVERIFIED]` · **Ch 21's source material** | ⬜ |
 | **V15.1** | ⭐ The thread zoo — five threads, five states | 👤 | — | Lab 10.1 · **Ch 10 §5.4** | ⬜ |
 | V15.2 | Read `neutrino.h`, `pthread_t`, `errno` | 👤 | — | Ch 10 §2.2, §3.1, §🔬 | ⬜ |
 | V15.3 | Default thread stack size | 👤 | — | Ch 10 §3.2 | ⬜ |
@@ -1304,6 +1302,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-09-01 | **V13.3c** | ✅ **Answered — and it corrected a published claim** | `$QNX_TARGET/x86_64/usr/bin/sleep` **does not exist**, while `/usr/bin/sleep` is running on the target. The directory *does* exist (the learner was standing in it), so this is not a path error — the file is genuinely absent. **The base userland is `toybox`**, one multi-call binary whose command names are links, so there is nothing for the SDP to ship. **Chapter 05 §2.2's *"a faithful image of a real QNX filesystem"* is wrong** and is corrected to *"laid out like"*, with the optional-vs-base distinction stated. Chapter 05 → v1.1, Chapter 08 → v1.4 (`scp` off the target is now the **primary** route, not the fallback). Hazard **H-17** — **Chapter 21 must put `toybox` into a `mkifs` image deliberately**, or it boots with no `ls`. |
 | 2026-08-26 | **V13.3 (partial)** | 🟨 **2 confirmed, 1 failed, 1 new finding** | ✅ **`target qnx <ip>:8000` connects** and ✅ **`info pidlist` lists target processes** (`path - pid/tid`) — both were previously asserted from reasoning alone, and both are now observed on GDB 14.2 / `x86_64-nto-qnx8.0.0`. ❌ `attach 1540128` failed with `usr/bin/sleep: No such file or directory` → **[D-016](../meta/Doubts.md#d-016)**: `gdb` reads symbols **on the host** and had no local copy. 🆕 **`target qnx <ip>` without the port hangs** rather than erroring. Chapter 08 → v1.2; lab step 5 split into 5a/5b. **The failure is the strongest evidence yet for §3.4's central claim** — everything crossed the network except meaning. |
 | 2026-08-26 | **V13.1 (first attempt)** | ⚠️ **Failed → D-015** | `scp` to `/data` returned `Permission denied`; `mkdir` in `/data` as `qnxuser` failed the same way. **`/data` is the writable partition but its root is root-owned.** Deploy target corrected to `/data/home/$(USER)` in both lab Makefiles and in Chapters 06, 07, 08 and 09. The learner's `mkdir` test was good diagnosis — it eliminated SSH, `scp` and the network in one command. **Retry pending.** |
 | 2026-08-26 | **V10.1 (part)** | ✅ **Disk breakdown supplied** | `du -sh ~/qnx800` = **79 GB** — `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB, `custom/` 315 MB. **Settles D-008: the virtual disk is NOT sparse.** Reconciles with block V3's 43 GB `df` delta, which predated the image and covered more than one directory. Corrected `PLAN.md` (~50 → **~85 GB** budget), Setup Guides 01 and 02, Chapters 05 and 06, and `check-environment.sh`'s thresholds. **T-016 closed.** |
@@ -1383,6 +1382,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.22 | 2026-09-01 | **V13.3c answered ✅** — the SDP does not ship the base userland. Corrected Ch 05 §2.2 and Ch 08 step 5b. V13.3d added for the `usr/bin` listing Chapter 21 needs. |
 | 1.21 | 2026-09-01 | **V13.3b extended** with an `ls` check and the `scp`-off-the-target fallback; **V13.3c added** to settle whether the SDP ships `sleep` ([D-017](../meta/Doubts.md#d-017)). |
 | 1.20 | 2026-09-01 | **Block V15 added** for Chapter 10 — the thread zoo, the headers, the default stack size, and the `fork()`-in-a-multi-threaded-process experiment. V15.1 is the one that decides whether §5.4's deadlock-reading advice is true. |
 | 1.19 | 2026-08-26 | **V13.3 run, partially.** `target qnx <ip>:8000` and `info pidlist` **confirmed** — the first direct observation of Chapter 08's central mechanism. `attach` failed → D-016 (host-side symbols); bare-IP hang is new. V13.3b added for the retry. |

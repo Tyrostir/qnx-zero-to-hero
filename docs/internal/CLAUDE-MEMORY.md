@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.21
+version: 1.22
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -388,6 +388,7 @@ that is precisely why the onboarding documents exist.
 | **H-14** | **"The partition is writable" ≠ "you can write there."** The course told readers to deploy to `/data` for four chapters; its root is owned by `root`, so `scp` as `qnxuser` fails. **Unix permissions apply normally on QNX** — the exotic parts are `/proc/boot` and the read-only system partition, and nothing else. Deploy to `/data/home/<user>`. | ✅ Fixed 2026-08-26 (D-015) |
 | **H-15** | **A remote-debug connection is not a symbol source.** `qconn` carries control — stop, read registers, read memory — and *never* symbols. `attach <pid>` therefore fails unless `gdb` already has a **host-side** copy of the binary; `info pidlist`'s paths are *target* paths and mean nothing locally. Start `gdb` with the binary, or `set sysroot $QNX_TARGET/x86_64`. Also: **`target qnx <ip>` without `:8000` hangs**, it does not error. | ✅ Fixed 2026-08-26 (D-016) |
 | **H-16** | **`$QNX_TARGET` is two trees in one directory.** `$QNX_TARGET/usr/` is architecture-*independent* development files (headers, docs) — it has **no `bin`**. Everything that runs on QNX is under `$QNX_TARGET/x86_64/` or `/aarch64le/`. When writing a path with the architecture in it, **say that the architecture level is required** — in a line that already contains `x86_64` twice it reads as noise and gets dropped. | ✅ Fixed 2026-09-01 (D-017) |
+| **H-17** | ⭐ **`$QNX_TARGET/x86_64/` is NOT a complete QNX system.** It holds the *optional, separately-shipped* pieces; the **base userland is `toybox`**, one multi-call binary whose command names are links, so `ls`/`grep`/`sed`/`sleep` are **not files there**. Consequences: (a) to debug a target utility, `scp` it off the running machine; (b) **Chapter 21 must put `toybox` into a `mkifs` image deliberately**, or the image boots with no `ls`. Chapter 05 §2.2 originally called the tree *"a faithful image of a real QNX filesystem"* — corrected. | ✅ Fixed 2026-09-01 (D-017) |
 | **H-13** | **Licence facts in this course came from a summary, and one was backwards.** Setup Guide 02 listed customer demonstrations as forbidden; they are explicitly permitted. Any licensing claim must be checked against QNX's licensing page or the EULA — never restated from an earlier course document. | ✅ Fixed 2026-08-26 (Ch 04) |
 | **H-12** | **Lab code is easy to under-explain.** Chapter 01's lab called `clock_gettime`, `nanosleep`, `perror` and `qsort` with no explanation of any — a course-rule-#4 violation that the writing rules missed because they spoke only of *terms*, not functions. Before publishing a lab, list every library call in it and confirm each is explained or linked. | ⚠️ Rule added to `PLAN.md` §2 and §17 |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
@@ -403,6 +404,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.22 | 2026-09-01 | Session 025 cont.: D-017's second half — the SDP does not ship the base userland; H-17; Ch 05 → v1.1, Ch 08 → v1.4. |
 | 1.21 | 2026-09-01 | Session 025: D-017 — the architecture level in `$QNX_TARGET`; H-16. Ch 10 published (Session 024). |
 | 1.20 | 2026-08-26 | Session 022 cont.: D-016 — `attach` needs host-side symbols; H-15. **First direct verification of Chapter 08's `qconn` connection.** |
 | 1.19 | 2026-08-26 | Session 022: D-015 — deploy path corrected across four chapters and both lab Makefiles; H-14. |

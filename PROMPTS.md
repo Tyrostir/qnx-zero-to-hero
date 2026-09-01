@@ -1,7 +1,7 @@
 ---
 title: "PROMPTS.md — Learner Prompt & Response Log (Claude sessions)"
 document_id: PROMPTS
-version: 2.22
+version: 2.23
 status: Active (living document)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -3146,10 +3146,132 @@ rather than from your disk.
 
 ---
 
+## PROMPT#25
+
+| | |
+|---|---|
+| **Date** | 2026-09-01 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 025 |
+| **Context** | The `ls` check recommended in PROMPT#24 came back negative. |
+| **Status** | ✅ Answered — and it corrected a published claim in Chapter 05 |
+
+### Prompt (verbatim)
+
+> "tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/x86_64/usr/bin$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+> GNU gdb (qnx800-gdb-14.2-release-55-g85f1a3-dev) 14.2
+> […]
+> Type "apropos word" to search for commands related to "word"...
+> /home/tyrostir/qnx800/target/qnx/x86_64/usr/bin/sleep: No such file or directory." and "tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/x86_64/usr/bin$  ls -l $QNX_TARGET/x86_64/usr/bin/sleep
+> ls: cannot access '/home/tyrostir/qnx800/target/qnx/x86_64/usr/bin/sleep': No such file or directory"
+
+### Standing instructions
+
+SI-1…SI-14 in force. **ADR-024** is the operative one: this is learner-executed output, so it
+overrides a published claim.
+
+### Response (full)
+
+**That settles it, and it corrects the course rather than your path.** You were standing *in*
+`$QNX_TARGET/x86_64/usr/bin`, so the directory exists and the layout is right. **The file genuinely
+is not there.**
+
+#### Why `sleep` is not in the SDP
+
+**The base userland is not shipped as separate files.** `ls`, `grep`, `sed`, `sleep` and most of the
+rest come from **`toybox`** — one multi-call binary that behaves as whichever command name it was
+invoked under. Chapter 07 already found it in `/proc/boot`.
+
+**On the target those names are links into `toybox`. They are not programs of their own** — so there
+is nothing for the SDP tree to contain.
+
+| | Running target | SDP target tree |
+|---|---|---|
+| `/usr/bin/sleep` | ✅ present, **and running** | ❌ absent |
+| `awk`, `aplay`, `callgrind_annotate` | present | ✅ present |
+
+#### ⚠️ Which makes a Chapter 05 sentence wrong
+
+§2.2 said the target tree is *"a faithful image of a real QNX filesystem"*. **It is not a superset of
+a running system.** The rule that actually holds:
+
+> **`$QNX_TARGET/x86_64/` holds the optional, separately-shipped pieces you assemble an image
+> *from*. The base userland arrives with the image itself, as `toybox`.**
+
+**Chapter 05 → v1.1:** *"laid out like"* instead of *"a faithful image of"*, the optional-vs-base
+distinction stated, the `scp` route given, and the illustrative `usr/bin` listing marked
+`[UNVERIFIED]` — because it was asserted, and V10.1 has not run.
+
+#### ⭐ And it lands hardest on Chapter 21
+
+`mkifs` builds a boot image by choosing files out of `$QNX_TARGET/x86_64/`. **Anyone who assumes that
+directory is everything a QNX system has will build an image with no `ls` in it** and lose an
+afternoon working out why.
+
+`toybox` has to be put in **deliberately**. Recorded as hazard **H-17** and **T-036** so Chapter 21
+cannot forget — this is the most valuable thing to come out of the question, and it arrived eleven
+chapters before the chapter that needs it.
+
+#### To finish step 5b right now
+
+```bash
+qnx$  sleep 600 &
+qnx$  pidin | grep sleep
+
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach <the sleep pid>
+(gdb) backtrace
+(gdb) detach
+```
+
+I expect `backtrace` to show `nanosleep`, matching `pidin`'s `NANOSLEEP` state. **Still unobserved** —
+please paste it.
+
+#### `scp` is now the rule, not the fallback
+
+**Chapter 08 → v1.4.** §3.4 and Lab 08.1 step 5b both lead with `scp` off the running target, and say
+plainly that the SDP does not ship `sleep`.
+
+> 💡 **It was always the better instruction.** `gdb` needs *a local file whose symbols match the
+> running code*. Where it came from is irrelevant — and the copy taken off the running machine is the
+> only one that **cannot** mismatch. Which also makes it the safe answer to Chapter 08's 💥
+> symbol-mismatch exercise: the thing the exercise breaks on purpose is the thing `scp` makes
+> impossible.
+
+#### 📋 One command left, and Chapter 21 wants it
+
+```bash
+host$ ls $QNX_TARGET/x86_64/usr/bin | head -30
+host$ find $QNX_TARGET -name 'toybox*' 2>/dev/null
+```
+
+Host only. It clears Chapter 05 §2.2's remaining `[UNVERIFIED]` **and** is the source material for
+what `mkifs` can pick from.
+
+#### The scoreboard
+
+| # | Claim | Verdict | Found by |
+|---|-------|---------|----------|
+| 1 | `-listAvailablePackages` | ❌ Does not exist | Running it (D-007) |
+| 2 | Customer demos forbidden | ❌ Backwards | Reading the source (Ch 04) |
+| 3 | Image is probably sparse | ❌ It is not | Running `du` (D-008) |
+| 4 | Deploy to `/data` | ❌ Root-owned | Running the lab (D-015) |
+| 5 | `target qnx` + `info pidlist` | ✅ Correct | Running the lab (D-016) |
+| 6 | The `attach` recipe | ⚠️ Right but incomplete | Running the lab (D-016) |
+| **7** | **The target tree is "a faithful image of a real QNX filesystem"** | ❌ **Not a superset — the base userland is `toybox`** | **Running `ls` (D-017)** |
+
+**Six of seven found by executing.** And this one was found by an `ls` that I asked for only because I
+was not willing to assert the file was there.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.23 | 2026-09-01 | PROMPT#25 logged: the SDP does not ship the base userland; Ch 05 §2.2 corrected. |
 | 2.22 | 2026-09-01 | PROMPT#24 logged: the architecture level in $QNX_TARGET (D-017). |
 | 2.21 | 2026-09-01 | PROMPT#23 logged: Chapter 10 published. |
 | 2.20 | 2026-08-26 | PROMPT#22 logged: `attach` diagnosed; Chapter 08's `qconn` connection verified for the first time. |
