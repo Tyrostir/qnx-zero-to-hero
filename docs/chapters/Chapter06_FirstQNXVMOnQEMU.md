@@ -7,7 +7,7 @@ core_lab: "L06 ⭐"
 est_time: "90 minutes reading · 45 minutes labs"
 prereqs: "Chapters 02 and 05. Setup Guide 03 (you already booted this VM)."
 status: Published
-version: 1.1
+version: 1.2
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -360,16 +360,21 @@ decoration:
 |------|-----------|--------------------|
 | `/proc/boot` | `ifs.bin` in RAM | ❌ Read-only, always |
 | `/`, `/usr`, `/system` | The image's system partition | ⚠️ **Usually not** |
-| **`/data`** | The writable data partition | ✅ **Yes** |
+| **`/data`** | The writable data partition ⚠️ *root-owned; write to `/data/home/<you>`* | ✅ **Yes** |
 | `/tmp` | RAM | ❌ |
 
 > ⚠️ **This is why Setup Guide 03 §9.4 warned that editing `/etc/ssh/sshd_config` may not survive.**
 > Not a bug — the design. An embedded system keeps its operating system in an image that cannot be
 > corrupted, and confines mutable state to a small, explicitly-chosen area.
 >
-> 💡 **The practical rule while learning:** put your work in **`/data`** or your home directory; treat
-> everything else as though it will be reset. If you need a change to be permanent, it belongs in the
-> **image** — which is Chapter 21, and is exactly the discipline real QNX products use.
+> ⚠️ **`/data` is the writable *partition*, but its root is owned by `root`.** As `qnxuser` you cannot
+> create files directly in `/data` — you get `Permission denied`. **Your home directory,
+> `/data/home/qnxuser`, is on that partition and is yours**, which is where your work belongs
+> ([D-015](../meta/Doubts.md#d-015)).
+>
+> 💡 **The practical rule while learning:** put your work in **your home directory**; treat everything
+> else as though it will be reset. If you need a change to be permanent, it belongs in the **image** —
+> which is Chapter 21, and is exactly the discipline real QNX products use.
 
 Lab 06.3 has you demonstrate this rather than take it on trust.
 
@@ -1030,7 +1035,7 @@ same idea, arrived at from the same requirement.
 |------|--------------------|
 | `/proc/boot` | ❌ read-only, from `ifs.bin` |
 | `/`, `/usr`, `/system`, `/etc` | ⚠️ usually not |
-| **`/data`** | ✅ **yes** |
+| **`/data/home/<you>`** | ✅ **yes** — `/data` itself is root-owned |
 | `/tmp` | ❌ RAM |
 
 **Files**
@@ -1088,5 +1093,6 @@ QNX is a path, and what that gets you.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.2 | 2026-08-26 | §3.3 corrected: `/data` is the writable partition but its **root is owned by root**, so unprivileged work belongs in `/data/home/<user>` ([D-015](../meta/Doubts.md#d-015)). |
 | 1.1 | 2026-08-26 | Disk figures corrected: `disk-qemu` is **not sparse** — it really occupies its 47 GB, and `images/` is **53 GB**, the largest item in the SDP ([D-008](../meta/Doubts.md#d-008)). |
 | 1.0 | 2026-08-26 | Created. ⭐ Contains core lab **L06**. Covers the full boot chain with `Startup complete` identified as the BSP/system boundary; the syspage and why `procnto` is board-independent; `ifs.bin` versus the virtual disk, and `/proc/boot` as a mounted 20 MB file; `slm`'s 22 components read as a dependency argument; and the read-only-image / writable-`/data` split with its consequences. §5 places every line of the verified boot log. Labs open `output/build/` — Chapter 21's source material — fifteen chapters early. All labs `[UNVERIFIED]` pending block **V11**. |

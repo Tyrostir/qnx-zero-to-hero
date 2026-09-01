@@ -1,7 +1,7 @@
 ---
 title: "Decisions Log — Append-Only History"
 document_id: DECLOG
-version: 1.20
+version: 1.21
 status: Active (append-only living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -1998,10 +1998,72 @@ cheap for the learner and materially change what the chapter can be.
 
 ---
 
+## 2026-08-26 — Session 022 (D-015: the deploy path was wrong)
+
+### VERIFIED — `/data`'s root is owned by root, and the course said otherwise
+
+The learner ran core lab L08 and hit:
+
+```text
+scp: dest open "/data/avg": Permission denied
+[qnxuser@qnxqemu /data]$ mkdir avg
+mkdir: 'avg': Permission denied
+```
+
+**The `mkdir` was good diagnosis** — it eliminated SSH, `scp` and the network in a single command,
+proving the problem was ordinary filesystem permissions.
+
+**What the course got wrong.** Chapter 06 §3.3 established, correctly, that `/data` is the **writable
+partition** — the only place changes survive a reboot. Chapters 06, 07, 08 and 09 then slid from that
+into *"deploy to `/data`"*, which does not follow: like any Unix directory, `/data` has an owner and a
+mode, and on this image it is owned by `root`.
+
+**The fix.** Deploy to the user's home, `/data/home/qnxuser`, which lives *on* that partition and is
+theirs. Both lab Makefiles now default to `DEST ?= /data/home/$(USER)`.
+
+**Corrected:** Chapter 06 → v1.2, Chapter 07 → v1.1, Chapter 08 → v1.1, Chapter 09 → v1.1, both lab
+Makefiles, both lab READMEs, the Glossary's *Data partition* entry, and Chapter 08's troubleshooting
+table — which now carries the **exact error text**, so the next reader finds it by searching for what
+they actually saw.
+
+---
+
+### The lesson, which generalises past QNX
+
+> *"The partition is writable"* and *"you can write there"* are different claims. The course conflated
+> them, and four chapters inherited the error from one sentence.
+
+**And the reassuring half:** the surprise here was **not** a QNX exotic. Unix permissions apply
+normally; `/data` behaved exactly as any root-owned directory would. The genuinely unusual parts of
+this filesystem are only `/proc/boot` (a mounted 20 MB file) and the read-only system partition —
+**everything else behaves as a Linux engineer would expect**, including the bit that just stopped the
+learner.
+
+Recorded as hazard **H-14**, phrased as a check rather than an observation: before telling a reader to
+write somewhere, confirm *the directory* is writable by *the account* they will use — not merely that
+the filesystem is.
+
+---
+
+### The fourth published claim caught by running it
+
+| # | Claim | How it was wrong | Found by |
+|---|-------|------------------|----------|
+| 1 | `-listAvailablePackages` | The option does not exist | Running it (D-007) |
+| 2 | Customer demos are forbidden | Exactly backwards | Reading the licensing page (Ch 04) |
+| 3 | The disk image is probably sparse | It is not; total ~40 GB low | Running `du` (D-008) |
+| **4** | **Deploy to `/data`** | **Root-owned; unwritable by the user** | **Running the lab (D-015)** |
+
+All four were plausible, well-sourced and wrong. **Three of the four were caught by the learner
+executing something**, which is the entire argument for ADR-024 and the verification blocks.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.21 | 2026-08-26 | Session 022 appended: D-015 — `/data`'s root is root-owned; the deploy path corrected across four chapters and both lab Makefiles; the fourth published claim caught by execution. |
 | 1.20 | 2026-08-26 | Session 021 appended: fault isolation explained mechanically; equal weight to what is not survivable; section 5's `errno` framing; "POSIX on top, messages underneath" as Part 2's organising sentence; three blocks now serving later chapters. |
 | 1.19 | 2026-08-26 | Session 020 appended: the symbols-on-the-host framing and its hazard; the inverted skeleton/solution roles; a 🐣 tag added against the TOC; **Parts 0 and 1 complete**. |
 | 1.18 | 2026-08-26 | Session 019 appended: disk figures corrected from `du` measurement across six documents and the check script; D-008 answered; `df`-versus-`du` reconciled; the third instance of a plausible-but-wrong published claim. |

@@ -64,6 +64,7 @@ host$ ssh qnxuser@$TGT 'echo ok'
 |---------|------|
 | `make` | Build the **buggy** program, and check it really is a QNX x86_64 binary |
 | `make TGT=$TGT run` | Build → deploy → run on the target |
+| `make TGT=$TGT DEST=/tmp run` | Same, but to `/tmp` — writable by anyone, **lost on reboot** |
 | `make TGT=$TGT debug` | Build → deploy → launch `gdb` connected to `qconn` |
 | `make SRC=solution/avg.c TGT=$TGT run` | The same, with the **fixed** program |
 | `make release` | Optimised, stripped build — compare the sizes |
@@ -118,6 +119,7 @@ host$ make TGT=$TGT debug
 | `qcc: command not found` | `source ~/qnx800/qnxsdp-env.sh` |
 | `WARNING: not a QNX x86_64 binary` | Check `-V` and `$QNX_TARGET` (Ch 05 §4.3) |
 | `Permission denied` on `scp` | Use `qnxuser@`, not `root@` |
+| `scp: dest open "/data/x": Permission denied` | **`/data`'s root is owned by root.** Deploy into your home — the Makefile now defaults to `/data/home/$(USER)` ([D-015](../../docs/meta/Doubts.md#d-015)) |
 | `gdb` cannot connect to `:8000` | Is the VM running? `pidin \| grep qconn` on the target |
 | Changes have no effect | You deployed by hand. Use `make run` |
 | `gdb` names functions that are not running | **Symbol mismatch** — rebuild *and* redeploy together (Ch 08 💥) |

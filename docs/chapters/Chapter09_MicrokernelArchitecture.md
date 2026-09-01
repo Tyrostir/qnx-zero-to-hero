@@ -6,7 +6,7 @@ paths: ["🐣 A", "🚶 B", "🏃 C"]
 est_time: "90 minutes reading · 45 minutes labs"
 prereqs: "Chapters 02, 07 and 08. A booting VM and the development loop."
 status: Published
-version: 1.0
+version: 1.1
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -678,7 +678,7 @@ host$ make TGT=$TGT deploy
 ```bash
 qnx$ pidin info
 qnx$ pidin | wc -l
-qnx$ /data/faulter
+qnx$ ~/faulter
 ```
 
 **Session 2 — immediately afterwards.**
@@ -1001,4 +1001,5 @@ you have read.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Lab deploy path corrected to `~` ([D-015](../meta/Doubts.md#d-015)). |
 | 1.0 | 2026-08-26 | Created. Opens Part 2. Enumerates what `procnto` provides and what it deliberately does not; introduces the kernel-call families and their naming; establishes **POSIX on top, messages underneath** as the central mechanism. §3 explains fault isolation **mechanically** — page tables, the fault path, and the seven-step teardown — and gives equal weight to what is *not* survivable, including the blast-radius table and the honest note that deadlock fails silently. §5 traces a NULL dereference end to end and argues that the kernel's real contribution is converting another process's death into the client's `errno`. Ships `labs/lab09_faultisolation/`. All labs `[UNVERIFIED]` pending block **V14**. |

@@ -44,7 +44,7 @@ qnx$ pidin info
 qnx$ pidin | wc -l
 
 # session 1 — crash it
-qnx$ /data/faulter
+qnx$ ~/faulter
 
 # session 2 — immediately after
 qnx$ pidin info

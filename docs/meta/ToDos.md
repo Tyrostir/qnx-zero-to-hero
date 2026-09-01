@@ -32,7 +32,8 @@ update_trigger: "Continuously"
 
 
 | T-028 | 🟠 | **Run block V14** — the kernel's real API surface, fault locality, and ⭐ whether a client is woken with `ESRCH` | ⬜ | — | V14.3 tests Chapter 09's central claim; V14.4 finds the core-dump location Chapter 25 needs. |
-| T-027 | 🔴 | ⭐ **Run block V13** — core lab L08: build, deploy, and **debug a target process from your host** | ⬜ | — | **The most consequential block since V5.** Every chapter from 09 onwards assumes this loop works. |
+| T-029 | 🟡 | Paste `ls -ld /data /data/home /data/home/qnxuser` and `id` | ⬜ | — | Confirms [D-015](Doubts.md#d-015)'s inference with the actual modes. |
+| T-027 | 🔴 | ⭐ **Run block V13** — ⚠️ `git pull` first; the Makefile's `DEST` was corrected — core lab L08: build, deploy, and **debug a target process from your host** | ⬜ | — | **The most consequential block since V5.** Every chapter from 09 onwards assumes this loop works. |
 | T-026 | 🟠 | **Run block V12** — the healthy-system baseline (`pidin` state census, `fds`, `NANOSLEEP` vs `REPLY`) | ⬜ | — | Target only, 30 min. Feeds Chapter 25's `⭐ L25` diagnostic lab. |
 | T-025 | 🔴 | **Run block V11** — ⭐ **especially V11.2**: paste `output/build/ifs.build` and `disk.layout` | ⬜ | — | **The most valuable outstanding request in the course.** It turns Chapter 21 from documentation into a walkthrough of the system you booted. V11.3 tests Ch 06 §3.3's central claim. |
 | T-024 | 🟠 | **Run block V10** — SDP layout, disk breakdown, `qcc -v` paths, and three deliberate failures | ⬜ | — | **Host only**, ~25 min; folds into a V9 session. V10.2 tests Chapter 05 §5.1's central claim. |
@@ -186,6 +187,7 @@ update_trigger: "Continuously"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.21 | 2026-08-26 | D-015: deploy path corrected across four chapters and both lab Makefiles. T-029 added. |
 | 1.20 | 2026-08-26 | **Chapter 09 published — Part 2 begins.** T-130 closed; T-130b (Chapter 10) promoted; T-028 added (block V14). |
 | 1.19 | 2026-08-26 | ⭐ **Chapter 08 published — Part 1 complete.** T-115e closed; T-130 (Chapter 09, Part 2) promoted; T-027 added (block V13). |
 | 1.18 | 2026-08-26 | **Chapter 07 published**; T-016 and T-151 closed (disk figures corrected). T-115d closed; T-115e (Chapter 08 ⭐) promoted; T-026 added (block V12). |

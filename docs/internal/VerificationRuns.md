@@ -916,9 +916,23 @@ chapter's central teaching point, and **only the second can deadlock**. Predicte
 host$ source ~/qnx800/qnxsdp-env.sh
 host$ export TGT=$(cd ~/qnx800/images/qemu/qemu && mkqnximage --getip)
 host$ cd ~/exercises/qnx-zero-to-hero/labs/lab08_devloop
+host$ git pull                      # ⚠️ the Makefile's DEST was corrected — see D-015
 host$ make
 host$ make TGT=$TGT run
 ```
+
+> ⚠️ **First attempt failed and produced [D-015](../meta/Doubts.md#d-015).** The Makefile deployed to
+> `/data`, whose root is owned by `root`, so `scp` as `qnxuser` returned `Permission denied`. `DEST`
+> now defaults to `/data/home/$(USER)`. **Pull before retrying.**
+
+**Also worth capturing while you are there:**
+
+```bash
+qnx$ ls -ld /data /data/home /data/home/qnxuser
+qnx$ id
+```
+
+📋 The course infers `/data`'s ownership from the failure; the actual modes have never been seen.
 
 📋 **Paste the full output**, including the Makefile's `OK: QNX x86_64 binary` check and whatever the
 program prints.
@@ -1115,7 +1129,8 @@ chapter, after V11.2 (Ch 21) and V12.1 (Ch 25).
 | V12.2 | `pidin fds` + `/dev` ↔ process correspondence | 👤 | — | Ch 07 §2.3, §3.3 | ⬜ |
 | V12.3 | 💥 `NANOSLEEP` vs `REPLY` | 👤 | — | **Ch 07's central distinction** | ⬜ |
 | — | Clear Chapter 07's lab markers | 🤖 | V12.3 | — | ⏸️ |
-| **V13.1** | ⭐ Build + deploy via the Makefile | 👤 | — | Lab 08.1 · **every later lab** | ⬜ |
+| **V13.1** | ⭐ Build + deploy via the Makefile | 👤 | — | Lab 08.1 · **every later lab** | 🔄 **found D-015** — `/data` root-owned; `DEST` fixed, retry |
+| V13.0 | `ls -ld /data /data/home /data/home/qnxuser` + `id` | 👤 | — | Confirms [D-015](../meta/Doubts.md#d-015) | ⬜ |
 | **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | ⬜ |
 | V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | ⬜ |
 | V13.4 | 💥 Symbol mismatch produces confident nonsense | 👤 | V13.2 | Ch 08 💥 | ⬜ |
@@ -1169,6 +1184,7 @@ future readers than a step that silently worked.
 
 | Date | Block | Result | Notes / marker cleared |
 |------|-------|--------|------------------------|
+| 2026-08-26 | **V13.1 (first attempt)** | ⚠️ **Failed → D-015** | `scp` to `/data` returned `Permission denied`; `mkdir` in `/data` as `qnxuser` failed the same way. **`/data` is the writable partition but its root is root-owned.** Deploy target corrected to `/data/home/$(USER)` in both lab Makefiles and in Chapters 06, 07, 08 and 09. The learner's `mkdir` test was good diagnosis — it eliminated SSH, `scp` and the network in one command. **Retry pending.** |
 | 2026-08-26 | **V10.1 (part)** | ✅ **Disk breakdown supplied** | `du -sh ~/qnx800` = **79 GB** — `images/` 53 GB, `target/` 23 GB, `host/` 2.7 GB, `bsp/` 1.1 GB, `custom/` 315 MB. **Settles D-008: the virtual disk is NOT sparse.** Reconciles with block V3's 43 GB `df` delta, which predated the image and covered more than one directory. Corrected `PLAN.md` (~50 → **~85 GB** budget), Setup Guides 01 and 02, Chapters 05 and 06, and `check-environment.sh`'s thresholds. **T-016 closed.** |
 | 2026-08-26 | **V5.6 – V5.7** | ✅ 🎉 **BLOCK V5 COMPLETE** | `./hello_qnx` on the target printed `Hello from QNX!` / `My process ID is 14032920` — **the full edit → cross-compile → deploy → run loop is closed.** SSH confirmed as `qnxuser`/`qnxuser`, `sudo` password the same. **Correction to D-009:** the image ships **`PermitRootLogin no`**, not `prohibit-password` — keys do not help root either; Setup Guide 03 §9.5 had said they would. `/etc/passwd` captured (9 accounts, homes on the writable `/data` partition, `sshd` privilege-separated). Setup Guide 03 → **v2.0**. +D-011, D-012, D-013. |
 | 2026-08-26 | **V5.3 – V5.5** | ✅ 🎉 **M2 REACHED** | **QNX 8.0.0 boots** (kernel build `2026/02/27-11:02:56EST`, host `qnxqemu`). 31 processes, 207 threads, 8 CPUs, 3659/4095 MB free. **Bridged networking worked on WSL2** — `192.168.122.46` on `vtnet0` — so hazard **H-9** did not materialise. **One real failure:** `sshd` refuses password auth for root (`PermitRootLogin prohibit-password`) → **D-009**, use `qnxuser`. Four benign boot warnings explained → **D-010**. `pidin`, `pidin info`, `ls /proc/boot` captured as course material. Setup Guide 03 → **v1.2**, §§4–9 verified. |
@@ -1246,6 +1262,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.18 | 2026-08-26 | **V13.1 attempted and failed → D-015.** Deploy path corrected; V13.0 added to capture `/data`'s actual ownership. |
 | 1.17 | 2026-08-26 | **Block V14 added** for Chapter 09 — the kernel's real API surface, fault locality, and (V14.3) whether a client blocked on a dying server is really woken with `ESRCH`. V14.4 finds the core-dump location for Chapter 25. |
 | 1.16 | 2026-08-26 | **Block V13 added** for Chapter 08's core lab L08 — build, deploy, **remote debugging through `qconn`**, attach-to-running, and the symbol-mismatch hazard. The most consequential block since V5. |
 | 1.15 | 2026-08-26 | **Block V12 added** for Chapter 07 — a state census of a healthy system, the `pidin fds` communication graph, and the `NANOSLEEP`-versus-`REPLY` distinction. |

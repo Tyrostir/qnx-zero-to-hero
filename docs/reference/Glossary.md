@@ -1,7 +1,7 @@
 ---
 title: "Glossary — QNX Terminology A–Z"
 document_id: GLOSSARY
-version: 1.12
+version: 1.13
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-26
@@ -54,7 +54,7 @@ update_trigger: "Every time a chapter introduces a new term"
 | Term | Definition | Ch. |
 |------|-----------|-----|
 | **Development loop** | Edit → build → deploy → run → **debug**. On QNX the middle two cross a network, and the classic failures are a **stale binary**, a **symbol mismatch**, the **wrong target architecture**, and an **unwritable destination**. The structural fix is making `run` and `debug` depend on `deploy`, which depends on the build. | 08 |
-| **Data partition (`/data`)** | The writable partition on a QNX target image. **The only place changes survive a reboot** — `/proc/boot` is read-only, `/tmp` is RAM, and `/`, `/usr` and `/etc` come from the image's system partition. Permanent configuration therefore belongs in the *image* (Ch 21), not in the running filesystem. | 06, 21 |
+| **Data partition (`/data`)** | The writable partition on a QNX target image — the only place changes survive a reboot, since `/proc/boot` is read-only, `/tmp` is RAM, and `/`, `/usr` and `/etc` come from the image's system partition. ⚠️ **Its root directory is owned by `root`**, so an unprivileged user writes to their home, `/data/home/<user>`, which lives on the same partition ([D-015](../meta/Doubts.md#d-015)). Permanent *configuration* still belongs in the image (Ch 21). | 06, 08, 21 |
 | **Development licence** | A QNX licence permitting you to *build* software. **It does not permit shipping** — *"distribution and production use is not permitted under a development license and requires a separate distribution license"*. Both the non-commercial and commercial development licences work this way. | 04 |
 | **Distribution licence** | The **separate** QNX licence required to give software containing QNX to anyone else. Needed in addition to a commercial development licence. Frequently discovered late, at launch planning. | 04 |
 | **Deadline** | The latest acceptable completion time for a response, measured from its release. Often equal to the period for a periodic task. Missing one is a *failure* (hard), makes the result *worthless* (firm), or *degrades quality* (soft). | 01 |
@@ -287,6 +287,7 @@ update_trigger: "Every time a chapter introduces a new term"
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.13 | 2026-08-26 | **Data partition** corrected — `/data`'s root is root-owned; unprivileged writes go to `/data/home/<user>` ([D-015](../meta/Doubts.md#d-015)). |
 | 1.12 | 2026-08-26 | Chapter 09: +4 terms (address space, kernel call, blast radius, `ESRCH`). |
 | 1.11 | 2026-08-26 | Chapter 08: +5 terms (`qconn`, `q++`, remote debugging, `ntox86_64-gdb`, development loop). |
 | 1.10 | 2026-08-26 | Chapter 07: +6 terms (`ksh` — with a new K section, pathname space, `slog2info`, `toybox`, `use`, `hogs`) and **blocking state** promoted from a planning stub with the full state list. |

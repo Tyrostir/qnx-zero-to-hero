@@ -1,7 +1,7 @@
 ---
 title: "CLAUDE-MEMORY — The Agent's Complete Working Memory"
 document_id: MEM
-version: 1.18
+version: 1.19
 status: Active (living document — regenerate at the end of every session)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -177,7 +177,7 @@ filesystem costume.
 | QNX SDP | ✅ **8.0 installed** at `~/qnx800` · cross-compiler **GCC 12.2.0** · cross-compile proven |
 | QNX VM booting | ✅ 🎉 **YES** — QNX 8.0.0 boots, `192.168.122.46`. **Milestone M2 reached 2026-08-26.** |
 | VM booting | ❌ Not yet |
-| Doubts logged | 14 (D-001…D-014, all answered) |
+| Doubts logged | 15 (D-001…D-015, all answered) |
 | ADRs | 25 (ADR-001…ADR-025) |
 | Git identity | `Karthikeyan Kasivishwanathan <Karthikeyan.KLU@gmail.com>` — note the **`i` after `Kas`**; a misspelling was corrected 2026-08-26. Commits 1–2 remain under `Tyrostir`. |
 | Commits | 6 on `main`; the learner pushes manually |
@@ -385,6 +385,7 @@ that is precisely why the onboarding documents exist.
 | ~~H-3~~ | Setup Guides 01 and 02 are both verified end to end. Three real bugs were found in Setup Guide 02 by running it. | ✅ Closed 2026-08-26 |
 | ~~H-4~~ | Risk **R9** — tested at Setup 01. **Did not materialise**: every documented package installed under its documented name on Ubuntu 26.04. | ✅ Closed 2026-08-25 |
 | ~~H-5~~ | Risk **R1** — licence approval latency. **Licence deployed 2026-08-26.** Latency itself was never captured, so Chapter 04 still cannot tell a reader what to expect (T-014, non-blocking). | ✅ Closed |
+| **H-14** | **"The partition is writable" ≠ "you can write there."** The course told readers to deploy to `/data` for four chapters; its root is owned by `root`, so `scp` as `qnxuser` fails. **Unix permissions apply normally on QNX** — the exotic parts are `/proc/boot` and the read-only system partition, and nothing else. Deploy to `/data/home/<user>`. | ✅ Fixed 2026-08-26 (D-015) |
 | **H-13** | **Licence facts in this course came from a summary, and one was backwards.** Setup Guide 02 listed customer demonstrations as forbidden; they are explicitly permitted. Any licensing claim must be checked against QNX's licensing page or the EULA — never restated from an earlier course document. | ✅ Fixed 2026-08-26 (Ch 04) |
 | **H-12** | **Lab code is easy to under-explain.** Chapter 01's lab called `clock_gettime`, `nanosleep`, `perror` and `qsort` with no explanation of any — a course-rule-#4 violation that the writing rules missed because they spoke only of *terms*, not functions. Before publishing a lab, list every library call in it and confirm each is explained or linked. | ⚠️ Rule added to `PLAN.md` §2 and §17 |
 | **H-10** | **`qnxsoftwarecenter_clt` option names must be checked against `-help`, not assumed.** `-listAvailablePackages` was carried in this course from Setup Guide 02 until a real run rejected it. Verified names live in D-007. | ✅ Fixed 2026-08-26 |
@@ -400,6 +401,7 @@ that is precisely why the onboarding documents exist.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.19 | 2026-08-26 | Session 022: D-015 — deploy path corrected across four chapters and both lab Makefiles; H-14. |
 | 1.18 | 2026-08-26 | Session 021: Chapter 09; Part 2 begins; block V14. |
 | 1.17 | 2026-08-26 | Session 020: **Parts 0 and 1 complete**; core lab L08; block V13. |
 | 1.16 | 2026-08-26 | Session 019: disk figures corrected; Chapter 07; block V12. |

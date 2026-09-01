@@ -198,7 +198,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
   T-202 exact SDP package version.
   ✅ **Blocks V1–V5 all complete. Milestone M2 complete. Phase 1 complete.**
 - **Labs:** 3 compiled — `lab01_timing` (V6), **`lab08_devloop` ⭐ L08** (V13), `lab09_faultisolation` (V14).
-- **Doubts logged:** 14 (D-001…D-014, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
+- **Doubts logged:** 15 (D-001…D-015, all answered). **`/btw` marks an aside that must be logged (ADR-025).**
 - **Top risks:** R5 (version drift — blocked on T-202) · R10 three-path authoring cost.
   ~~R1~~ ~~R2~~ ~~R3~~ ~~R9~~ all **closed**. No external dependency remains anywhere.
 
@@ -206,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.21 | 2026-08-26 | Regenerated after Session 022: deploy path corrected to `~` (D-015). |
 | 1.20 | 2026-08-26 | Regenerated after Session 021: Part 2 begun; Chapter 09. |
 | 1.19 | 2026-08-26 | Regenerated after Session 020: **Parts 0 and 1 complete**; Part 2 next. |
 | 1.18 | 2026-08-26 | Regenerated after Session 019: real disk figures (79 GB; image not sparse); budget ~85 GB. |

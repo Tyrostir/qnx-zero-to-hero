@@ -13,7 +13,10 @@ TARGET := -Vgcc_ntox86_64
 CFLAGS := -g -O0 -Wall -Wextra
 TGT    ?= 192.168.122.46
 USER   ?= qnxuser
-DEST   ?= /data
+# /data is the writable PARTITION, but its root is owned by root -- qnxuser
+# cannot create files there. Deploy into the user's home, which lives on /data
+# and so persists across reboots. See D-015.
+DEST   ?= /data/home/$(USER)
 BIN    := faulter
 
 .PHONY: all deploy run clean check-env

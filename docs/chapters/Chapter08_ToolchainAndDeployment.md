@@ -7,7 +7,7 @@ core_lab: "L08 ⭐"
 est_time: "120 minutes reading · 60 minutes labs"
 prereqs: "Chapters 05, 06 and 07. A booting VM reachable over SSH."
 status: Published
-version: 1.0
+version: 1.1
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -34,8 +34,8 @@ target_verified_on: "QNX 8.0.0, kernel build 2026/02/27-11:02:56EST; qcc GCC 12.
 
 ```bash
 host$ qcc -Vgcc_ntox86_64 -g -O0 -o prog prog.c        # build (debuggable)
-host$ scp prog qnxuser@$TGT:/data/                      # deploy  ⚠️ qnxuser, not root
-qnx$  /data/prog                                        # run
+host$ scp prog qnxuser@$TGT:~/                      # deploy — ⚠️ `~`, not /data (D-015)
+qnx$  ~/prog                                        # run
 host$ ntox86_64-gdb prog                                # debug — symbols from the HOST copy
 (gdb) target qnx $TGT:8000
 ```
@@ -60,8 +60,9 @@ is nothing to install.
 **The debugging rule that matters:** run the **stripped/plain binary on the target**, point `gdb` at
 the **unstripped copy on your host**. Symbols live on the host; only bytes go to the target.
 
-**Deploy to `/data`** — it is the only writable, persistent location (Chapter 06 §3.3). `/tmp` works
-for throwaways and vanishes on reboot.
+**Deploy to `~`** — your home, `/data/home/qnxuser`, which is on the writable `/data` partition.
+⚠️ **Not `/data` itself**: its root is owned by root ([D-015](../meta/Doubts.md#d-015)). `/tmp` works for
+throwaways and vanishes on reboot.
 
 **Build systems, in the order this course teaches them (ADR-007):** raw `qcc` → a plain Makefile →
 QNX's **recursive Makefiles** (`common.mk`) → CMake if your project needs it.
@@ -196,23 +197,34 @@ host$ qcc -Vgcc_ntox86_64 -g -O0 -Wall -Wextra -o prog prog.c
 ### 2.2 Deploy
 
 ```bash
-host$ scp prog qnxuser@$TGT:/data/
+host$ scp prog qnxuser@$TGT:~/
 ```
 
 | Decision | Why |
 |----------|-----|
 | **`qnxuser`**, not `root` | `PermitRootLogin no` ([D-009](../meta/Doubts.md#d-009)). Affects `scp` identically |
-| **`/data`**, not `/etc` or `/usr` | The only writable, persistent area (Ch 06 §3.3) |
+| **Your home directory** — `~`, i.e. `/data/home/qnxuser` | On the writable `/data` partition, **and writable by you** |
 | A **key**, not a password | Setup Guide 03 §9.5. You will do this hundreds of times |
 
-> 💡 **`/tmp` is fine for throwaways** and disappears on reboot — which is occasionally exactly what
-> you want.
+> ⚠️ **Deploy to `~`, not to `/data`.** `/data` is the writable *partition*, but **its root is owned by
+> root** — `qnxuser` cannot create files directly in it:
+>
+> ```text
+> scp: dest open "/data/avg": Permission denied
+> ```
+>
+> Your home lives **on** that partition (`/data/home/qnxuser`, per
+> [D-011](../meta/Doubts.md#d-011)), so it is both writable and persistent. An earlier version of this
+> chapter said `/data` — corrected, see [D-015](../meta/Doubts.md#d-015).
+
+> 💡 **`/tmp` is fine for throwaways** — writable by anyone, and it disappears on reboot, which is
+> occasionally exactly what you want.
 
 ### 2.3 Run
 
 ```bash
-qnx$ chmod +x /data/prog
-qnx$ /data/prog
+qnx$ chmod +x ~/prog
+qnx$ ~/prog
 ```
 
 | Command | Standard | Does |
@@ -233,7 +245,7 @@ This is the stage most people skip, and it is the one worth the effort.
 qnx$  qconn                      # usually already running — slm starts it
 host$ ntox86_64-gdb prog         # the HOST copy, with symbols
 (gdb) target qnx 192.168.122.46:8000
-(gdb) upload prog /data/prog
+(gdb) upload prog ~/prog
 (gdb) break main
 (gdb) run
 ```
@@ -331,7 +343,7 @@ prog: prog.c
 	$(CC) $(TARGET) $(CFLAGS) -o $@ $<
 
 deploy: prog
-	scp prog $(USER)@$(TGT):/data/
+	scp prog $(USER)@$(TGT):$(DEST)/
 
 clean:
 	rm -f prog
@@ -384,7 +396,7 @@ sequenceDiagram
     participant P as ▶️ your process<br/>(target)
     H->>Q: target qnx <ip>:8000
     Q-->>H: connected
-    H->>Q: upload prog /data/prog
+    H->>Q: upload prog ~/prog
     H->>Q: break main  →  "set a trap at 0x4004f2"
     Note over H: gdb translated<br/>"main" using the<br/>HOST copy's symbols
     H->>Q: run
@@ -403,7 +415,7 @@ information.*
 ```bash
 host$ ntox86_64-gdb prog
 (gdb) target qnx 192.168.122.46:8000
-(gdb) upload prog /data/prog
+(gdb) upload prog ~/prog
 (gdb) break main
 (gdb) run
 (gdb) next
@@ -499,8 +511,8 @@ host$ qcc -Vgcc_ntoaarch64le -g -o prog prog.c                   # ARM64
 
 ```bash
 host$ export TGT=$(cd ~/qnx800/images/qemu/qemu && mkqnximage --getip)
-host$ scp prog qnxuser@$TGT:/data/
-host$ ssh qnxuser@$TGT 'chmod +x /data/prog && /data/prog'
+host$ scp prog qnxuser@$TGT:~/
+host$ ssh qnxuser@$TGT 'chmod +x ~/prog && ~/prog'
 host$ ntox86_64-gdb prog
 (gdb) target qnx $TGT:8000
 ```
@@ -518,7 +530,8 @@ host$ ntox86_64-gdb prog
 | `gdb` shows wrong function names, or nonsense | **Symbol mismatch** — host and target copies differ | Rebuild *and* redeploy from one command |
 | `cannot execute: required file not found` **on the target** | Built for the **wrong architecture** | `file prog` — check `x86-64` and `ldqnx-64.so.2` |
 | `Permission denied` on `scp` | Used **`root@`** | Use `qnxuser@` ([D-009](../meta/Doubts.md#d-009)) |
-| Deployed file gone after a reboot | Wrote to `/tmp` or `/etc` | Deploy to **`/data`** (Ch 06 §3.3) |
+| `scp: dest open "/data/x": Permission denied` | **`/data`'s root is owned by root** | Deploy to **`~`** (`/data/home/qnxuser`) — [D-015](../meta/Doubts.md#d-015) |
+| Deployed file gone after a reboot | Wrote to `/tmp` or `/etc` | Deploy to **`~`**, which is on the `/data` partition (Ch 06 §3.3) |
 | `qcc: command not found` | Environment not loaded | `source ~/qnx800/qnxsdp-env.sh` |
 
 > 💡 **The first two are the same bug**, and both are cured by never deploying by hand. One `make
@@ -544,7 +557,7 @@ TARGET := -Vgcc_ntox86_64
 CFLAGS := -g -O0 -Wall -Wextra
 TGT    ?= 192.168.122.46
 USER   ?= qnxuser
-DEST   ?= /data
+DEST   ?= /data/home/$(USER)
 
 prog: prog.c
 	$(CC) $(TARGET) $(CFLAGS) -o $@ $<
@@ -609,8 +622,8 @@ exercise.
 ```bash
 host$ qcc -Vgcc_ntox86_64 -g -O0 -Wall -Wextra -o avg avg.c
 host$ file avg
-host$ scp avg qnxuser@$TGT:/data/
-host$ ssh qnxuser@$TGT 'chmod +x /data/avg && /data/avg'
+host$ scp avg qnxuser@$TGT:~/
+host$ ssh qnxuser@$TGT 'chmod +x ~/avg && ~/avg'
 ```
 
 The output is *a* number. On a good day it is 25 and you never notice. On a bad day it is enormous,
@@ -624,7 +637,7 @@ or the program crashes — because `r[4]` is past the end of the array.
 ```bash
 host$ ntox86_64-gdb avg
 (gdb) target qnx 192.168.122.46:8000
-(gdb) upload avg /data/avg
+(gdb) upload avg ~/avg
 (gdb) break sum_readings
 (gdb) run
 ```
@@ -735,7 +748,7 @@ or by hand:
 ```bash
 host$ ntox86_64-gdb avg
 (gdb) target qnx <ip>:8000
-(gdb) upload avg /data/avg
+(gdb) upload avg ~/avg
 (gdb) break sum_readings
 (gdb) run
 (gdb) info args
@@ -844,7 +857,7 @@ Open `labs/lab08_devloop/Makefile` and read it. Then:
 host$ cd /tmp
 host$ printf '#include <stdio.h>\nvoid alpha(void){printf("ALPHA\\n");}\nint main(void){alpha();return 0;}\n' > v.c
 host$ qcc -Vgcc_ntox86_64 -g -O0 -o v v.c
-host$ scp v qnxuser@$TGT:/data/
+host$ scp v qnxuser@$TGT:~/
 ```
 
 **Step 2 — change the source substantially, rebuild the *host* copy only.** Do **not** redeploy.
@@ -871,7 +884,7 @@ running.)*
 **Step 4 — clean up.**
 
 ```bash
-host$ scp v qnxuser@$TGT:/data/          # redeploy, restoring sanity
+host$ scp v qnxuser@$TGT:~/          # redeploy, restoring sanity
 host$ rm -f /tmp/v /tmp/v.c
 ```
 
@@ -1046,7 +1059,7 @@ What does the pipeline need, and what would you assert to prove it built and dep
 ```bash
 file build/prog | grep -q 'ldqnx-64.so.2'   || exit 1   # it is a QNX binary
 file build/prog | grep -q 'x86-64'          || exit 1   # …for the right architecture
-ssh -o BatchMode=yes qnxuser@$TGT '/data/prog' | grep -q 'expected output' || exit 1
+ssh -o BatchMode=yes qnxuser@$TGT '~/prog' | grep -q 'expected output' || exit 1
 ```
 
 **And the one worth arguing for:** the third assertion — **actually running it on a target** — is
@@ -1094,8 +1107,8 @@ q++ -Vgcc_ntox86_64_gpp -g -O0 -o prog prog.cpp           # C++
 
 ```bash
 export TGT=$(cd ~/qnx800/images/qemu/qemu && mkqnximage --getip)
-scp prog qnxuser@$TGT:/data/
-ssh qnxuser@$TGT 'chmod +x /data/prog && /data/prog'
+scp prog qnxuser@$TGT:~/
+ssh qnxuser@$TGT 'chmod +x ~/prog && ~/prog'
 ```
 
 **Debug**
@@ -1103,7 +1116,7 @@ ssh qnxuser@$TGT 'chmod +x /data/prog && /data/prog'
 ```bash
 ntox86_64-gdb prog
 (gdb) target qnx $TGT:8000
-(gdb) upload prog /data/prog
+(gdb) upload prog ~/prog
 (gdb) break main
 (gdb) run
 ```
@@ -1174,4 +1187,5 @@ Chapter 08 came first.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | **Correction:** deployment target changed from `/data` to **`~`** (`/data/home/qnxuser`). `/data` is the writable *partition*, but its root is owned by root, so `scp` to it fails with `Permission denied` — found by the learner running Lab 08.1 ([D-015](../meta/Doubts.md#d-015)). Affects §2.2, §4.2, §4.3, §4.5, §5 and the cheat sheet. |
 | 1.0 | 2026-08-26 | Created. ⭐ Contains core lab **L08**, closing Part 1. Covers `qcc`/`q++` in earnest, the ADR-007 build-system progression, deployment to `/data` as `qnxuser`, and — the centre of the chapter — **remote debugging through `qconn`**, with the symbols-stay-on-the-host split explained and its one hazard (confident nonsense from mismatched builds) demonstrated in the 💥 exercise. §5 finds an off-by-one buffer overrun with the debugger rather than `printf`, and argues why that matters on a real-time system. Ships `labs/lab08_devloop/`. All labs `[UNVERIFIED]` pending block **V13**. |

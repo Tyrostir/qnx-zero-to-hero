@@ -6,7 +6,7 @@ paths: ["🐣 A", "🚶 B", "🏃 C"]
 est_time: "75 minutes reading · 40 minutes labs"
 prereqs: "Chapter 06. A booting VM."
 status: Published
-version: 1.0
+version: 1.1
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -193,7 +193,7 @@ boot  dev   home  opt  root  sys   tmp     var
 | `/proc/boot` | ⭐ **`ifs.bin`, mounted** — ~80 files | The image, in RAM |
 | `/dev` | **Processes that registered paths** | Live services |
 | `/proc` | Process and system information | `procnto` |
-| **`/data`** | ⭐ **The only writable, persistent area** | The data partition |
+| **`/data`** | ⭐ **The writable, persistent partition** — but its root is root-owned; write to `/data/home/<you>` ([D-015](../meta/Doubts.md#d-015)) | The data partition |
 | `/tmp` | Scratch | RAM |
 | `/bin`, `/usr`, `/lib`, `/sbin` | The familiar POSIX layout | The disk |
 | `/system` | QNX system files | The disk |
@@ -424,7 +424,7 @@ service · `21r`/`25r` drivers · `254i`/`255i` kernel interrupt threads.
 | Want | Path |
 |------|------|
 | The boot image contents | `/proc/boot` |
-| **Writable, persistent storage** | **`/data`** |
+| **Writable, persistent storage** | **`~`** = `/data/home/<you>` |
 | Services' registered names | `/dev` |
 | Your home | `/data/home/<user>` |
 | `slm`'s configuration | `/proc/boot/slm.cfg` |
@@ -940,7 +940,7 @@ qnx# slog2info | tail -50
 |------|----|
 | `/proc/boot` | `ifs.bin`, mounted — read-only |
 | `/dev` | **Processes that registered paths** |
-| **`/data`** | **The only persistent writable area** |
+| **`/data/home/<you>`** | **Your persistent writable area** (`/data`'s root is root-owned) |
 | `/tmp` | RAM |
 | `/etc` | ⚠️ may not survive a reboot |
 
@@ -989,4 +989,5 @@ After Chapter 08 you have the complete development loop, and **Part 2 begins the
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.1 | 2026-08-26 | Filesystem tables corrected: `/data`'s root is root-owned, so the writable location for an unprivileged user is `/data/home/<user>` ([D-015](../meta/Doubts.md#d-015)). |
 | 1.0 | 2026-08-26 | Created. `pidin` taught properly — threads, priority, policy and above all **blocking states**, with the `REPLY`-chain technique and the `grep -v RECEIVE` filter that makes exceptions visible. Establishes that `/dev` entries are **processes that registered paths**, not device nodes, and that QNX's `/proc` is small because the information belongs to the processes that own it. §5 diagnoses an unfamiliar system in six steps; the Path A activity has the reader find a **three-process deadlock cycle** from six lines of output. Labs `[UNVERIFIED]` pending block **V12**. |

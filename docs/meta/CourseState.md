@@ -211,6 +211,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 
 *Newest first. One entry per working session.*
 
+### Session 022 — 2026-08-26 🔧 **D-015: the deploy path was wrong**
+
+| | |
+|---|---|
+| **Goal** | Unblock the learner at core lab L08, and fix what the failure exposed. |
+| **Done** | ⚠️ **The course had told readers to deploy to `/data` for four chapters.** `/data` is the writable *partition*, but **its root directory is owned by `root`** — `scp` as `qnxuser` fails with `Permission denied`, as does `mkdir`<br>• **Fix:** deploy to `~` = `/data/home/qnxuser`, which is on the same partition and is the user's own<br>• The learner's own `mkdir` in `/data` was good diagnosis — it ruled out SSH, `scp` and the network in one command<br>• **Corrected:** Chapter 06 → v1.2, Chapter 07 → v1.1, Chapter 08 → v1.1, Chapter 09 → v1.1, both lab Makefiles (`DEST ?= /data/home/$(USER)`), both lab READMEs, and the Glossary<br>• Chapter 08's troubleshooting table gains the exact error text so the next reader finds it by searching<br>• **D-015** written in full, with the general lesson: *"the partition is writable"* and *"you can write there"* are different claims — **Unix permissions apply normally on QNX**, and the exotic parts of the filesystem are only `/proc/boot` and the read-only system partition<br>• Hazard **H-14** recorded |
+| **Learner decisions** | — |
+| **Questions logged** | **D-015** |
+| **Blockers** | None — `make TGT=$TGT run` should now work unchanged |
+| **Next session** | **Chapter 10 — Processes and Threads** |
+
 ### Session 021 — 2026-08-26 📕 **Chapter 09 — Part 2 begins**
 
 | | |
@@ -464,6 +475,7 @@ At the end of each session, update:
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.21 | 2026-08-26 | Session 022: D-015 — the deploy path corrected across four chapters and both lab Makefiles. |
 | 1.20 | 2026-08-26 | Session 021: **Chapter 09 published — Part 2 begins** (10/34). Block V14 added. |
 | 1.19 | 2026-08-26 | Session 020: ⭐ **Chapter 08 published — Parts 0 and 1 complete (9/34)**. Core lab L08 and `labs/lab08_devloop/`. Block V13 added. |
 | 1.18 | 2026-08-26 | Session 019: disk figures corrected from measurement; **Chapter 07 published** (8/34). Block V12 added. |

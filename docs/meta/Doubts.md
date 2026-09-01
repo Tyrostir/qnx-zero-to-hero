@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.5
+version: 1.6
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -74,8 +74,9 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-012](#d-012) | Setup/Install | SSH as `root` seemed to accept the `qnxuser` password. Why? | ✅ |
 | [D-013](#d-013) | Concept | Why is my process ID `14032920` instead of a small number? | ✅ |
 | [D-014](#d-014) | Toolchain | `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in? | ✅ |
+| [D-015](#d-015) | Setup/Install | `scp` to `/data` fails with `Permission denied`, and `mkdir` in `/data` fails too. Why, and where should I deploy? | ✅ |
 
-**Open questions: 0** · **Needs verification: 0** · **Answered: 14**
+**Open questions: 0** · **Needs verification: 0** · **Answered: 15**
 
 ---
 
@@ -1206,10 +1207,132 @@ where it is.
 
 ---
 
+## D-015
+
+### `scp` to `/data` fails with `Permission denied`. Why, and where should I deploy?
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Context** | Chapter 08, core lab L08 — the first `make run` |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered |
+
+**Question (verbatim).**
+
+```text
+$ make TGT=$QTGT run
+scp avg qnxuser@192.168.122.46:/data/
+scp: dest open "/data/avg": Permission denied
+scp: failed to upload file avg to /data/
+make: *** [Makefile:50: deploy] Error 1
+
+[qnxuser@qnxqemu /data]$ mkdir avg
+mkdir: 'avg': Permission denied
+```
+
+**Short answer.**
+**`/data` is the writable *partition*, but its root directory is owned by `root`.** An unprivileged
+user cannot create files directly in it. **Deploy into your home directory instead** — `~`, which is
+`/data/home/qnxuser`, lives *on* that partition and is yours:
+
+```bash
+host$ make TGT=$TGT DEST=/data/home/qnxuser run
+```
+
+The lab Makefiles now default to that, so plain `make TGT=$TGT run` works.
+
+> ✏️ **This was an error in the course, not in your setup.** Chapters 06, 07 and 08 all said "deploy
+> to `/data`". Corrected — see *Action taken*.
+
+**Full answer.**
+
+### Why it happens
+
+Chapter 06 §3.3 established that `/data` is the **writable partition** — the only place changes
+survive a reboot, since `/proc/boot` is read-only, `/tmp` is RAM, and `/`, `/usr` and `/etc` come from
+the image.
+
+**That is true at the partition level, and it is not the same as "you may write to `/data`".** Like
+any Unix directory, `/data` has an owner and a mode. On this image it is owned by `root` and is not
+world-writable, so `qnxuser` cannot create entries in it. Your `mkdir` proves it independently of
+`scp` — which is a useful piece of diagnosis, because it rules out SSH, `scp` and the network in one
+command.
+
+**Confirm it:**
+
+```bash
+qnx$ ls -ld /data /data/home /data/home/qnxuser
+qnx$ id
+```
+
+| Command | Standard | Does |
+|---------|----------|------|
+| `ls -ld dir` | POSIX | Show the **directory's own** entry — owner, group, mode — rather than its contents |
+| `id` | POSIX | Print your user and group IDs |
+
+You should see `/data` owned by `root`, and `/data/home/qnxuser` owned by `qnxuser`.
+
+### Where to deploy
+
+| Destination | Writable by `qnxuser`? | Survives a reboot? | Use for |
+|-------------|------------------------|--------------------|---------|
+| **`~` = `/data/home/qnxuser`** | ✅ | ✅ | ⭐ **Default. Everything in this course** |
+| `/tmp` | ✅ | ❌ RAM | Throwaway tests |
+| `/data` | ❌ root-owned | ✅ | Only with `sudo` |
+| `/proc/boot` | ❌ read-only, always | ❌ | Never — that needs a rebuilt image (Ch 21) |
+
+**Three ways to fix it now:**
+
+```bash
+# 1. Deploy to your home (what the Makefiles now do)
+host$ scp avg qnxuser@$TGT:~/
+host$ ssh qnxuser@$TGT 'chmod +x ~/avg && ~/avg'
+
+# 2. Override the destination explicitly
+host$ make TGT=$TGT DEST=/data/home/qnxuser run
+
+# 3. Throwaway
+host$ make TGT=$TGT DEST=/tmp run
+```
+
+> 💡 **A note on `~` in `scp`.** `scp file user@host:~/` and `scp file user@host:` both land in the
+> remote home directory — the remote shell expands `~`. The lab Makefiles use the explicit
+> `/data/home/$(USER)` instead, because an explicit path is clearer in a build log and does not depend
+> on shell expansion inside a quoted `ssh` command.
+
+### If you genuinely need a shared directory under `/data`
+
+```bash
+qnx$ sudo mkdir -p /data/lab
+qnx$ sudo chown qnxuser:qnxuser /data/lab
+```
+
+*(`sudo` password is `qnxuser` — [D-009](#d-009).)* Then `DEST=/data/lab`. ⚠️ Whether that survives a
+reboot depends on how the image treats `/data` — home directories certainly do, so **prefer the home
+directory** unless you have a reason.
+
+> 💡 **The general lesson, which is worth more than the fix.** *"The partition is writable"* and
+> *"you can write there"* are different claims, and the course conflated them. Unix permissions apply
+> normally on QNX — the exotic part of the filesystem is `/proc/boot` and the read-only system
+> partition; **everything else behaves exactly as you would expect**, including the bit that just
+> stopped you.
+
+**Related.** [Chapter 06 §3.3](../chapters/Chapter06_FirstQNXVMOnQEMU.md) ·
+[Chapter 08 §2.2](../chapters/Chapter08_ToolchainAndDeployment.md) ·
+[D-009](#d-009) (why `qnxuser` and not root) · [D-011](#d-011) (`/etc/passwd`, homes on `/data`)
+
+**Action taken.** Corrected in **Chapter 06 → v1.2**, **Chapter 07 → v1.1**, **Chapter 08 → v1.1**,
+**Chapter 09 → v1.1**, and both lab Makefiles, which now default to `DEST = /data/home/$(USER)`.
+Chapter 08's troubleshooting table gains the exact error text.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.6 | 2026-08-26 | +D-015 — `/data` is the writable *partition* but its root is root-owned; deploy to `/data/home/<user>`. Corrected in four chapters and both lab Makefiles. |
 | 1.5 | 2026-08-26 | **D-008 answered definitively** — `disk-qemu` is *not* sparse, and `~/qnx800` is **79 GB**, not ~43 GB. The `df`-versus-`du` discrepancy explained. |
 | 1.4 | 2026-08-26 | +D-014 (the four library functions in Lab 01.2 — a course-rule-#4 gap, now closed). |
 | 1.3 | 2026-08-26 | **D-009 corrected** — the image ships `PermitRootLogin no`, not `prohibit-password`; keys do not help root. +D-011 (reading `/etc/passwd` and `sshd_config`), D-012 (the apparent root SSH success), D-013 (why QNX PIDs are large). |

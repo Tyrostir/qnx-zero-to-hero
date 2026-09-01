@@ -21,7 +21,10 @@ CFLAGS := -g -O0 -Wall -Wextra
 # Override on the command line:  make TGT=192.168.122.46 run
 TGT    ?= 192.168.122.46
 USER   ?= qnxuser
-DEST   ?= /data
+# /data is the writable PARTITION, but its root is owned by root -- qnxuser
+# cannot create files there. Deploy into the user's home, which lives on /data
+# and so persists across reboots. See D-015.
+DEST   ?= /data/home/$(USER)
 # Default to the SKELETON -- the buggy program you debug in Lab 08.1.
 # Build the fixed one with:  make SRC=solution/avg.c run
 SRC    ?= skeleton/avg.c

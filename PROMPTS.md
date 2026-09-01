@@ -73,6 +73,7 @@ and this project has already lost one author mid-task. Requested directly by the
 | [PROMPT#18](#prompt18) | 2026-08-26 | Claude (Opus 5) | `du` measurement supplied; write Chapter 07 | ⚠️ **Disk figures corrected across 6 docs + the check script** (79 GB; not sparse) · 📕 **Chapter 07 published** (8/34) · block V12 |
 | [PROMPT#19](#prompt19) | 2026-08-26 | Claude (Opus 5) | "proceed to next" | 🎉 **Chapter 08 published — Parts 0 and 1 complete (9/34)** · core lab L08 · `labs/lab08_devloop/` · block V13 |
 | [PROMPT#20](#prompt20) | 2026-08-26 | Claude (Opus 5) | Write Chapter 09 | 📕 **Chapter 09 published — Part 2 begins** (10/34) · fault isolation, mechanically · `labs/lab09_faultisolation/` · block V14 |
+| [PROMPT#21](#prompt21) | 2026-08-26 | Claude (Opus 5) | `scp` to `/data` fails with Permission denied in lab 08 | ⚠️ **Course error — `/data`'s root is root-owned.** **D-015** · deploy path corrected in 4 chapters + both lab Makefiles |
 
 ---
 
@@ -2534,10 +2535,135 @@ There are now **three blocks that exist to serve later chapters** — V11.2 → 
 
 ---
 
+## PROMPT#21
+
+| | |
+|---|---|
+| **Date** | 2026-08-26 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 022 |
+| **Context** | The learner hit a permission failure on the first run of core lab L08. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> I am facing some permission issue while performing lab08. "tyrostir@APT-CR-5ZSYVG3:~/exercises/qnx-zero-to-hero/labs/lab08_devloop$ make TGT=$QTGT run
+> scp avg qnxuser@192.168.122.46:/data/
+> ** WARNING: connection is not using a post-quantum key exchange algorithm.
+> ** This session may be vulnerable to "store now, decrypt later" attacks.
+> ** The server may need to be upgraded. See https://openssh.com/pq.html
+> scp: dest open "/data/avg": Permission denied
+> scp: failed to upload file avg to /data/
+> make: *** [Makefile:50: deploy] Error 1" and I tried directly on qnx seiral terminal. "[qnxuser@qnxqemu /data]$ mkdir avg
+> mkdir: 'avg': Permission denied"
+
+### Standing instructions
+
+*(None new.)*
+
+### Response (full)
+
+> *Reproduced as delivered.*
+
+---
+
+**My error, not your setup.** Here is the unblock:
+
+```bash
+host$ cd ~/exercises/qnx-zero-to-hero
+host$ git pull
+host$ cd labs/lab08_devloop
+host$ make TGT=$QTGT run
+```
+
+The Makefile now deploys to `/data/home/qnxuser` instead of `/data`. If you would rather not pull yet:
+
+```bash
+host$ make TGT=$QTGT DEST=/data/home/qnxuser run
+```
+
+## What is actually wrong
+
+**`/data` is the writable *partition*. Its root *directory* is owned by `root`.**
+
+Those are different claims, and I conflated them. Chapter 06 §3.3 correctly established that `/data` is the only partition where changes survive a reboot — and then Chapters 06, 07, 08 and 09 all slid from that into *"deploy to `/data`"*, which does not follow. Like any Unix directory, `/data` has an owner and a mode.
+
+**Your home is on that partition and is yours** — `/data/home/qnxuser`, exactly as `/etc/passwd` showed back in [D-011](docs/meta/Doubts.md#d-011). So it is both writable and persistent.
+
+| Destination | Writable by you? | Survives reboot? | |
+|---|---|---|---|
+| **`~` = `/data/home/qnxuser`** | ✅ | ✅ | ⭐ the default now |
+| `/tmp` | ✅ | ❌ RAM | throwaways |
+| `/data` | ❌ root-owned | ✅ | only with `sudo` |
+
+## Your `mkdir` was the right move
+
+```text
+[qnxuser@qnxqemu /data]$ mkdir avg
+mkdir: 'avg': Permission denied
+```
+
+That one command **eliminated SSH, `scp` and the network** and proved it was ordinary filesystem permissions. That is exactly the right instinct — reduce the failing thing to the smallest command that still fails.
+
+> 🐣 The `post-quantum key exchange` warning above it is unrelated and harmless — your host's OpenSSH 10.2 noting that the target's older `sshd` doesn't offer PQ key exchange. It's in Setup Guide 03 §9.3.
+
+## The general lesson, which I've written into the course
+
+> *"The partition is writable"* and *"you can write there"* are different claims.
+
+And the reassuring half: **this was not a QNX exotic.** Unix permissions apply normally here. The genuinely unusual parts of this filesystem are `/proc/boot` (a mounted 20 MB file) and the read-only system partition — **everything else behaves exactly as you'd expect on Linux**, including the bit that just stopped you.
+
+I've recorded that as a check rather than an observation: *before telling a reader to write somewhere, confirm the **directory** is writable by the **account** they'll use, not merely that the filesystem is.*
+
+## Fixed
+
+**D-015** written in full. Corrected in **Chapter 06 → v1.2**, **Chapter 07 → v1.1**, **Chapter 08 → v1.1**, **Chapter 09 → v1.1**, both lab Makefiles (`DEST ?= /data/home/$(USER)`), both lab READMEs, and the Glossary. Chapter 08's troubleshooting table now carries **the exact error text**, so the next reader finds it by searching for what they actually saw.
+
+## 📌 This is the fourth published claim caught by running it
+
+| # | Claim | How it was wrong | Found by |
+|---|---|---|---|
+| 1 | `-listAvailablePackages` | Doesn't exist | Running it |
+| 2 | Customer demos forbidden | Exactly backwards | Reading the licence |
+| 3 | Disk image probably sparse | It isn't; total ~40 GB low | Running `du` |
+| **4** | **Deploy to `/data`** | **Root-owned** | **Running the lab** |
+
+All four plausible, well-sourced and wrong. **Three of the four were caught by you executing something** — which is the whole argument for the `[UNVERIFIED]` protocol.
+
+---
+
+## 👉 Back to it
+
+```bash
+host$ git pull && cd labs/lab08_devloop && make TGT=$QTGT run
+```
+
+Then the part I most want back — **block V13.2**:
+
+```bash
+host$ make TGT=$QTGT debug
+(gdb) break sum_readings
+(gdb) run
+(gdb) next          # until i reaches 4
+(gdb) print r[4]
+```
+
+And while you're on the target, two commands that settle what I had to infer:
+
+```bash
+qnx$ ls -ld /data /data/home /data/home/qnxuser
+qnx$ id
+```
+
+I deduced `/data`'s ownership from your failure; I've never seen the actual modes.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.19 | 2026-08-26 | PROMPT#21 logged: the deploy-path error and its correction. |
 | 2.18 | 2026-08-26 | PROMPT#20 logged: Chapter 09; Part 2 begins. |
 | 2.17 | 2026-08-26 | PROMPT#19 logged: Chapter 08; Parts 0 and 1 complete. |
 | 2.16 | 2026-08-26 | PROMPT#18 logged: disk corrections and Chapter 07. |
