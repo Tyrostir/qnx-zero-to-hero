@@ -1,7 +1,7 @@
 ---
 title: "Course State — Where We Are"
 document_id: STATE
-version: 1.24
+version: 1.25
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 025 — 2026-09-01 🔧 **D-017: the architecture level in `$QNX_TARGET`**
+
+| | |
+|---|---|
+| **Goal** | Unblock the learner at Lab 08.1 step 5b, where `$QNX_TARGET/usr/bin` did not exist. |
+| **Done** | ⚠️ **`$QNX_TARGET` is two things stacked in one directory**, and Chapter 08 never said so at the point of use. `$QNX_TARGET/usr/` is the **architecture-independent** development side — `include/`, `lib/`, `help/`, `share/`; every file that *runs on QNX* is one level down under `x86_64/` or `aarch64le/`<br>• The course printed `$QNX_TARGET/x86_64/usr/bin/sleep` **correctly** in both §3.4 and step 5b, and never flagged that the `x86_64/` was load-bearing — in a line already containing `x86_64` twice, it reads as noise<br>• Chapter 05 §2.1–2.2 explains the layout properly; **Chapter 08 is where the reader types it**, five chapters later<br>• **Chapter 08 → v1.3:** §3.4 and step 5b both gain the ⚠️ note, an `ls` check *before* opening `gdb`, and the `scp`-off-the-target fallback; troubleshooting table gains the literal `cd: bin: No such file or directory`; cheat sheet's `set sysroot` row notes the architecture level<br>• 💡 **The fallback is the better lesson:** `gdb` needs *a local file whose symbols match* — where it came from is irrelevant, and copying it off the running target is the only route that **cannot** mismatch<br>• **D-017** written; 📋 one sub-question left open — whether the SDP ships `sleep` at all, or whether it is a `toybox` link. **V13.3c** added |
+| **Learner decisions** | — |
+| **Questions logged** | **D-017** |
+| **Blockers** | None |
+| **Next session** | **Chapter 11 — Scheduling & Real-Time Priorities** |
 
 ### Session 024 — 2026-09-01 📕 **Chapter 10 — Processes and Threads (11/34)**
 

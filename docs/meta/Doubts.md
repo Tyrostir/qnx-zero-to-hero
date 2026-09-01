@@ -1,7 +1,7 @@
 ---
 title: "Doubts — Questions Asked & Answered"
 document_id: DOUBTS
-version: 1.7
+version: 1.8
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -76,8 +76,9 @@ is read as a rhetorical aside. Questions may also arrive inside a file dropped i
 | [D-014](#d-014) | Toolchain | `clock_gettime`, `nanosleep`, `perror`, `qsort` — what are they, are they C++ or QNX, and which files do they live in? | ✅ |
 | [D-015](#d-015) | Setup/Install | `scp` to `/data` fails with `Permission denied`, and `mkdir` in `/data` fails too. Why, and where should I deploy? | ✅ |
 | [D-016](#d-016) | Debug | `gdb` connects and `info pidlist` works, but `attach <pid>` says `usr/bin/sleep: No such file or directory`. Why? | ✅ |
+| [D-017](#d-017) | Setup/Install | `$QNX_TARGET/usr/bin` does not exist — `cd bin` fails. Where are the target's binaries? | ✅ |
 
-**Open questions: 0** · **Needs verification: 0** · **Answered: 16**
+**Open questions: 0** · **Needs verification: 1** *(is `sleep` in the SDP's target tree? — D-017)* · **Answered: 17**
 
 ---
 
@@ -1466,10 +1467,131 @@ via `$QNX_TARGET`), with the failure explained as the design rather than a fault
 
 ---
 
+## D-017
+
+### `$QNX_TARGET/usr/bin` does not exist. Where are the target's binaries?
+
+| | |
+|---|---|
+| **Date** | 2026-09-01 |
+| **Context** | Following [D-016](#d-016)'s fix for `attach` in Chapter 08's Lab 08.1 step 5b |
+| **Category** | Setup/Install |
+| **Status** | ✅ Answered · 📋 one sub-question left to the target |
+
+**Question (verbatim).**
+
+```text
+~/qnx800/target/qnx$ ls
+aarch64le  etc  lib  sbin  usr  x86_64
+~/qnx800/target/qnx$ cd usr
+~/qnx800/target/qnx/usr$ ls
+help  include  lib  share
+~/qnx800/target/qnx/usr$ cd bin
+bash: cd: bin: No such file or directory
+```
+
+**Short answer.**
+**One directory short — and it is the one that matters.** The path is
+`$QNX_TARGET/`**`x86_64`**`/usr/bin`, not `$QNX_TARGET/usr/bin`:
+
+```bash
+host$ ls $QNX_TARGET/x86_64/usr/bin | head
+```
+
+`$QNX_TARGET/usr/` is the **architecture-independent development side** — headers, link libraries,
+docs. Nothing in it is a QNX program. Everything that actually **runs on QNX** lives one level down,
+under an architecture directory.
+
+**Full answer.**
+
+### The `ls` output is the whole explanation
+
+```text
+~/qnx800/target/qnx$ ls
+aarch64le  etc  lib  sbin  usr  x86_64
+                              ↑    ↑
+              headers & docs ─┘    └─ a complete QNX filesystem, for x86_64
+```
+
+`$QNX_TARGET` is **two different things stacked in one directory**, and knowing which is which saves
+a lot of confusion later:
+
+| Path | Holds | Runs on |
+|------|-------|---------|
+| `$QNX_TARGET/usr/include/` | The QNX headers — `sys/neutrino.h`, `pthread.h`, `stdio.h` | Nothing. They are **text** |
+| `$QNX_TARGET/usr/lib/`, `help/`, `share/` | Architecture-neutral development files and docs | — |
+| **`$QNX_TARGET/x86_64/`** | ⭐ `bin/` `sbin/` `usr/bin/` `lib/` `usr/lib/` `boot/` — **a QNX filesystem** | **QNX**, on x86_64 |
+| **`$QNX_TARGET/aarch64le/`** | The same, for 64-bit ARM | **QNX**, on ARM (Part 6) |
+
+**The headers are shared because they have to be.** `sys/neutrino.h` describes an interface, and the
+interface is identical on x86_64 and ARM — that is the point of having one. Everything *compiled*
+differs per architecture, so it is filed per architecture.
+
+> 💡 **This is why one SDP builds for several targets** (Chapter 05 §2.1). One set of headers, one
+> `qcc`, and a `-V` flag choosing which architecture directory to link against. Chapter 05 §4.3's
+> disk figures show `x86_64/` and `aarch64le/` as *complete, independent copies* — which is also why
+> dropping an unused architecture is the biggest single saving available on the install.
+
+### The course's own error
+
+Chapter 08 §3.4 and Lab 08.1 step 5b both printed the path correctly:
+
+```bash
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+```
+
+**and never said that the `x86_64/` was load-bearing.** In a line that already contains `x86_64`
+twice — in `ntox86_64-gdb` and in the path — it reads like noise. Chapter 05 explains the layout
+properly, but Chapter 08 is where the reader is *typing* it, five chapters later.
+
+**Both places now** flag the architecture level explicitly, check the file exists before opening
+`gdb`, and give the fallback below. Chapter 08 → **v1.3**.
+
+### 📋 The sub-question this leaves open
+
+**Is `sleep` in the SDP's target tree at all?** The course does not know. Much of QNX's userland is
+supplied by **`toybox`**, a multi-call binary (Glossary), so `/usr/bin/sleep` on the target may be a
+link to it rather than a program of its own — and the SDP tree may or may not mirror that.
+
+```bash
+host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep
+host$ ls $QNX_TARGET/x86_64/usr/bin | head -30
+```
+
+### The fallback that always works
+
+If the SDP does not ship it, **take the binary from the machine that is running it.** That copy is,
+by definition, the one whose symbols match:
+
+```bash
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
+(gdb) target qnx <ip>:8000
+(gdb) attach <pid>
+```
+
+> 💡 **And this is worth more than the workaround.** It restates D-016's lesson in one line: `gdb`
+> needs **a local file whose symbols match the running code**. Where that file came from — the SDP,
+> your build directory, or `scp` — is irrelevant. What matters is that it matches. Copying it off the
+> target is the only method that *cannot* mismatch, which is why it is also the safe answer to
+> Chapter 08's 💥 symbol-mismatch exercise.
+
+**Related.** [D-016](#d-016) · [Chapter 05 §2.1–2.2](../chapters/Chapter05_InstallingQNXSDP.md) ·
+[Chapter 08 §3.4](../chapters/Chapter08_ToolchainAndDeployment.md) · Chapter 21 (`mkifs` builds boot
+images out of `$QNX_TARGET/x86_64/`)
+
+**Action taken.** Chapter 08 → **v1.3**: §3.4 and Lab 08.1 step 5b both gain the ⚠️ note, an `ls`
+check before `gdb`, and the `scp`-off-the-target fallback; the troubleshooting table gains the exact
+`cd: bin: No such file or directory` text; the cheat sheet's `set sysroot` row notes the `x86_64/` is
+required. Lab 08's README updated. **V13.3b** extended to report which of the two routes was needed.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.8 | 2026-09-01 | +D-017 — `$QNX_TARGET/usr` is the architecture-independent headers side; target binaries live under `x86_64/`. Chapter 08 gave the path without flagging the architecture level. |
 | 1.7 | 2026-08-26 | +D-016 — `attach` needs a local copy of the binary, because symbols live on the host; the port is required on `target qnx`. Also **confirms** `target qnx <ip>:8000` and `info pidlist`, previously unverified. |
 | 1.6 | 2026-08-26 | +D-015 — `/data` is the writable *partition* but its root is root-owned; deploy to `/data/home/<user>`. Corrected in four chapters and both lab Makefiles. |
 | 1.5 | 2026-08-26 | **D-008 answered definitively** — `disk-qemu` is *not* sparse, and `~/qnx800` is **79 GB**, not ~43 GB. The `df`-versus-`du` discrepancy explained. |

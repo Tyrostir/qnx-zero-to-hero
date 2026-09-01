@@ -7,7 +7,7 @@ core_lab: "L08 ⭐"
 est_time: "120 minutes reading · 60 minutes labs"
 prereqs: "Chapters 05, 06 and 07. A booting VM reachable over SSH."
 status: Published
-version: 1.2
+version: 1.3
 created: 2026-08-26
 last_updated: 2026-08-26
 sdp_version: "QNX SDP 8.0"
@@ -449,10 +449,25 @@ host$ ntox86_64-gdb ./prog                    # ⭐ give gdb the HOST copy FIRST
 > a Linux binary of the same name.
 >
 > **For your own programs** the host copy is right there — start `gdb` with it. **For a target
-> utility**, its host copy lives in the SDP's target tree (Chapter 05 §2.2):
+> utility**, look in the SDP's target tree (Chapter 05 §2.2) — ⚠️ **note the `x86_64/`**:
 >
 > ```bash
+> host$ ls $QNX_TARGET/x86_64/usr/bin/sleep        # check it is actually there first
 > host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+> ```
+>
+> > ⚠️ **`$QNX_TARGET/usr/bin` does not exist, and that is not a mistake.** `$QNX_TARGET/usr` holds
+> > the *architecture-independent* development side — `include/`, `lib/`, `help/`, `share/`. Every
+> > file that actually **runs on QNX** lives one level down, under the architecture:
+> > `$QNX_TARGET/x86_64/…` or `$QNX_TARGET/aarch64le/…` (Chapter 05 §2.1). Drop the `x86_64/` and you
+> > land in the headers. See [D-017](../meta/Doubts.md#d-017).
+>
+> **And if the utility is not in the SDP at all**, take the binary from the machine that is running
+> it — which is the one copy guaranteed to match:
+>
+> ```bash
+> host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+> host$ ntox86_64-gdb /tmp/sleep.qnx
 > ```
 >
 > Or point `gdb` at the whole tree once and let it resolve paths itself:
@@ -567,6 +582,7 @@ host$ ntox86_64-gdb prog
 | `Permission denied` on `scp` | Used **`root@`** | Use `qnxuser@` ([D-009](../meta/Doubts.md#d-009)) |
 | `target qnx <ip>` **hangs** | Port omitted | Always `<ip>:8000` |
 | `attach` says `…: No such file or directory` | **`gdb` has no local copy of the binary** | Start `gdb` with it, or `set sysroot $QNX_TARGET/x86_64` ([D-016](../meta/Doubts.md#d-016)) |
+| `cd: bin: No such file or directory` under `$QNX_TARGET/usr` | Missing the architecture level | `$QNX_TARGET/**x86_64**/usr/bin` — `$QNX_TARGET/usr` is headers ([D-017](../meta/Doubts.md#d-017)) |
 | `scp: dest open "/data/x": Permission denied` | **`/data`'s root is owned by root** | Deploy to **`~`** (`/data/home/qnxuser`) — [D-015](../meta/Doubts.md#d-015) |
 | Deployed file gone after a reboot | Wrote to `/tmp` or `/etc` | Deploy to **`~`**, which is on the `/data` partition (Ch 06 §3.3) |
 | `qcc: command not found` | Environment not loaded | `source ~/qnx800/qnxsdp-env.sh` |
@@ -837,6 +853,8 @@ host$ ntox86_64-gdb avg                        # ⭐ the host copy, with symbols
 ```bash
 qnx$  sleep 600 &
 qnx$  pidin | grep sleep
+
+host$ ls $QNX_TARGET/x86_64/usr/bin/sleep      # ⚠️ note the x86_64/ — check it exists
 host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
 (gdb) target qnx <ip>:8000
 (gdb) info pidlist
@@ -844,6 +862,21 @@ host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
 (gdb) backtrace
 (gdb) detach
 ```
+
+> ⚠️ **`$QNX_TARGET/usr/bin` does not exist.** `$QNX_TARGET/usr/` is the architecture-*independent*
+> development side — headers and docs. Everything that runs on QNX is under the architecture:
+> `$QNX_TARGET/x86_64/`. ([D-017](../meta/Doubts.md#d-017))
+
+**If `ls` says the file is not there**, the SDP does not ship that utility. Copy it off the target
+instead — the running machine's own copy is by definition the right one:
+
+```bash
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
+```
+
+📋 **Report which of the two you needed.** The course does not know whether `sleep` is in the SDP's
+target tree — [D-017](../meta/Doubts.md#d-017).
 
 📋 **Report both**, including any error.
 
@@ -1192,7 +1225,7 @@ ntox86_64-gdb prog
 | `target qnx <ip>:8000` | Connect to `qconn` |
 | `info pidlist` | List target processes (`path - pid/tid`) |
 | `attach <pid>` · `detach` | Attach · release. ⚠️ needs a **local** copy of the binary |
-| `set sysroot $QNX_TARGET/x86_64` | Where to find target binaries and libraries |
+| `set sysroot $QNX_TARGET/x86_64` | Where to find target binaries and libraries — ⚠️ the `x86_64/` is required |
 | `break` · `delete` · `run` · `continue` · `next` · `step` · `finish` | Control |
 | `print` · `info locals` · `info args` · `backtrace` · `list` | Inspect |
 
@@ -1255,6 +1288,7 @@ Chapter 08 came first.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.3 | 2026-09-01 | **Correction:** §3.4 and Lab 08.1 step 5b gave `$QNX_TARGET/x86_64/usr/bin/sleep` without saying that the **`x86_64/` is load-bearing** — `$QNX_TARGET/usr` is the architecture-independent headers-and-docs side and has no `bin`. Both places now flag it, check the file exists first, and give the always-works fallback of copying the binary off the running target. [D-017](../meta/Doubts.md#d-017). |
 | 1.2 | 2026-08-26 | **Verified and corrected against a real `gdb` session.** ✅ `target qnx <ip>:8000` and `info pidlist` both work as documented (GDB 14.2, `x86_64-nto-qnx8.0.0`). ⚠️ Two corrections: **the port is required** — a bare IP *hangs* rather than erroring; and **`attach` needs a local copy of the binary**, because `gdb` reads symbols on the host. Lab step 5 split into 5a (your own program) and 5b (a target utility, via `$QNX_TARGET/x86_64/usr/bin/…`), which turns the failure into the payoff for Chapter 05 §2.2. See [D-016](../meta/Doubts.md#d-016). |
 | 1.1 | 2026-08-26 | **Correction:** deployment target changed from `/data` to **`~`** (`/data/home/qnxuser`). `/data` is the writable *partition*, but its root is owned by root, so `scp` to it fails with `Permission denied` — found by the learner running Lab 08.1 ([D-015](../meta/Doubts.md#d-015)). Affects §2.2, §4.2, §4.3, §4.5, §5 and the cheat sheet. |
 | 1.0 | 2026-08-26 | Created. ⭐ Contains core lab **L08**, closing Part 1. Covers `qcc`/`q++` in earnest, the ADR-007 build-system progression, deployment to `/data` as `qnxuser`, and — the centre of the chapter — **remote debugging through `qconn`**, with the symbols-stay-on-the-host split explained and its one hazard (confident nonsense from mismatched builds) demonstrated in the 💥 exercise. §5 finds an off-by-one buffer overrun with the debugger rather than `printf`, and argues why that matters on a real-time system. Ships `labs/lab08_devloop/`. All labs `[UNVERIFIED]` pending block **V13**. |

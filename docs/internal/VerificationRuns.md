@@ -997,12 +997,20 @@ host$ ntox86_64-gdb avg
 
 # 5b — a target utility, symbols from the SDP's target tree
 qnx$  sleep 600 &
+host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep    # <-- does the SDP even ship it?  D-017
 host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
 (gdb) target qnx <ip>:8000
 (gdb) attach <the sleep pid>
 (gdb) backtrace
 (gdb) detach
+
+# 5b fallback, if the SDP does not ship it — always works
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
 ```
+
+📋 **Also report `ls $QNX_TARGET/x86_64/usr/bin | head -30`** — [D-017](../meta/Doubts.md#d-017)
+does not know whether `sleep` is a program there or a link to `toybox`.
 
 📋 **Paste both.** 🎯 **Still unobserved:** whether `attach` succeeds once `gdb` has the symbols, and
 whether `backtrace` on a sleeping process shows `nanosleep` in the frame list.
@@ -1239,6 +1247,7 @@ means something different:
 | **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | 🟨 **connection confirmed** via V13.3; `break`/`print`/`upload` still unobserved |
 | V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | 🟨 **`target qnx` + `info pidlist` ✅; `attach` failed → [D-016](../meta/Doubts.md#d-016)**, retry |
 | V13.3b | Retry `attach` with the binary loaded (5a and 5b) | 👤 | V13.3 | Ch 08 §3.4, [D-016](../meta/Doubts.md#d-016) | ⬜ |
+| V13.3c | `ls $QNX_TARGET/x86_64/usr/bin` — is `sleep` there, or a `toybox` link? | 👤 | — | [D-017](../meta/Doubts.md#d-017) · Ch 05 §2.2 · Ch 21 | ⬜ |
 | **V15.1** | ⭐ The thread zoo — five threads, five states | 👤 | — | Lab 10.1 · **Ch 10 §5.4** | ⬜ |
 | V15.2 | Read `neutrino.h`, `pthread_t`, `errno` | 👤 | — | Ch 10 §2.2, §3.1, §🔬 | ⬜ |
 | V15.3 | Default thread stack size | 👤 | — | Ch 10 §3.2 | ⬜ |
@@ -1374,6 +1383,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.21 | 2026-09-01 | **V13.3b extended** with an `ls` check and the `scp`-off-the-target fallback; **V13.3c added** to settle whether the SDP ships `sleep` ([D-017](../meta/Doubts.md#d-017)). |
 | 1.20 | 2026-09-01 | **Block V15 added** for Chapter 10 — the thread zoo, the headers, the default stack size, and the `fork()`-in-a-multi-threaded-process experiment. V15.1 is the one that decides whether §5.4's deadlock-reading advice is true. |
 | 1.19 | 2026-08-26 | **V13.3 run, partially.** `target qnx <ip>:8000` and `info pidlist` **confirmed** — the first direct observation of Chapter 08's central mechanism. `attach` failed → D-016 (host-side symbols); bare-IP hang is new. V13.3b added for the retry. |
 | 1.18 | 2026-08-26 | **V13.1 attempted and failed → D-015.** Deploy path corrected; V13.0 added to capture `/data`'s actual ownership. |

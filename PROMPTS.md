@@ -1,7 +1,7 @@
 ---
 title: "PROMPTS.md — Learner Prompt & Response Log (Claude sessions)"
 document_id: PROMPTS
-version: 2.21
+version: 2.22
 status: Active (living document)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -3022,10 +3022,135 @@ entries stay. 135 terms.
 
 ---
 
+## PROMPT#24
+
+| | |
+|---|---|
+| **Date** | 2026-09-01 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 025 |
+| **Context** | Following [D-016](../docs/meta/Doubts.md#d-016)'s fix, the path it recommended appeared not to exist. |
+| **Status** | ✅ Answered |
+
+### Prompt (verbatim)
+
+> You told me to use "tyrostir@APT-CR-5ZSYVG3:~/exercises/qnx-zero-to-hero$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep" command for attach something already running from chapter 08. But "tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx$ ls
+> aarch64le  etc  lib  sbin  usr  x86_64
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx$ cd usr
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/usr$ ls
+> help  include  lib  share
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/usr$ cd bin
+> bash: cd: bin: No such file or directory
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/usr$ ls
+> help  include  lib  share
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/usr$ echo $QNX_TARGET
+> /home/tyrostir/qnx800/target/qnx
+> tyrostir@APT-CR-5ZSYVG3:~/qnx800/target/qnx/usr$ "
+
+### Standing instructions
+
+SI-1…SI-14 in force. Relevant: **ADR-024** (the author cannot verify), **SI-13** (a `/btw` becomes a
+`D-NNN` — this was not prefixed, but it is a doubt about published material and gets one anyway),
+**SI-5/SI-6**.
+
+### Response (full)
+
+**One directory short — and it is the one that matters.**
+
+```text
+$QNX_TARGET/usr/bin          ❌ does not exist
+$QNX_TARGET/x86_64/usr/bin   ✅
+```
+
+Your own `ls` contains the answer:
+
+```text
+~/qnx800/target/qnx$ ls
+aarch64le  etc  lib  sbin  usr  x86_64
+                              ↑    ↑
+              headers & docs ─┘    └─ a complete QNX filesystem, for x86_64
+```
+
+#### `$QNX_TARGET` is two different things stacked in one directory
+
+| Path | Holds | Runs on |
+|------|-------|---------|
+| `$QNX_TARGET/usr/include/` | The QNX headers — `sys/neutrino.h`, `pthread.h` | Nothing. They are **text** |
+| `$QNX_TARGET/usr/lib`, `help`, `share` | Architecture-neutral development files, docs | — |
+| ⭐ **`$QNX_TARGET/x86_64/`** | `bin/` `sbin/` `usr/bin/` `lib/` `usr/lib/` `boot/` — **a QNX filesystem** | **QNX** on x86_64 |
+| **`$QNX_TARGET/aarch64le/`** | The same, for ARM64 | **QNX** on ARM (Part 6) |
+
+**The headers are shared because they have to be.** `sys/neutrino.h` describes an *interface*, and
+the interface is identical on x86_64 and ARM — that is the point of having one. Everything
+**compiled** differs per architecture, so it is filed per architecture. That is also why one SDP
+builds for several targets with nothing but a `-V` flag, and why dropping an unused architecture is
+the biggest single saving on the install (Ch 05 §4.3).
+
+#### So, to continue
+
+```bash
+host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep       # check first
+host$ ntox86_64-gdb $QNX_TARGET/x86_64/usr/bin/sleep
+(gdb) target qnx 192.168.122.46:8000
+(gdb) attach <the sleep pid>
+```
+
+#### 📋 And if that `ls` says the file is not there
+
+**I do not know whether the SDP ships `sleep`.** Much of QNX's userland comes from **`toybox`**, a
+multi-call binary, so `/usr/bin/sleep` may be a link to it rather than a program of its own.
+
+**The fallback always works — take the binary from the machine that is running it:**
+
+```bash
+host$ scp qnxuser@$TGT:/usr/bin/sleep /tmp/sleep.qnx
+host$ ntox86_64-gdb /tmp/sleep.qnx
+```
+
+> 💡 **This is the better lesson, actually.** It restates D-016 in one line: `gdb` needs **a local
+> file whose symbols match the running code**. Where it came from — the SDP, your build directory, or
+> `scp` — is irrelevant. Copying it off the target is the only route that **cannot** mismatch, which
+> makes it the safe answer to Chapter 08's 💥 symbol-mismatch exercise too.
+
+#### The course's error, and it is a real one
+
+Chapter 08 printed the path **correctly** in both §3.4 and lab step 5b — and never said the `x86_64/`
+was load-bearing. In a line that already contains `x86_64` twice, in `ntox86_64-gdb` and again in the
+path, that component reads as noise.
+
+Chapter 05 §2.1–2.2 explains the layout properly. **But Chapter 08 is where the reader is typing it,
+five chapters later**, and a correct path with no warning is not the same as a usable instruction.
+
+**Chapter 08 → v1.3:**
+
+- §3.4 and lab step 5b both gain the ⚠️ note that `$QNX_TARGET/usr/bin` does not exist and why
+- Both now **check the file exists** with `ls` *before* opening `gdb`
+- Both give the `scp`-off-the-target fallback
+- Troubleshooting table gains the literal `cd: bin: No such file or directory`, so the next reader
+  finds it by searching for what they actually saw
+- The cheat sheet's `set sysroot` row notes the architecture level is required
+
+**Also:** **D-017** written in full · hazard **H-16** · **V13.3c** and **T-035** added to settle the
+open half · Lab 08's README updated.
+
+#### 📋 Two small things when you are next at the host
+
+```bash
+host$ ls -l $QNX_TARGET/x86_64/usr/bin/sleep
+host$ ls $QNX_TARGET/x86_64/usr/bin | head -30
+```
+
+Host only, no VM needed. The second one is also raw material for **Chapter 21** — that list is what
+`mkifs` picks from when you build a boot image, and Chapter 05 §2.2 describes it from documentation
+rather than from your disk.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.22 | 2026-09-01 | PROMPT#24 logged: the architecture level in $QNX_TARGET (D-017). |
 | 2.21 | 2026-09-01 | PROMPT#23 logged: Chapter 10 published. |
 | 2.20 | 2026-08-26 | PROMPT#22 logged: `attach` diagnosed; Chapter 08's `qconn` connection verified for the first time. |
 | 2.19 | 2026-08-26 | PROMPT#21 logged: the deploy-path error and its correction. |
