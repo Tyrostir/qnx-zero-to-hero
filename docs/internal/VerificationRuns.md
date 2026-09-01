@@ -109,6 +109,7 @@ Worked / Failed. Notes: ...
 | **V12** — a healthy-system baseline | ⬜ Chapter 07, 30 minutes. Feeds Chapter 25's diagnostic lab |
 | **V13** — ⭐ the development loop | ⬜ Chapter 08, 60 minutes. **The most consequential block since V5** — every later chapter assumes it |
 | **V14** — fault isolation | ⬜ Chapter 09, 45 minutes. V14.3 tests the chapter's central mechanical claim |
+| **V15** — processes and threads | ⬜ Chapter 10, 45 minutes. **V15.1 decides whether Ch 10 §5.4 survives**; V15.4 answers a question the chapter refuses to guess at |
 
 > 🎉 **All four blocks are done.** Setup Guides 01 and 02 are verified end to end and carry no
 > `[UNVERIFIED]` markers. Risks **R1**, **R2**, **R3** and **R9** are all closed.
@@ -1101,6 +1102,86 @@ chapter, after V11.2 (Ch 21) and V12.1 (Ch 25).
 
 ---
 
+## 7k. Block V15 — Chapter 10's processes and threads
+
+> 🎯 **Goal:** confirm that a `pthread_t` is the tid, that `pidin`'s `Blocked` column names the
+> **owner** of a contended mutex, and settle what QNX 8 actually does with `fork()` in a
+> multi-threaded process — which the chapter explicitly refuses to guess.
+> ⏱️ 45 minutes. Host **and** target.
+> 📖 [Chapter 10 Labs 10.1, 10.2, 10.3 and 💥](../chapters/Chapter10_ProcessesAndThreads.md)
+
+### V15.1 — ⭐ The thread zoo
+
+```bash
+host$ cd ~/exercises/qnx-zero-to-hero/labs/lab10_threads
+host$ make TGT=$TGT run
+```
+
+Then, in a **second** target session:
+
+```bash
+qnx$ pidin -p threadzoo
+qnx$ pidin -p threadzoo mem
+```
+
+Stop it with `Ctrl-C`, or `slay threadzoo`.
+
+📋 **Paste the program's own output and both `pidin` listings.**
+🎯 **Three claims, all asserted from architecture, none observed:**
+
+| Claim | Where |
+|-------|-------|
+| One pid, five tids, **one address space** | §1.2, §5.2 |
+| `pthread_self()` **is** the tid `pidin` prints | §🔬 |
+| ⭐ **`MUTEX`'s `Blocked` names the owning tid**, and `JOIN`'s names the joined tid | **§5.3, §5.4** |
+
+> ⭐ **V15.1's third claim is the most useful thing in the chapter.** §5.4 argues that a QNX deadlock
+> is visible in one line *because* the column names the owner. If it names something else — a mutex
+> address, a sync object id, nothing at all — **§5.4 is wrong and must be rewritten**, and Chapter
+> 12's and Chapter 25's diagnostic advice change with it.
+
+### V15.2 — Read the headers *(host only, 10 minutes)*
+
+```bash
+host$ grep -A5 -w "ThreadCreate" $QNX_TARGET/usr/include/sys/neutrino.h
+host$ grep -rn "typedef.*pthread_t" $QNX_TARGET/usr/include/
+host$ grep -rn "define errno" $QNX_TARGET/usr/include/errno.h
+```
+
+📋 **Paste all three.**
+🎯 **Why:** §3.1 (`ThreadCreate`'s prototype), §🔬 (`pthread_t` is an `int`) and §2.2 (`errno` is a
+macro over per-thread storage) are all written from reasoning. **Your headers are the authority.**
+
+### V15.3 — The default thread stack
+
+```bash
+host$ make SRC=solution/stacksize.c BIN=stacksize TGT=$TGT run
+```
+
+📋 **Report the number.**
+🎯 **Why:** §3.2 says the stack is what a thread costs, and then declines to name a figure because the
+course does not know one. This replaces a gap with a measurement — and it is the number that decides
+how large a thread pool an embedded target can afford.
+
+### V15.4 — 💥 `fork()` in a multi-threaded process ⭐
+
+```bash
+host$ make SRC=solution/forktest.c BIN=forktest TGT=$TGT run
+```
+
+📋 **Paste all three experiments' results.**
+🎯 **The open question §4.1 refuses to guess at.** `forktest` forks once single-threaded, once
+multi-threaded, then `posix_spawn`s while multi-threaded. Any of three outcomes is possible and each
+means something different:
+
+| Outcome | What §4.1 becomes |
+|---------|-------------------|
+| **Fails with an error** | The strongest possible endorsement of `posix_spawn`, and a one-line fix for anyone porting from Linux |
+| **Succeeds, calling thread only** | Standard POSIX. The async-signal-safety restriction is fully live |
+| **Succeeds, apparently fine** | §4.1's reasons still stand — the danger is a mutex held by a thread that no longer exists, which a test this small cannot show |
+
+---
+
 ## 8. Status board
 
 **Legend:** ⬜ not started · 🔄 in progress · ✅ verified · ❌ failed, guide needs fixing · ⏸️ blocked
@@ -1158,6 +1239,11 @@ chapter, after V11.2 (Ch 21) and V12.1 (Ch 25).
 | **V13.2** | ⭐ **Remote debugging through `qconn`** | 👤 | V13.1 | **Ch 08's centre** | 🟨 **connection confirmed** via V13.3; `break`/`print`/`upload` still unobserved |
 | V13.3 | `info pidlist` + `attach` to a running process | 👤 | V13.2 | Ch 08 §3.4 | 🟨 **`target qnx` + `info pidlist` ✅; `attach` failed → [D-016](../meta/Doubts.md#d-016)**, retry |
 | V13.3b | Retry `attach` with the binary loaded (5a and 5b) | 👤 | V13.3 | Ch 08 §3.4, [D-016](../meta/Doubts.md#d-016) | ⬜ |
+| **V15.1** | ⭐ The thread zoo — five threads, five states | 👤 | — | Lab 10.1 · **Ch 10 §5.4** | ⬜ |
+| V15.2 | Read `neutrino.h`, `pthread_t`, `errno` | 👤 | — | Ch 10 §2.2, §3.1, §🔬 | ⬜ |
+| V15.3 | Default thread stack size | 👤 | — | Ch 10 §3.2 | ⬜ |
+| **V15.4** | 💥 `fork()` from a multi-threaded process | 👤 | — | **Ch 10 §4.1's open question** | ⬜ |
+| — | Clear Chapter 10's lab markers | 🤖 | V15.1 | — | ⏸️ |
 | V13.4 | 💥 Symbol mismatch produces confident nonsense | 👤 | V13.2 | Ch 08 💥 | ⬜ |
 | V13.5 | Optional: debug vs stripped release sizes | 👤 | V13.1 | Ch 05 §3.4 | ⬜ |
 | — | Clear Chapter 08's lab markers | 🤖 | V13.2 | — | ⏸️ |
@@ -1288,6 +1374,7 @@ future readers than a step that silently worked.
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.20 | 2026-09-01 | **Block V15 added** for Chapter 10 — the thread zoo, the headers, the default stack size, and the `fork()`-in-a-multi-threaded-process experiment. V15.1 is the one that decides whether §5.4's deadlock-reading advice is true. |
 | 1.19 | 2026-08-26 | **V13.3 run, partially.** `target qnx <ip>:8000` and `info pidlist` **confirmed** — the first direct observation of Chapter 08's central mechanism. `attach` failed → D-016 (host-side symbols); bare-IP hang is new. V13.3b added for the retry. |
 | 1.18 | 2026-08-26 | **V13.1 attempted and failed → D-015.** Deploy path corrected; V13.0 added to capture `/data`'s actual ownership. |
 | 1.17 | 2026-08-26 | **Block V14 added** for Chapter 09 — the kernel's real API surface, fault locality, and (V14.3) whether a client blocked on a dying server is really woken with `ESRCH`. V14.4 finds the core-dump location for Chapter 25. |

@@ -1,7 +1,7 @@
 ---
 title: "PROMPTS.md — Learner Prompt & Response Log (Claude sessions)"
 document_id: PROMPTS
-version: 2.20
+version: 2.21
 status: Active (living document)
 created: 2026-08-26
 last_updated: 2026-08-26
@@ -2874,10 +2874,159 @@ execution — four wrong, one right-but-incomplete. None was found by re-reading
 
 ---
 
+## PROMPT#23
+
+| | |
+|---|---|
+| **Date** | 2026-09-01 |
+| **Agent** | Claude (Opus 5) via Claude Code |
+| **Session** | 024 |
+| **Context** | Chapter 09 published; Chapter 10 is next in sequence. |
+| **Status** | ✅ Done |
+
+### Prompt (verbatim)
+
+> proceed to chapter 10
+
+### Standing instructions
+
+SI-1…SI-14 all in force. Load-bearing here: **SI-14** (every library function explained on first
+use — purpose, arguments, return, header), **ADR-024** (the author cannot verify; every claim the
+course has not observed carries `[UNVERIFIED]` and a block), **SI-8** (Tier 1 never mentions the
+two-machine split).
+
+### Response (full)
+
+📕 **Chapter 10 — Processes and Threads is published.** 1090 lines. **11 of 34.**
+
+#### The chapter's spine
+
+One sentence, and everything follows from it: **a process is a container; a thread is a worker.**
+
+Chapter 07 showed you a `pidin` listing and told you the second column was a thread id. Chapter 09
+listed "thread management" among the eight things `procnto` provides. **Chapter 10 is where that debt
+comes due** — and §1.1 opens by pointing at the three facts hiding in that column:
+
+- `prio` is on the same line as `tid`, **not** as `pid` — priority belongs to the thread
+- `STATE` is on the same line as `tid` — "the process is blocked" is never a sentence
+- the `Blocked` column names a **pid** for some states and a **tid** for others
+
+#### §2.1 — the table to know cold
+
+| Per **process** | Per **thread** |
+|---|---|
+| address space · fds · pathname space · uid/gid · cwd · env · signal *dispositions* · pid | **stack · registers · priority ⭐ · blocking state ⭐ · signal *mask* · `errno` ⭐** · tid |
+
+Three rows carry a ⭐ and each is a chapter's worth of consequence. Per-thread priority is what
+Chapter 11 schedules and what makes a resource-manager thread pool work. Per-thread blocking state is
+why `pidin` can diagnose. Per-thread `errno` is why threaded C works at all.
+
+#### §2.2 — the `errno` derivation
+
+Rather than *stating* that `pthread_*` returns errors by value, the chapter **derives** it. `errno` is
+a macro over per-thread storage, not a variable; POSIX did not want error reporting to depend on
+thread-local storage working; therefore `pthread_*` returns the error directly. So `strerror(rc)`,
+never `perror()` — and `extern int errno;` from 1980s code does not compile.
+
+Explaining the most-repeated beginner mistake by mechanism rather than by rule is the whole method of
+the course.
+
+#### §3.4 — join or detach, as a rule
+
+> *Every thread you create is either joined or detached. Decide which at the moment you create it.*
+
+And the failure it prevents, named honestly: a per-thread leak that on a device running four years
+presents as **"the system slows down after a few months"** — the hardest class of bug there is.
+
+§3.5 adds the one that surprises everyone: **`return` from `main` calls `exit()`**, killing every
+other thread mid-instruction. Which is why so many threaded programs end in `pthread_join` — not
+ceremony, just the only thing keeping the process alive.
+
+#### §4 — `posix_spawn`, not `fork`, argued three ways
+
+1. `fork()` has **no good answer** for the other threads. Duplicate them and you duplicate them
+   mid-operation, inheriting locked mutexes nothing will release. Drop them and the child wakes in a
+   process whose invariants assumed they existed. POSIX chose *drop*, then restricted the child to
+   async-signal-safe functions — a list without `printf` or `malloc`.
+2. Duplicating an address space has **unpredictable cost**, which is what a real-time system spends
+   its life avoiding.
+3. `fork()` **wants an MMU** to be efficient, and QNX runs where that is not given.
+
+And then the chapter **refuses to guess** what QNX 8 actually does with `fork()` in a multi-threaded
+process. `forktest` in the lab finds out. Three outcomes are possible and §4.1 gets rewritten around
+whichever one you observe.
+
+#### ⭐ §5.3–§5.4 — the chapter's real contribution
+
+`pidin`'s `Blocked` column names **whatever is capable of releasing you**:
+
+| State | `Blocked` is |
+|-------|--------------|
+| `REPLY` | a **pid** — the server process |
+| `MUTEX` | a **tid** — the thread **owning the lock** |
+| `JOIN` | a **tid** — the thread you are waiting for |
+| `RECEIVE` | a channel id |
+
+So a deadlock is readable in one line:
+
+```text
+ 1560123   3 server   10r MUTEX  4     ← 3 waits for 4's lock
+ 1560123   4 server   10r MUTEX  3     ← 4 waits for 3's lock
+```
+
+**Chapter 09 was honest that the microkernel does nothing about deadlock**, because nothing fails
+loudly. This is the compensation: QNX cannot detect it, but it makes it trivially visible — *provided
+you know the number in that column is a tid*.
+
+📌 **This is also the chapter's most consequential unverified claim**, and V15.1 exists to settle it.
+If `MUTEX` names something else, §5.4 is wrong and Chapters 12 and 25's diagnostic advice change with
+it.
+
+#### `labs/lab10_threads/`
+
+| File | What |
+|------|------|
+| `solution/threadzoo.c` | **Five threads, five blocking states, one process.** `JOIN` · `NANOSLEEP` · `CONDVAR` · `NANOSLEEP` (holding a mutex) · `MUTEX`. It does not exit — you look at it from a second session |
+| `skeleton/threadzoo.c` | Four TODOs, two or three lines each |
+| `solution/forktest.c` | 💥 The `fork()` experiment. Three forks, reports each |
+| `solution/stacksize.c` | Measures the default thread stack — the figure §3.2 declines to guess |
+| `expected_output.txt` | A **prediction**, clearly labelled as one, not a recording |
+
+Every library function the lab calls is documented with purpose, arguments, return **and header**
+(SI-14) — including the trap that `pthread_*` returns the error rather than setting `errno`.
+
+#### Also updated
+
+**Block V15** written (V15.1–V15.4) · Glossary **+6 terms** · **T-032/033/034** · TOC and chapters
+README · CourseState session 024 · CompactContext.
+
+**One incidental cleanup.** Re-sorting the Glossary's letter sections alphabetically surfaced **18
+duplicate entries** — each a 🌱 placeholder written early and later superseded by a full entry, which
+alphabetical ordering had been hiding by separating them. The placeholders are removed; the full
+entries stay. 135 terms.
+
+#### 📋 What I would like from you
+
+| # | Run | Why |
+|---|-----|-----|
+| **V15.1** ⭐ | `make TGT=$TGT run` in `lab10_threads`, then `pidin -p threadzoo` | **Decides whether §5.4 survives.** The single most useful claim in the chapter |
+| **V15.4** | `make SRC=solution/forktest.c BIN=forktest TGT=$TGT run` | Answers the question §4.1 refuses to guess at |
+| V15.2 | Three `grep`s over `$QNX_TARGET/usr/include/` — **host only** | Settles `ThreadCreate`'s prototype, `pthread_t`'s type, and `errno`'s macro |
+| V15.3 | `make SRC=solution/stacksize.c BIN=stacksize TGT=$TGT run` | Replaces a gap with a number |
+
+**Still open from last session:** **T-030** — retry Lab 08.1 step 5 now that `gdb` gets the binary.
+
+**Next: Chapter 11 — Scheduling & Real-Time Priorities.** You have now seen `10r`, `21r`, `255i` and
+`0f` in `pidin` four chapters running without being told what they mean. Chapter 11 is that, plus
+**priority inheritance** — the mechanism that makes QNX real-time rather than merely fast.
+
+---
+
 ## 📝 Changelog
 
 | Version | Date | Change |
 |---------|------|--------|
+| 2.21 | 2026-09-01 | PROMPT#23 logged: Chapter 10 published. |
 | 2.20 | 2026-08-26 | PROMPT#22 logged: `attach` diagnosed; Chapter 08's `qconn` connection verified for the first time. |
 | 2.19 | 2026-08-26 | PROMPT#21 logged: the deploy-path error and its correction. |
 | 2.18 | 2026-08-26 | PROMPT#20 logged: Chapter 09; Part 2 begins. |

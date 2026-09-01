@@ -83,7 +83,7 @@ all of Part 0 while your QNX licence request is being processed.*
 | # | Chapter | Paths | Est. | Status |
 |---|---------|-------|------|--------|
 | 09 | [Microkernel Architecture & procnto](chapters/Chapter09_MicrokernelArchitecture.md) | 🐣🚶🏃 | 90 m | 📕 |
-| 10 | [Processes and Threads](chapters/Chapter10_ProcessesAndThreads.md) | 🚶🏃 | 90 m | 📄 |
+| 10 | [Processes and Threads](chapters/Chapter10_ProcessesAndThreads.md) | 🚶🏃 | 90 m | 📕 |
 | 11 | [Scheduling & Real-Time Priorities](chapters/Chapter11_SchedulingAndPriorities.md) | 🚶🏃 | 100 m | 📄 |
 | 12 | [Synchronization Primitives](chapters/Chapter12_Synchronization.md) | 🚶🏃 | 100 m | 📄 |
 | 13 | [Message Passing I — Send / Receive / Reply](chapters/Chapter13_MessagePassingI.md) ⭐ | 🐣🚶🏃 | 150 m | 📄 |
@@ -235,7 +235,7 @@ documented**; you are not locked in.
 | L07.1 | 07 | Explore the QNX filesystem and `/proc` | | 📄 |
 | L08.1 | 08 | Hello QNX: compile, deploy, run | ⭐ | 📄 |
 | L08.2 | 08 | Remote debugging with `qconn` + `gdb` | | 📄 |
-| L10.1 | 10 | Thread lifecycle and `pidin` observation | | 📄 |
+| L10.1 | 10 | Thread lifecycle and `pidin` observation | | 📕 |
 | L11.1 | 11 | Priority inversion, observed and fixed | | 📄 |
 | L12.1 | 12 | Mutex / condvar producer-consumer | | 📄 |
 | L13.1 | 13 | Client / server with `MsgSend`–`MsgReply` | ⭐ | 📄 |

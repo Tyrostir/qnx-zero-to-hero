@@ -1,7 +1,7 @@
 ---
 title: "Course State — Where We Are"
 document_id: STATE
-version: 1.23
+version: 1.24
 status: Active (living document)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -26,27 +26,27 @@ update_trigger: "End of every working session, and after every chapter is publis
 | **Active path** | 🚶 **Path B — Self-Learner** *(confirmed 2026-08-25; Paths A and C authored in full for future readers — ADR-008)* |
 | **Current phase** | **Phase 2 — writing chapters** |
 | **Plan status** | ✅ **Approved** by the learner, 2026-08-25 |
-| **Chapters published** | **10 / 34** — Parts 0 and 1 complete; **Part 2 begun** |
+| **Chapters published** | **11 / 34** — Parts 0 and 1 complete; **Part 2 in progress** |
 | **Setup guides published** | **3 / 5** — **all three ✅ verified end to end**, zero `[UNVERIFIED]` markers |
-| **Labs published** | **3 / 21** compiled — Lab 01.2 (V6), **⭐ L08** (V13), Lab 09.2 (V14) · plus non-compiled labs in every published chapter |
+| **Labs published** | **4 / 21** compiled — Lab 01.2 (V6), **⭐ L08** (V13), Lab 09.2 (V14), Lab 10.1 (V15) · plus non-compiled labs in every published chapter |
 | **QNX licence** | ✅ **Deployed** 2026-08-26 |
 | **QNX software installed?** | ✅ **SDP 8.0 at `~/qnx800`** — cross-compile proven |
 | **QNX VM booting?** | ✅ **YES** — QNX 8.0.0, 31 processes, IP `192.168.122.46` 🎉 |
 | **Blocked on** | **Nothing.** Setup Guide 03 awaits its first real run (block V5). |
-| **Last session** | 2026-08-26 (Session 004) |
+| **Last session** | 2026-09-01 (Session 024) |
 
 ### Progress bar
 
 ```text
 Part 0  Orientation        [████████████████████] 100 %   (4/4 chapters) 🎉
 Part 1  Environment        [████████████████████] 100 %   (5/5 chapters) 🎉
-Part 2  Microkernel Core   [██                  ]  14 %   (1/7 chapters)
+Part 2  Microkernel Core   [█████               ]  29 %   (2/7 chapters)
 Part 3  Resource Managers  [                    ]   0 %   (0/5 chapters)
 Part 4  System Building    [                    ]   0 %   (0/4 chapters)
 Part 5  Debug & Safety     [                    ]   0 %   (0/6 chapters)
 Part 6  Hardware & Beyond  [                    ]   0 %   (0/4 chapters)
 ────────────────────────────────────────────────────────────────────────
-OVERALL                    [█████               ]  29 %   (10/34)
+OVERALL                    [██████              ]  32 %   (11/34)
 ```
 
 ---
@@ -55,8 +55,8 @@ OVERALL                    [█████               ]  29 %   (10/34)
 
 | Who | Action |
 |-----|--------|
-| 👤 **You — do next** | 📕 **Read [Chapter 09](../chapters/Chapter09_MicrokernelArchitecture.md)** (~90 min). **Block V13 (core lab L08) remains the priority** — everything from here builds and debugs code. V14.3 tests Chapter 09's central claim. |
-| 🤖 **Me — next turn** | **Chapter 10 — Processes and Threads** (T-130b). The process model, address spaces, thread lifecycle, and how `pthread_*` maps onto `ThreadCreate` — plus why QNX schedules *threads*. |
+| 👤 **You — do next** | 📕 **Read [Chapter 10](../chapters/Chapter10_ProcessesAndThreads.md)** (~90 min) and run **Lab 10.1** — 45 min. ⭐ **V15.1 is the priority**: it decides whether Chapter 10 §5.4's claim that `pidin` names a contended mutex's *owner* is true, and Chapters 12 and 25 both depend on it. **T-030** (retry the `attach`) and the rest of V13 remain open. |
+| 🤖 **Me — next turn** | **Chapter 11 — Scheduling & Real-Time Priorities** (T-130c). 256 priorities, FIFO / round-robin / sporadic, and **priority inheritance** — the mechanism that makes QNX real-time rather than merely fast. |
 
 > 💡 **Why this order.** The QNX Everywhere licence request has unknown latency (Risk R1). Submitting
 > it today costs 15 minutes and removes the only real blocker in the course. Everything in Part 0
@@ -131,7 +131,7 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 | # | Chapter | Doc status | Learner status | Notes |
 |---|---------|-----------|----------------|-------|
 | 09 | Microkernel Architecture & procnto | 📕 | — | v1.0. Opens Part 2. Fault isolation, mechanically. |
-| 10 | Processes and Threads | 📄 | — | |
+| 10 | Processes and Threads | 📕 | — | v1.0. Container vs worker. ⭐ §5.4: reading a deadlock out of `pidin`'s `Blocked` column. |
 | 11 | Scheduling & Real-Time Priorities | 📄 | — | |
 | 12 | Synchronization Primitives | 📄 | — | |
 | 13 | Message Passing I ⭐ | 📄 | — | |
@@ -210,6 +210,17 @@ Progression: `13·9·3` → `19·6·0` → **`24·3·0`**.
 ## 6. Session log
 
 *Newest first. One entry per working session.*
+
+### Session 024 — 2026-09-01 📕 **Chapter 10 — Processes and Threads (11/34)**
+
+| | |
+|---|---|
+| **Goal** | Write Chapter 10 and its lab. |
+| **Done** | 📕 **Chapter 10 published** (1090 lines) — the container/worker distinction, the per-process vs per-thread table, and the three rows that carry consequence: **priority, blocking state and `errno` are per-thread**<br>• §2.2 derives the `pthread_*` return convention from `errno` being a per-thread macro — the single most-repeated beginner error, explained by mechanism rather than by rule<br>• §3.4 makes **join-or-detach** a rule and names the failure it prevents: a leak that presents as *"the system slows down after a few months"*<br>• §3.5 warns that **`return` from `main` calls `exit()`** and kills every other thread mid-instruction<br>• §4 argues for `posix_spawn` over `fork` from three independent directions — the other threads, unpredictable cost, and the MMU assumption — and then **explicitly refuses to guess** what QNX 8 does with `fork()` in a multi-threaded process. The 💥 lab finds out<br>• ⭐ **§5.3–§5.4 is the chapter's real contribution:** `pidin`'s `Blocked` column names a **tid** for `MUTEX`/`JOIN` and a **pid** for `REPLY`, so a deadlock is readable in one line. Marked as the claim most worth verifying<br>• Ships **`labs/lab10_threads/`** — `threadzoo` (five threads, five blocking states), `forktest` (the `fork` experiment), `stacksize` (measures what §3.2 declines to guess), plus a four-TODO skeleton<br>• **Block V15** written: V15.1 decides whether §5.4 survives<br>• Glossary +6 terms; **every letter section re-sorted**, which surfaced **18 duplicate entries** — 🌱 placeholders later superseded by full entries, now removed |
+| **Learner decisions** | — |
+| **Questions logged** | — |
+| **Blockers** | None |
+| **Next session** | **Chapter 11 — Scheduling & Real-Time Priorities** |
 
 ### Session 023 — 2026-08-26 ✅ **D-016: Chapter 08's centre, verified — by a failure**
 

@@ -1,7 +1,7 @@
 ---
 title: "Compact Context — One-Page Session Reload"
 document_id: CTX
-version: 1.22
+version: 1.23
 status: Active (regenerated every session)
 created: 2026-08-25
 last_updated: 2026-08-25
@@ -206,6 +206,7 @@ tools/{build-pdf.sh,check-environment.sh,qemu/,pdf/}
 
 | Version | Date | Change |
 |---------|------|--------|
+| 1.23 | 2026-09-01 | **Chapter 10 published (11/34).** A process is a container, a thread is a worker; **priority, blocking state and `errno` are per-thread**; `posix_spawn` not `fork`; ⭐ **`pidin`'s `Blocked` column names a tid for `MUTEX`/`JOIN` and a pid for `REPLY`** — the claim block V15 must confirm. |
 | 1.22 | 2026-08-26 | D-016: `attach` needs **host-side** symbols; `target qnx` requires `:8000`. **`target qnx <ip>:8000` and `info pidlist` are now VERIFIED** — the first direct observation of Chapter 08's central mechanism. |
 | 1.21 | 2026-08-26 | Regenerated after Session 022: deploy path corrected to `~` (D-015). |
 | 1.20 | 2026-08-26 | Regenerated after Session 021: Part 2 begun; Chapter 09. |

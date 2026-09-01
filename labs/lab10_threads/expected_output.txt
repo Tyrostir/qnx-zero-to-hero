@@ -1,0 +1,36 @@
+threadzoo -- expected output
+============================
+[UNVERIFIED] -- written from the source, not from a run. Block V15.
+
+Thread ids are assigned by the kernel in creation order, so yours should
+match these; the ORDER of the four "tid N" lines may differ, because the
+four threads race to announce themselves and nothing serialises them.
+
+    threadzoo: pid 1560123
+      tid 1    main         -> expect JOIN once the others are up
+      tid 2    sleeper      -> expect NANOSLEEP
+      tid 3    cond waiter  -> expect CONDVAR
+      tid 4    mutex holder -> expect NANOSLEEP (and it owns `held`)
+      tid 5    contender    -> expect MUTEX
+
+    all threads up. arrivals = 4
+    now run  `pidin -p threadzoo`  in another session.
+    stop me with Ctrl-C, or `slay threadzoo`.
+
+And in the second session:
+
+    # pidin -p threadzoo
+         pid tid name               prio STATE       Blocked
+     1560123   1 threadzoo           10r JOIN        2
+     1560123   2 threadzoo           10r NANOSLEEP
+     1560123   3 threadzoo           10r CONDVAR
+     1560123   4 threadzoo           10r NANOSLEEP
+     1560123   5 threadzoo           10r MUTEX       4
+
+ONE pid. FIVE tids. FIVE states. One address space.
+
+The two `Blocked` values are the interesting part:
+  * main's JOIN is blocked on 2      -- the tid it is waiting for
+  * contender's MUTEX is blocked on 4 -- the tid that OWNS the mutex
+
+`pidin` names the owner. That is how you break a real deadlock.
